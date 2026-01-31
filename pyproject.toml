@@ -1,0 +1,31 @@
+[project]
+name = "lifeflow-ai"
+version = "0.1.0"
+description = "Backend-First Procedural Intelligence Platform"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+    "pydantic>=2.5.3",
+    "sqlalchemy>=2.0.25",  # Core dependency, drivers are optional
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.1"
+]
+
+[project.optional-dependencies]
+postgres = [
+    "psycopg2-binary>=2.9.9"
+]
+rag = [
+    "langchain>=0.1.0",
+    "langchain-community>=0.0.10",
+    "faiss-cpu>=1.7.4"
+]
+dev = [
+    "httpx>=0.26.0",
+    "pytest>=8.0.0"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
