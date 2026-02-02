@@ -59,6 +59,7 @@ class IntakeRequest(BaseModel):
 
 class WorkflowPreview(BaseModel):
     template_id: int
+    version_id: int
     title: str
     description: str
     match_reason: str
@@ -74,21 +75,27 @@ def intake_situational(payload: IntakeRequest, db: Session = Depends(get_db)):
     message = payload.user_message.lower()
     results = []
     
-    # Simple Keyword Matching
+    # Eager load versions for valid IDs
     templates = db.query(WorkflowTemplate).all()
+    
     for t in templates:
         score = 0
         reason = ""
         
-        # Mock Logic
-        if "death" in message or "died" in message or "passed away" in message:
-            if "death" in t.name.lower():
-                score += 10
-                reason = "It sounds like you are dealing with a loss."
-        
+        # Loss match
+        loss_keywords = ["death", "died", "passed away", "lost", "loss", "grief"]
+        if any(k in message for k in loss_keywords):
+           if "death" in t.name.lower() or "estate" in t.name.lower():
+               score += 10
+               reason = "It sounds like you are dealing with a loss."
+
         if score > 0:
+            # Find active version
+            version_id = t.versions[0].id if t.versions else 0
+            
             results.append(WorkflowPreview(
                 template_id=t.id,
+                version_id=version_id, # return actual version
                 title=t.name,
                 description=t.description,
                 match_reason=reason

@@ -27,6 +27,7 @@ export interface JourneyStep extends StepNodeDefinition {
 
 export interface WorkflowPreview {
     template_id: number;
+    version_id: number;
     title: string;
     description: string;
     match_reason: string;

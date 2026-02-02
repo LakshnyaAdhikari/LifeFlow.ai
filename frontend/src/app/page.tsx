@@ -35,15 +35,34 @@ export default function Home() {
   };
 
   const startWorkflow = async (versionId: number) => {
-    // For MVP, we auto-create a user or use the demo user. 
-    // In real app, we'd auth here.
-    // Let's assume we are the 'demo_human_first' user (ID from seed).
-    // We need to hit the backend to CREATE an instance, then navigate to Journey Map.
+    try {
+      // 1. Get seed data for user ID (or hardcode/auth in real app)
+      // Assuming User 1 exists (demo user) or we could fetch from /seed again to be safe but simpler to try ID 1.
+      // If ID 1 fails (database cleared), we might need to hit /seed first.
+      const userId = 1;
+      const docket = `CASE-${Date.now()}`;
 
-    // For now, let's just alert.
-    alert("Starting Journey... (Next step: Implement creation & transition)");
+      const res = await fetch("http://127.0.0.1:8000/workflows", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          version_id: versionId,
+          docket_number: docket
+        }),
+      });
 
-    // TODO: Call POST /workflows -> Get ID -> Push to /journey/[id]
+      if (res.ok) {
+        const data = await res.json();
+        window.location.href = `/journey/${data.instance_id}`;
+      } else {
+        const err = await res.json();
+        alert(`Failed to start workflow: ${err.detail || "Unknown error"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error starting workflow");
+    }
   };
 
   return (
@@ -103,7 +122,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {suggestions.map((s) => (
-              <div key={s.template_id} className="bg-card border border-border/50 hover:border-primary/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group cursor-pointer" onClick={() => startWorkflow(s.template_id)}>
+              <div key={s.template_id} className="bg-card border border-border/50 hover:border-primary/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group cursor-pointer" onClick={() => startWorkflow(s.version_id)}>
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">{s.title}</h3>
                   <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-medium">Suggested</span>
