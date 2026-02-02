@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Environment Variables
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Build & Dist
+build/
+dist/
+*.egg-info/
+
+# Vector Store (Local FAISS)
+faiss_index/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+htmlcov/
+coverage.xml
+
+# Project specific temporary files
+tmp/
+temp/
+refactor_log.txt
+test_error.txt
+refactor_output.txt
+verify_refactor_result.txt

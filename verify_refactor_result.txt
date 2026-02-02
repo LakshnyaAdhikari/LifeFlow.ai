@@ -1,4 +1,0 @@
-FAILED: (sqlite3.IntegrityError) UNIQUE constraint failed: workflow_instances.docket_number
-[SQL: INSERT INTO workflow_instances (user_id, version_id, docket_number, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
-[parameters: (1, 1, 'REFACTOR-TEST-001', 'ACTIVE', '2026-01-31 18:18:30.790692', '2026-01-31 18:18:30.790697')]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
