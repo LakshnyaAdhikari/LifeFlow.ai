@@ -45,6 +45,15 @@ test_intake.py
 test_journey.py
 test_write.py
 test_server.py
+test_connection.html
+verify_backend.py
+test_write.py
+network_tab_guide.md
+backend_analysis.md
+debug_test_instructions.md
+where_to_type.md
+auth_progress.md
+TROUBLESHOOTING.md
 
 # IDE
 .vscode/

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Loader2, CheckCircle, Circle, Clock, AlertTriangle, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { Loader2, CheckCircle, Circle, Clock, AlertTriangle, ArrowRight, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JourneyStep } from "@/types/api";
 
@@ -16,7 +17,12 @@ export default function JourneyPage() {
 
     const fetchJourney = async () => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/workflows/${id}/journey_map`);
+            const token = localStorage.getItem("access_token");
+            const res = await fetch(`http://127.0.0.1:8000/workflows/${id}/journey_map`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (!res.ok) throw new Error("Failed to load journey");
             const data = await res.json();
             setSteps(data.steps);
@@ -33,6 +39,7 @@ export default function JourneyPage() {
 
     const handleSubmit = async (nodeId: string) => {
         try {
+            const token = localStorage.getItem("access_token");
             // Mock evidence payload
             const payload = {
                 evidence_type: "UserConfirmation",
@@ -41,7 +48,10 @@ export default function JourneyPage() {
 
             const res = await fetch(`http://127.0.0.1:8000/workflows/${id}/steps/${nodeId}/submit`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(payload)
             });
 
@@ -64,14 +74,23 @@ export default function JourneyPage() {
         <main className="min-h-screen bg-stone-50 dark:bg-stone-950 p-6 md:p-12 font-sans">
             <div className="max-w-3xl mx-auto space-y-12">
 
-                <header className="space-y-2">
-                    <div className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Your Journey</div>
-                    <h1 className="text-3xl font-serif text-foreground">Death in Family</h1>
-                    <p className="text-muted-foreground">We are here to guide you through each step. Take your time.</p>
+                <header className="space-y-4">
+                    <button
+                        onClick={() => window.location.href = "/home"}
+                        className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors group"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                        Back to Home
+                    </button>
+                    <div className="space-y-2">
+                        <div className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Your Journey</div>
+                        <h1 className="text-3xl font-serif text-foreground">Death in Family</h1>
+                        <p className="text-muted-foreground">We are here to guide you through each step. Take your time.</p>
+                    </div>
                 </header>
 
                 <div className="relative border-l-2 border-primary/20 ml-3 md:ml-6 space-y-12 pb-12">
-                    {steps.map((step, index) => {
+                    {steps.map((step: JourneyStep, index: number) => {
                         const isCompleted = step.state === "COMPLETED";
                         const isEligible = step.state === "ELIGIBLE" || step.state === "PENDING";
 

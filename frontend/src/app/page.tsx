@@ -1,144 +1,134 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight, MessageSquare, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { WorkflowPreview } from "@/types/api";
+import { useRouter } from "next/navigation";
+import { Shield, Heart, Lock, ArrowRight } from "lucide-react";
 
-export default function Home() {
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<WorkflowPreview[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
+export default function LandingPage() {
+    const router = useRouter();
 
-  const handleIntake = async () => {
-    if (!message.trim()) return;
-    setLoading(true);
-    setSuggestions([]);
+    return (
+        <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+            {/* Hero Section */}
+            <div className="max-w-6xl mx-auto px-6 py-20">
+                <div className="text-center space-y-8">
+                    {/* Logo/Title */}
+                    <div className="space-y-4">
+                        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                            LifeFlow
+                        </h1>
+                        <p className="text-2xl md:text-3xl text-slate-600 dark:text-slate-300 font-light">
+                            We're here for life's hardest moments
+                        </p>
+                    </div>
 
-    try {
-      const res = await fetch("http://127.0.0.1:8000/intake/situational", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_message: message }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSuggestions(data);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-      setHasSearched(true);
-    }
-  };
+                    {/* Trust Signals */}
+                    <div className="grid md:grid-cols-3 gap-8 mt-16 max-w-4xl mx-auto">
+                        <div className="space-y-3 p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700">
+                            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto">
+                                <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <h3 className="font-semibold text-lg">Privacy First</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                                Your data is encrypted and never shared without your consent
+                            </p>
+                        </div>
 
-  const startWorkflow = async (versionId: number) => {
-    try {
-      // 1. Get seed data for user ID (or hardcode/auth in real app)
-      // Assuming User 1 exists (demo user) or we could fetch from /seed again to be safe but simpler to try ID 1.
-      // If ID 1 fails (database cleared), we might need to hit /seed first.
-      const userId = 1;
-      const docket = `CASE-${Date.now()}`;
+                        <div className="space-y-3 p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700">
+                            <div className="w-12 h-12 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center mx-auto">
+                                <Heart className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+                            </div>
+                            <h3 className="font-semibold text-lg">Compassionate</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                                Trauma-aware guidance designed with empathy and care
+                            </p>
+                        </div>
 
-      const res = await fetch("http://127.0.0.1:8000/workflows", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          version_id: versionId,
-          docket_number: docket
-        }),
-      });
+                        <div className="space-y-3 p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700">
+                            <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mx-auto">
+                                <Lock className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                            </div>
+                            <h3 className="font-semibold text-lg">Secure</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                                Bank-level security to protect your sensitive information
+                            </p>
+                        </div>
+                    </div>
 
-      if (res.ok) {
-        const data = await res.json();
-        window.location.href = `/journey/${data.instance_id}`;
-      } else {
-        const err = await res.json();
-        alert(`Failed to start workflow: ${err.detail || "Unknown error"}`);
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error starting workflow");
-    }
-  };
+                    {/* CTA */}
+                    <div className="mt-16 space-y-4">
+                        <button
+                            onClick={() => router.push("/auth/signup")}
+                            className="group bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-xl text-lg font-medium hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2"
+                        >
+                            Get Started
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
 
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-background text-foreground transition-colors duration-500">
-
-      {/* Hero / Intake Section */}
-      <div className={cn(
-        "flex flex-col items-center max-w-2xl w-full text-center space-y-8 transition-all duration-700 ease-in-out",
-        hasSearched ? "pt-10" : "flex-1 justify-center"
-      )}>
-
-        <div className="space-y-4">
-          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-primary">
-            LifeFlow
-          </h1>
-          <p className="text-xl text-muted-foreground font-light">
-            Your companion for life's complex moments.
-          </p>
-        </div>
-
-        <div className="w-full relative group">
-          <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative flex items-center bg-white dark:bg-card shadow-lg rounded-2xl p-2 border border-border focus-within:ring-2 ring-primary/50 transition-all">
-            <MessageSquare className="ml-4 text-muted-foreground w-6 h-6" />
-            <input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleIntake()}
-              placeholder="What's going on?"
-              className="flex-1 bg-transparent border-none focus:ring-0 text-lg px-4 py-3 placeholder:text-muted-foreground/50"
-            />
-            <button
-              onClick={handleIntake}
-              disabled={loading || !message.trim()}
-              className="bg-primary text-primary-foreground p-3 rounded-xl hover:opacity-90 transition-all disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {!hasSearched && (
-          <div className="flex gap-3 text-sm text-muted-foreground mt-4">
-            <span>Try:</span>
-            <button onClick={() => setMessage("I lost my dad")} className="hover:text-primary underline">"I lost my dad"</button>
-            <button onClick={() => setMessage("I need to file taxes")} className="hover:text-primary underline">"I need to file taxes"</button>
-          </div>
-        )}
-      </div>
-
-      {/* Results Section */}
-      {hasSearched && (
-        <div className="w-full max-w-4xl mt-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
-          <h2 className="text-2xl font-medium text-center mb-8 text-secondary-foreground">
-            {suggestions.length > 0 ? "Here is a path that might help." : "We couldn't find a perfect match, but we are here."}
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {suggestions.map((s) => (
-              <div key={s.template_id} className="bg-card border border-border/50 hover:border-primary/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group cursor-pointer" onClick={() => startWorkflow(s.version_id)}>
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">{s.title}</h3>
-                  <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-medium">Suggested</span>
+                        <div className="text-sm text-slate-500">
+                            Already have an account?{" "}
+                            <button
+                                onClick={() => router.push("/auth/login")}
+                                className="text-blue-600 hover:underline font-medium"
+                            >
+                                Sign in
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  {s.description}
-                </p>
-                <div className="bg-muted/50 p-3 rounded-lg text-sm text-secondary-foreground italic">
-                  "{s.match_reason}"
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-    </main>
-  );
+                {/* How It Works */}
+                <div className="mt-32 space-y-12">
+                    <h2 className="text-3xl font-semibold text-center">How LifeFlow Helps</h2>
+
+                    <div className="grid md:grid-cols-3 gap-8">
+                        <div className="space-y-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
+                                1
+                            </div>
+                            <h3 className="font-semibold text-lg">Tell us what's happening</h3>
+                            <p className="text-slate-600 dark:text-slate-400">
+                                Share your situation in your own words. We'll listen without judgment.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 font-bold">
+                                2
+                            </div>
+                            <h3 className="font-semibold text-lg">Get a personalized path</h3>
+                            <p className="text-slate-600 dark:text-slate-400">
+                                Receive step-by-step guidance tailored to your specific needs and location.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">
+                                3
+                            </div>
+                            <h3 className="font-semibold text-lg">Move forward with confidence</h3>
+                            <p className="text-slate-600 dark:text-slate-400">
+                                Track your progress and get support at every step of your journey.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Transparency */}
+                <div className="mt-32 p-8 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <h2 className="text-2xl font-semibold mb-4">Our Commitment to You</h2>
+                    <div className="space-y-3 text-slate-600 dark:text-slate-400">
+                        <p>
+                            <strong className="text-slate-900 dark:text-slate-100">Your data, your control:</strong> We only collect information necessary to provide personalized guidance. You can delete your account and data at any time.
+                        </p>
+                        <p>
+                            <strong className="text-slate-900 dark:text-slate-100">How we use your information:</strong> Your profile helps us provide jurisdiction-specific guidance and age-appropriate language. We never sell your data.
+                        </p>
+                        <p>
+                            <strong className="text-slate-900 dark:text-slate-100">Security:</strong> All sensitive data is encrypted both in transit and at rest. We use industry-standard security practices.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    );
 }

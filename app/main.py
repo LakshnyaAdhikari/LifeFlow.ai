@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 from app.database import get_db, engine, Base
 from app.models import User, WorkflowTemplate, WorkflowVersion, WorkflowInstance, NodeInstanceState, StepState, StepEvidence
+from app.auth_models import UserAuth, OTPVerification, UserProfile, UserSession  # Import for table creation
 from app.infrastructure.sqlalchemy_repository import SqlAlchemyWorkflowRepository, SqlAlchemyAuditRepository
 from app.infrastructure.rag_adapter import FAISSRAGAdapter
 from app.workflow_engine import StateManager, GraphTraverser
@@ -19,6 +20,10 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="LifeFlow.ai API", description="Procedural Intelligence Platform", lifespan=lifespan)
+
+# Include routers
+from app.routers import auth
+app.include_router(auth.router)
 
 from fastapi.middleware.cors import CORSMiddleware
 
