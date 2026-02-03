@@ -28,6 +28,7 @@ class User(Base):
     
     workflow_instances = relationship("WorkflowInstance", back_populates="user")
     auth = relationship("UserAuth", back_populates="user", uselist=False)
+    situations = relationship("UserSituation", back_populates="user")
     profile = relationship("UserProfile", back_populates="user", uselist=False)
     sessions = relationship("UserSession", back_populates="user")
 

@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 from app.database import get_db, engine, Base
 from app.models import User, WorkflowTemplate, WorkflowVersion, WorkflowInstance, NodeInstanceState, StepState, StepEvidence
+from app.models.situation import UserSituation, SituationInteraction, UserFeedback  # New situation models
+from app.models.knowledge import KnowledgeDomain, KnowledgeDocument, KnowledgeChunk, UserQuery, GuidanceSession  # Knowledge models
 from app.auth_models import UserAuth, OTPVerification, UserProfile, UserSession  # Import for table creation
 from app.infrastructure.sqlalchemy_repository import SqlAlchemyWorkflowRepository, SqlAlchemyAuditRepository
 from app.infrastructure.rag_adapter import FAISSRAGAdapter
@@ -24,6 +26,18 @@ app = FastAPI(title="LifeFlow.ai API", description="Procedural Intelligence Plat
 # Include routers
 from app.routers import auth
 app.include_router(auth.router)
+
+# New ML-driven intake router
+from app.routers import intake_v2
+app.include_router(intake_v2.router)
+
+# Situation lifecycle router
+from app.routers import situations
+app.include_router(situations.router)
+
+# Guidance (RAG) router
+from app.routers import guidance
+app.include_router(guidance.router)
 
 from fastapi.middleware.cors import CORSMiddleware
 

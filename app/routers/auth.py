@@ -99,44 +99,57 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     Create a new user account
     Returns user_id and requires OTP verification before login
     """
-    # Check if phone already exists
-    existing_auth = db.query(UserAuth).filter(UserAuth.phone == payload.phone).first()
-    if existing_auth:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Phone number already registered"
+    try:
+        # Check if phone already exists
+        existing_auth = db.query(UserAuth).filter(UserAuth.phone == payload.phone).first()
+        if existing_auth:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Phone number already registered"
+            )
+        
+        # Create user
+        from datetime import datetime
+        unique_email = f"{payload.phone}.{int(datetime.utcnow().timestamp())}@lifeflow.temp"
+        user = User(
+            email=unique_email,
+            full_name=payload.full_name
         )
-    
-    # Create user
-    user = User(
-        email=f"{payload.phone}@lifeflow.temp",  # Temporary email
-        full_name=payload.full_name
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    
-    # Create auth record
-    user_auth = UserAuth(
-        user_id=user.id,
-        phone=payload.phone,
-        password_hash=hash_password(payload.password),
-        is_phone_verified=False
-    )
-    db.add(user_auth)
-    db.commit()
-    db.refresh(user_auth)
-    
-    # Generate and send OTP
-    otp = OTPService.create_otp(db, user_auth.id, payload.phone)
-    OTPService.send_otp_sms(payload.phone, otp.otp_code)
-    
-    return {
-        "message": "Account created. Please verify your phone number.",
-        "user_id": user.id,
-        "phone": payload.phone,
-        "otp_sent": True
-    }
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        
+        # Create auth record
+        user_auth = UserAuth(
+            user_id=user.id,
+            phone=payload.phone,
+            password_hash=hash_password(payload.password),
+            is_phone_verified=False
+        )
+        db.add(user_auth)
+        db.commit()
+        db.refresh(user_auth)
+        
+        # Generate and send OTP
+        otp = OTPService.create_otp(db, user_auth.id, payload.phone)
+        OTPService.send_otp_sms(payload.phone, otp.otp_code)
+        
+        return {
+            "message": "Account created. Please verify your phone number.",
+            "user_id": user.id,
+            "phone": payload.phone,
+            "otp_sent": True
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        error_detail = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+        print(f"Signup error: {error_detail}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Signup failed: {str(e)}"
+        )
 
 @router.post("/verify-otp", response_model=TokenResponse)
 def verify_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
