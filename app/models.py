@@ -27,6 +27,9 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     workflow_instances = relationship("WorkflowInstance", back_populates="user")
+    auth = relationship("UserAuth", back_populates="user", uselist=False)
+    profile = relationship("UserProfile", back_populates="user", uselist=False)
+    sessions = relationship("UserSession", back_populates="user")
 
 class WorkflowTemplate(Base):
     __tablename__ = "workflow_templates"
