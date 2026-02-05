@@ -12,7 +12,7 @@ from datetime import datetime
 from loguru import logger
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.routers.auth import get_current_user
 from app.models import User
 from app.models.situation import UserSituation, SituationInteraction
 from app.services.situation.context_builder import SituationContextBuilder, SituationContext

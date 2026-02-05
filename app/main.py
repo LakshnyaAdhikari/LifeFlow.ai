@@ -2,10 +2,13 @@ from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 from app.database import get_db, engine, Base
-from app.models import User, WorkflowTemplate, WorkflowVersion, WorkflowInstance, NodeInstanceState, StepState, StepEvidence
-from app.models.situation import UserSituation, SituationInteraction, UserFeedback  # New situation models
-from app.models.knowledge import KnowledgeDomain, KnowledgeDocument, KnowledgeChunk, UserQuery, GuidanceSession  # Knowledge models
-from app.auth_models import UserAuth, OTPVerification, UserProfile, UserSession  # Import for table creation
+from app.models.core import (
+    User, WorkflowTemplate, WorkflowVersion, WorkflowInstance, 
+    NodeInstanceState, StepEvidence
+)
+from app.models.situation import UserSituation, SituationInteraction, UserFeedback
+from app.models.knowledge import KnowledgeDomain, KnowledgeDocument, KnowledgeChunk, UserQuery, GuidanceSession
+from app.auth_models import UserAuth, OTPVerification, UserProfile, UserSession
 from app.infrastructure.sqlalchemy_repository import SqlAlchemyWorkflowRepository, SqlAlchemyAuditRepository
 from app.infrastructure.rag_adapter import FAISSRAGAdapter
 from app.workflow_engine import StateManager, GraphTraverser
@@ -39,7 +42,15 @@ app.include_router(situations.router)
 from app.routers import guidance
 app.include_router(guidance.router)
 
+# Migration router (for transitioning from workflows to situations)
+from app.routers import migration
+app.include_router(migration.router)
+
 from fastapi.middleware.cors import CORSMiddleware
+
+# Add deprecation middleware
+from app.middleware.deprecation import DeprecationMiddleware
+app.add_middleware(DeprecationMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, Phone, Lock } from "lucide-react";
+import { ArrowRight, Loader2, Phone, Lock, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -13,16 +13,39 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const normalizePhone = (phone: string) => {
+        // Remove spaces and dashes
+        phone = phone.replace(/\s/g, '').replace(/-/g, '');
+
+        // Add +91 if not present
+        if (!phone.startsWith('+91')) {
+            if (phone.startsWith('91')) {
+                phone = '+' + phone;
+            } else if (phone.length === 10) {
+                phone = '+91' + phone;
+            }
+        }
+
+        return phone;
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setLoading(true);
 
         try {
-            const res = await fetch("http://127.0.0.1:8000/auth/login", {
+            const normalizedPhone = normalizePhone(formData.phone);
+
+            // Try simplified login first (for development)
+            const res = await fetch("http://127.0.0.1:8000/auth/login-simple", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    phone: normalizedPhone,
+                    password: formData.password,
+                    skip_otp: true
+                })
             });
 
             const data = await res.json();
@@ -39,16 +62,17 @@ export default function LoginPage() {
                 // Redirect to home (protected)
                 router.push("/home");
             } else {
-                // If not verified, redirect to OTP page
-                if (data.detail === "Please verify your phone number first") {
-                    localStorage.setItem("pending_phone", formData.phone);
+                // If simplified login fails, try regular login
+                if (data.detail?.includes("not verified")) {
+                    localStorage.setItem("pending_phone", normalizedPhone);
                     router.push("/auth/verify-otp");
                 } else {
                     setError(data.detail || "Login failed. Please check your credentials.");
                 }
             }
         } catch (err) {
-            setError("Network error. Please check your connection.");
+            console.error("Login error:", err);
+            setError("Network error. Please check your connection and ensure backend is running.");
         } finally {
             setLoading(false);
         }
@@ -82,11 +106,14 @@ export default function LoginPage() {
                                     type="tel"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="+91XXXXXXXXXX"
+                                    placeholder="9876543210 or +919876543210"
                                     className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
                                     required
                                 />
                             </div>
+                            <p className="text-xs text-slate-500">
+                                Enter 10-digit number (with or without +91)
+                            </p>
                         </div>
 
                         {/* Password */}
@@ -100,7 +127,7 @@ export default function LoginPage() {
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    placeholder="Your password"
+                                    placeholder="Enter your password"
                                     className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
                                     required
                                 />
@@ -109,8 +136,9 @@ export default function LoginPage() {
 
                         {/* Error Message */}
                         {error && (
-                            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
-                                {error}
+                            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
                             </div>
                         )}
 
@@ -118,12 +146,12 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-lg font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Signing In...
+                                    Signing in...
                                 </>
                             ) : (
                                 <>
@@ -133,18 +161,21 @@ export default function LoginPage() {
                             )}
                         </button>
                     </div>
-                </form>
 
-                {/* Footer */}
-                <div className="text-center text-sm text-slate-600 dark:text-slate-400">
-                    Don't have an account?{" "}
-                    <button
-                        onClick={() => router.push("/auth/signup")}
-                        className="text-blue-600 hover:underline font-medium"
-                    >
-                        Create one
-                    </button>
-                </div>
+                    {/* Sign Up Link */}
+                    <div className="text-center">
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Don't have an account?{" "}
+                            <button
+                                type="button"
+                                onClick={() => router.push("/auth/signup")}
+                                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                            >
+                                Sign up
+                            </button>
+                        </p>
+                    </div>
+                </form>
             </div>
         </main>
     );

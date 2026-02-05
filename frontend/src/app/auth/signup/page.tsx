@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, Phone, Lock, User } from "lucide-react";
+import { ArrowRight, Loader2, Phone, Lock, User, AlertCircle } from "lucide-react";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -15,18 +15,36 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const normalizePhone = (phone: string) => {
+        // Remove spaces and dashes
+        phone = phone.replace(/\s/g, '').replace(/-/g, '');
+
+        // Add +91 if not present
+        if (!phone.startsWith('+91')) {
+            if (phone.startsWith('91')) {
+                phone = '+' + phone;
+            } else if (phone.length === 10) {
+                phone = '+91' + phone;
+            }
+        }
+
+        return phone;
+    };
+
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
 
         // Validation
-        if (!formData.phone.match(/^\+91[6-9]\d{9}$/)) {
-            setError("Please enter a valid Indian phone number (+91XXXXXXXXXX)");
+        const normalizedPhone = normalizePhone(formData.phone);
+
+        if (!normalizedPhone.match(/^\+91[6-9]\d{9}$/)) {
+            setError("Please enter a valid 10-digit Indian phone number");
             return;
         }
 
-        if (formData.password.length < 8) {
-            setError("Password must be at least 8 characters");
+        if (formData.password.length < 6) {
+            setError("Password must be at least 6 characters");
             return;
         }
 
@@ -47,7 +65,7 @@ export default function SignupPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    phone: formData.phone,
+                    phone: normalizedPhone,
                     password: formData.password,
                     full_name: formData.fullName
                 })
@@ -57,13 +75,36 @@ export default function SignupPage() {
 
             if (res.ok) {
                 // Store phone for OTP verification
-                localStorage.setItem("pending_phone", formData.phone);
-                router.push("/auth/verify-otp");
+                localStorage.setItem("pending_phone", normalizedPhone);
+
+                // For development: auto-login with simplified endpoint
+                const loginRes = await fetch("http://127.0.0.1:8000/auth/login-simple", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        phone: normalizedPhone,
+                        password: formData.password,
+                        skip_otp: true
+                    })
+                });
+
+                if (loginRes.ok) {
+                    const loginData = await loginRes.json();
+                    localStorage.setItem("access_token", loginData.access_token);
+                    localStorage.setItem("refresh_token", loginData.refresh_token);
+                    localStorage.setItem("user_id", loginData.user_id);
+                    document.cookie = `access_token=${loginData.access_token}; path=/; max-age=3600; SameSite=Lax`;
+                    router.push("/home");
+                } else {
+                    // Fallback to OTP verification
+                    router.push("/auth/verify-otp");
+                }
             } else {
                 setError(data.detail || "Signup failed. Please try again.");
             }
         } catch (err) {
-            setError("Network error. Please check your connection.");
+            console.error("Signup error:", err);
+            setError("Network error. Please check your connection and ensure backend is running.");
         } finally {
             setLoading(false);
         }
@@ -78,7 +119,7 @@ export default function SignupPage() {
                         Create Your Account
                     </h1>
                     <p className="text-slate-600 dark:text-slate-400">
-                        We'll send you a verification code to confirm your number
+                        Join LifeFlow to get personalized legal guidance
                     </p>
                 </div>
 
@@ -115,12 +156,14 @@ export default function SignupPage() {
                                     type="tel"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="+91XXXXXXXXXX"
+                                    placeholder="9876543210 or +919876543210"
                                     className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
                                     required
                                 />
                             </div>
-                            <p className="text-xs text-slate-500">Format: +91 followed by 10 digits</p>
+                            <p className="text-xs text-slate-500">
+                                Enter 10-digit number (with or without +91)
+                            </p>
                         </div>
 
                         {/* Password */}
@@ -134,7 +177,7 @@ export default function SignupPage() {
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    placeholder="At least 8 characters"
+                                    placeholder="At least 6 characters"
                                     className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
                                     required
                                 />
@@ -161,8 +204,9 @@ export default function SignupPage() {
 
                         {/* Error Message */}
                         {error && (
-                            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
-                                {error}
+                            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
                             </div>
                         )}
 
@@ -170,38 +214,36 @@ export default function SignupPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-lg font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Creating Account...
+                                    Creating account...
                                 </>
                             ) : (
                                 <>
-                                    Continue
+                                    Create Account
                                     <ArrowRight className="w-5 h-5" />
                                 </>
                             )}
                         </button>
                     </div>
+
+                    {/* Login Link */}
+                    <div className="text-center">
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Already have an account?{" "}
+                            <button
+                                type="button"
+                                onClick={() => router.push("/auth/login")}
+                                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                            >
+                                Sign in
+                            </button>
+                        </p>
+                    </div>
                 </form>
-
-                {/* Footer */}
-                <div className="text-center text-sm text-slate-600 dark:text-slate-400">
-                    Already have an account?{" "}
-                    <button
-                        onClick={() => router.push("/auth/login")}
-                        className="text-blue-600 hover:underline font-medium"
-                    >
-                        Sign in
-                    </button>
-                </div>
-
-                {/* Privacy Note */}
-                <div className="text-center text-xs text-slate-500 max-w-sm mx-auto">
-                    By continuing, you agree to our terms and privacy policy. Your data is encrypted and secure.
-                </div>
             </div>
         </main>
     );

@@ -11,7 +11,7 @@ from typing import Optional, List, Dict, Any
 from loguru import logger
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.routers.auth import get_current_user
 from app.models import User
 from app.services.guidance.rag_engine import GuidanceEngine, GuidanceResponse
 

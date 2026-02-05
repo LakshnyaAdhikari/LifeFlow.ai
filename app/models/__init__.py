@@ -1,14 +1,25 @@
-"""
-Models package initialization
+# Models package - exports all database models
 
-Import all models here for easy access
-"""
+# Import from source files
+from .core import (
+    User, WorkflowTemplate, WorkflowVersion, WorkflowInstance,
+    NodeInstanceState, StepEvidence, ActionLog, Asset, StepState
+)
+from .knowledge import (
+    KnowledgeDomain, KnowledgeDocument, KnowledgeChunk,
+    UserQuery, GuidanceSession
+)
+from .situation import (
+    UserSituation, SituationInteraction, UserFeedback
+)
 
-# Import from parent models.py
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-# This file is just for organization
-# Models are imported from app.models and app.models.situation
-
+__all__ = [
+    # Core models
+    "User", "WorkflowTemplate", "WorkflowVersion", "WorkflowInstance",
+    "NodeInstanceState", "StepEvidence", "ActionLog", "Asset", "StepState",
+    # Knowledge models
+    "KnowledgeDomain", "KnowledgeDocument", "KnowledgeChunk",
+    "UserQuery", "GuidanceSession",
+    # Situation models
+    "UserSituation", "SituationInteraction", "UserFeedback",
+]

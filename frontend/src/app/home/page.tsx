@@ -1,27 +1,81 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight, MessageSquare, Loader2, LogOut, User as UserIcon, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, MessageSquare, Loader2, LogOut, User as UserIcon, Settings, FileText, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { WorkflowPreview } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+
+interface DomainClassification {
+  primary_domain: string;
+  secondary_domain?: string;
+  related_domains: string[];
+  confidence: number;
+  user_friendly_summary: string;
+  risk_assessment: {
+    safe_to_proceed: boolean;
+    risk_score: number;
+    recommendation: string;
+    message?: string;
+  };
+}
+
+interface Situation {
+  id: number;
+  title: string;
+  primary_domain: string;
+  status: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function Home() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<WorkflowPreview[]>([]);
+  const [classification, setClassification] = useState<DomainClassification | null>(null);
+  const [situations, setSituations] = useState<Situation[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [loadingSituations, setLoadingSituations] = useState(true);
 
-  const handleIntake = async () => {
+  // Load user's existing situations
+  useEffect(() => {
+    loadSituations();
+  }, []);
+
+  const loadSituations = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/situations", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSituations(data.situations || []);
+      }
+    } catch (e) {
+      console.error("Failed to load situations:", e);
+    } finally {
+      setLoadingSituations(false);
+    }
+  };
+
+  const handleClassify = async () => {
     if (!message.trim()) return;
     setLoading(true);
-    setSuggestions([]);
+    setClassification(null);
 
     const token = localStorage.getItem("access_token");
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/intake/situational", {
+      const res = await fetch("http://127.0.0.1:8000/intake/resolve", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -29,49 +83,56 @@ export default function Home() {
         },
         body: JSON.stringify({ user_message: message }),
       });
+
       if (res.ok) {
         const data = await res.json();
-        setSuggestions(data);
+        setClassification(data);
+      } else {
+        const error = await res.json();
+        alert(`Classification failed: ${error.detail || "Unknown error"}`);
       }
     } catch (e) {
       console.error(e);
+      alert("Error classifying your query");
     } finally {
       setLoading(false);
       setHasSearched(true);
     }
   };
 
-  const startWorkflow = async (versionId: number) => {
+  const createSituation = async () => {
+    if (!classification) return;
+
+    const token = localStorage.getItem("access_token");
+
     try {
-      if (!user) return;
-
-      const token = localStorage.getItem("access_token");
-      const docket = `CASE-${Date.now()}`;
-
-      const res = await fetch("http://127.0.0.1:8000/workflows", {
+      const res = await fetch("http://127.0.0.1:8000/situations/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-          user_id: user.id,
-          version_id: versionId,
-          docket_number: docket
+          description: message,
+          priority: classification.risk_assessment.risk_score >= 3 ? "urgent" : "normal"
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        window.location.href = `/journey/${data.instance_id}`;
+        router.push(`/situation/${data.situation_id}`);
       } else {
-        const err = await res.json();
-        alert(`Failed to start workflow: ${err.detail || "Unknown error"}`);
+        const error = await res.json();
+        alert(`Failed to create situation: ${error.detail || "Unknown error"}`);
       }
     } catch (e) {
       console.error(e);
-      alert("Error starting workflow");
+      alert("Error creating situation");
     }
+  };
+
+  const openSituation = (situationId: number) => {
+    router.push(`/situation/${situationId}`);
   };
 
   return (
@@ -103,70 +164,151 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero / Intake Section */}
-      <div className={cn(
-        "flex flex-col items-center max-w-2xl w-full text-center space-y-8 transition-all duration-700 ease-in-out",
-        hasSearched ? "pt-10" : "flex-1 justify-center"
-      )}>
+      {/* Hero Section */}
+      <div className="w-full max-w-4xl text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          LifeFlow.ai
+        </h1>
+        <p className="text-lg text-muted-foreground mb-8">
+          Your AI-powered guide for legal and administrative procedures in India
+        </p>
 
-        <div className="space-y-4">
-          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-primary">
-            LifeFlow
-          </h1>
-          <p className="text-xl text-muted-foreground font-light">
-            Your companion for life's complex moments.
-          </p>
-        </div>
-
-        <div className="w-full relative group">
-          <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative flex items-center bg-white dark:bg-card shadow-lg rounded-2xl p-2 border border-border focus-within:ring-2 ring-primary/50 transition-all">
-            <MessageSquare className="ml-4 text-muted-foreground w-6 h-6" />
-            <input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleIntake()}
-              placeholder="What's going on?"
-              className="flex-1 bg-transparent border-none focus:ring-0 text-lg px-4 py-3 placeholder:text-muted-foreground/50"
-            />
+        {/* Search Input */}
+        <div className="relative">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <MessageSquare className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleClassify()}
+                placeholder="Describe your situation... (e.g., 'My car insurance claim was rejected')"
+                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-border bg-card text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-colors"
+                disabled={loading}
+              />
+            </div>
             <button
-              onClick={handleIntake}
+              onClick={handleClassify}
               disabled={loading || !message.trim()}
-              className="bg-primary text-primary-foreground p-3 rounded-xl hover:opacity-90 transition-all disabled:opacity-50"
+              className="px-8 py-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
             >
-              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  Get Guidance
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
             </button>
           </div>
         </div>
-
-        {!hasSearched && (
-          <div className="flex gap-3 text-sm text-muted-foreground mt-4">
-            <span>Try:</span>
-            <button onClick={() => setMessage("I lost my dad")} className="hover:text-primary underline">"I lost my dad"</button>
-            <button onClick={() => setMessage("I need to file taxes")} className="hover:text-primary underline">"I need to file taxes"</button>
-          </div>
-        )}
       </div>
 
-      {/* Results Section */}
-      {hasSearched && (
-        <div className="w-full max-w-4xl mt-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
-          <h2 className="text-2xl font-medium text-center mb-8 text-secondary-foreground">
-            {suggestions.length > 0 ? "Here is a path that might help." : "We couldn't find a perfect match, but we are here."}
-          </h2>
+      {/* Classification Result */}
+      {classification && (
+        <div className="w-full max-w-4xl mb-8">
+          <div className="bg-card border-2 border-border rounded-xl p-6 shadow-lg">
+            <h3 className="text-xl font-semibold mb-4">We understand your situation</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {suggestions.map((s: WorkflowPreview) => (
-              <div key={s.template_id} className="bg-card border border-border/50 hover:border-primary/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group cursor-pointer" onClick={() => startWorkflow(s.version_id)}>
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">{s.title}</h3>
-                  <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-medium">Suggested</span>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Classification</p>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                    {classification.primary_domain}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Confidence: {(classification.confidence * 100).toFixed(0)}%
+                  </span>
                 </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  {s.description}
-                </p>
-                <div className="bg-muted/50 p-3 rounded-lg text-sm text-secondary-foreground italic">
-                  "{s.match_reason}"
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Summary</p>
+                <p className="text-foreground">{classification.user_friendly_summary}</p>
+              </div>
+
+              {classification.related_domains.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Related Areas</p>
+                  <div className="flex flex-wrap gap-2">
+                    {classification.related_domains.map((domain) => (
+                      <span key={domain} className="px-2 py-1 rounded-full bg-muted text-sm">
+                        {domain}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {classification.risk_assessment.message && (
+                <div className={cn(
+                  "p-4 rounded-lg",
+                  classification.risk_assessment.risk_score >= 3
+                    ? "bg-red-50 dark:bg-red-900/20 border border-red-200"
+                    : "bg-blue-50 dark:bg-blue-900/20 border border-blue-200"
+                )}>
+                  <p className="text-sm">{classification.risk_assessment.message}</p>
+                </div>
+              )}
+
+              <button
+                onClick={createSituation}
+                className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+              >
+                <FileText className="w-5 h-5" />
+                Start Tracking This Situation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Existing Situations */}
+      {situations.length > 0 && (
+        <div className="w-full max-w-4xl">
+          <h3 className="text-xl font-semibold mb-4">Your Ongoing Situations</h3>
+          <div className="grid gap-4">
+            {situations.map((situation) => (
+              <div
+                key={situation.id}
+                onClick={() => openSituation(situation.id)}
+                className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary transition-all cursor-pointer"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-semibold text-lg">{situation.title}</h4>
+                  <span className={cn(
+                    "px-3 py-1 rounded-full text-xs font-medium",
+                    situation.priority === "urgent"
+                      ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                      : "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+                  )}>
+                    {situation.priority}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <FileText className="w-4 h-4" />
+                    {situation.primary_domain}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    {new Date(situation.created_at).toLocaleDateString()}
+                  </span>
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-xs",
+                    situation.status === "active"
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400"
+                  )}>
+                    {situation.status}
+                  </span>
                 </div>
               </div>
             ))}
@@ -174,6 +316,18 @@ export default function Home() {
         </div>
       )}
 
+      {/* Empty State */}
+      {!loadingSituations && situations.length === 0 && !hasSearched && (
+        <div className="w-full max-w-4xl text-center py-12">
+          <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+            <MessageSquare className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No situations yet</h3>
+          <p className="text-muted-foreground">
+            Describe your legal or administrative situation above to get started
+          </p>
+        </div>
+      )}
     </main>
   );
 }

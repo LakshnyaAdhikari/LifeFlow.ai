@@ -11,7 +11,7 @@ from typing import Optional, List
 from loguru import logger
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.routers.auth import get_current_user
 from app.models import User
 from app.services.intake.domain_classifier import get_domain_classifier, DomainClassification
 from app.services.safety.legal_filter import LegalBoundaryDetector, RiskAssessment

@@ -82,11 +82,11 @@ class KnowledgeChunk(Base):
     document_id = Column(Integer, ForeignKey("knowledge_documents.id"), nullable=False)
     
     # Chunk content
-    content = Column(Text, nullable=False)
+    text = Column(Text, nullable=False)
     chunk_index = Column(Integer, nullable=False)  # Position in document
     
     # Metadata
-    metadata = Column(JSON, default=dict)  # Section, headers, etc.
+    chunk_metadata = Column(JSON, default=dict)  # Renamed from 'metadata' to avoid SQLAlchemy conflict # Section, headers, etc.
     
     # Embedding (stored as JSON array for SQLite compatibility)
     # In production with PostgreSQL, use ARRAY type
