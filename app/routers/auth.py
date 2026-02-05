@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from datetime import datetime, timedelta
 import re
@@ -25,7 +25,7 @@ class SignupRequest(BaseModel):
     password: str
     full_name: str
     
-    @validator('phone')
+    @field_validator('phone')
     def validate_phone(cls, v):
         # Auto-add +91 if not present
         if not v.startswith('+91'):
@@ -39,7 +39,7 @@ class SignupRequest(BaseModel):
             raise ValueError('Phone must be a valid 10-digit Indian number')
         return v
     
-    @validator('password')
+    @field_validator('password')
     def validate_password(cls, v):
         if len(v) < 6:  # Relaxed for testing
             raise ValueError('Password must be at least 6 characters')

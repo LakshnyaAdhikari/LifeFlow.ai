@@ -2,41 +2,37 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, KeyRound, AlertCircle, RefreshCcw } from "lucide-react";
 
 export default function VerifyOTPPage() {
     const router = useRouter();
     const [otp, setOtp] = useState("");
-    const [phone, setPhone] = useState("");
     const [loading, setLoading] = useState(false);
-    const [resending, setResending] = useState(false);
     const [error, setError] = useState("");
-    const [countdown, setCountdown] = useState(0);
+    const [phone, setPhone] = useState("");
+    const [resendTimer, setResendTimer] = useState(30);
 
     useEffect(() => {
-        // Get phone from localStorage
-        const pendingPhone = localStorage.getItem("pending_phone");
-        if (!pendingPhone) {
+        const storedPhone = localStorage.getItem("pending_phone");
+        if (!storedPhone) {
             router.push("/auth/signup");
             return;
         }
-        setPhone(pendingPhone);
-        setCountdown(60); // 60 second cooldown for resend
-    }, [router]);
+        setPhone(storedPhone);
 
-    useEffect(() => {
-        if (countdown > 0) {
-            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [countdown]);
+        const timer = setInterval(() => {
+            setResendTimer((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [router]);
 
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
 
         if (otp.length !== 6) {
-            setError("Please enter a 6-digit code");
+            setError("Please enter the 6-digit OTP code");
             return;
         }
 
@@ -55,100 +51,103 @@ export default function VerifyOTPPage() {
             const data = await res.json();
 
             if (res.ok) {
-                // Store tokens
                 localStorage.setItem("access_token", data.access_token);
                 localStorage.setItem("refresh_token", data.refresh_token);
                 localStorage.setItem("user_id", data.user_id);
+                document.cookie = `access_token=${data.access_token}; path=/; max-age=3600; SameSite=Lax`;
                 localStorage.removeItem("pending_phone");
 
-                // Redirect to profile setup
                 router.push("/auth/profile");
             } else {
-                setError(data.detail || "Invalid OTP. Please try again.");
+                setError(data.detail || "Verification failed. Please check the code.");
             }
         } catch (err) {
-            setError("Network error. Please check your connection.");
+            console.error("Verification error:", err);
+            setError("Network error. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
     const handleResend = async () => {
-        if (countdown > 0) return;
+        if (resendTimer > 0) return;
 
-        setResending(true);
         setError("");
-
         try {
-            const res = await fetch(`http://127.0.0.1:8000/auth/resend-otp?phone=${encodeURIComponent(phone)}`, {
-                method: "POST"
+            const res = await fetch("http://127.0.0.1:8000/auth/send-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone })
             });
-
             if (res.ok) {
-                setCountdown(60);
-                setOtp("");
+                setResendTimer(30);
+                alert("OTP resent successfully!");
             } else {
                 const data = await res.json();
                 setError(data.detail || "Failed to resend OTP");
             }
         } catch (err) {
             setError("Network error. Please try again.");
-        } finally {
-            setResending(false);
         }
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-6">
-            <div className="w-full max-w-md space-y-8">
-                {/* Header */}
+        <main className="min-h-screen bg-background text-foreground flex flex-col items-center p-6 transition-colors duration-500">
+            {/* Header */}
+            <div className="w-full max-w-6xl flex justify-between items-center mb-12">
+                <button
+                    onClick={() => router.push("/auth/signup")}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to signup
+                </button>
+                <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        LifeFlow.ai
+                    </span>
+                </div>
+                <div className="w-[100px]"></div> {/* Spacer */}
+            </div>
+
+            <div className="w-full max-w-md space-y-8 mt-10">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                        Verify Your Phone
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-400">
-                        We sent a 6-digit code to
-                    </p>
-                    <p className="text-lg font-medium text-slate-900 dark:text-slate-100">
-                        {phone}
+                    <h1 className="text-3xl font-bold">Verify Phone</h1>
+                    <p className="text-muted-foreground">
+                        We sent a 6-digit code to <span className="text-foreground font-semibold">{phone}</span>
                     </p>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleVerify} className="space-y-6">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 space-y-5">
-
+                <div className="bg-card border-2 border-border rounded-xl p-8 shadow-sm">
+                    <form onSubmit={handleVerify} className="space-y-6">
                         {/* OTP Input */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Verification Code
-                            </label>
-                            <input
-                                type="text"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                placeholder="000000"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:ring-2 ring-blue-500 outline-none text-center text-2xl tracking-widest font-mono"
-                                maxLength={6}
-                                required
-                            />
-                            <p className="text-xs text-slate-500 text-center">
-                                Check your SMS messages for the code
-                            </p>
+                            <label className="text-sm font-semibold">OTP Code</label>
+                            <div className="relative">
+                                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                <input
+                                    type="text"
+                                    maxLength={6}
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                                    placeholder="000000"
+                                    className="w-full pl-11 pr-4 py-4 rounded-xl border-2 border-border bg-background text-center text-3xl font-bold tracking-[0.5em] focus:border-primary focus:outline-none transition-colors"
+                                    required
+                                />
+                            </div>
                         </div>
 
-                        {/* Error Message */}
                         {error && (
-                            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
-                                {error}
+                            <div className="flex items-start gap-2 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200">
+                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                             </div>
                         )}
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading || otp.length !== 6}
-                            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-lg font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
@@ -162,45 +161,30 @@ export default function VerifyOTPPage() {
                                 </>
                             )}
                         </button>
+                    </form>
 
-                        {/* Resend OTP */}
-                        <div className="text-center">
-                            <button
-                                type="button"
-                                onClick={handleResend}
-                                disabled={countdown > 0 || resending}
-                                className="text-sm text-blue-600 hover:underline disabled:text-slate-400 disabled:no-underline inline-flex items-center gap-2"
-                            >
-                                {resending ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Sending...
-                                    </>
-                                ) : countdown > 0 ? (
-                                    `Resend code in ${countdown}s`
-                                ) : (
-                                    <>
-                                        <RotateCcw className="w-4 h-4" />
-                                        Resend code
-                                    </>
-                                )}
-                            </button>
-                        </div>
+                    <div className="mt-8 text-center">
+                        <button
+                            onClick={handleResend}
+                            disabled={resendTimer > 0}
+                            className="text-sm font-medium flex items-center justify-center gap-2 mx-auto disabled:text-muted-foreground text-primary hover:underline transition-colors"
+                        >
+                            <RefreshCcw className={`w-4 h-4 ${resendTimer > 0 ? "" : "animate-spin-once"}`} />
+                            {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend OTP code"}
+                        </button>
                     </div>
-                </form>
-
-                {/* Footer */}
-                <div className="text-center text-sm text-slate-600 dark:text-slate-400">
-                    Wrong number?{" "}
-                    <button
-                        onClick={() => {
-                            localStorage.removeItem("pending_phone");
-                            router.push("/auth/signup");
-                        }}
-                        className="text-blue-600 hover:underline font-medium"
-                    >
-                        Go back
-                    </button>
+                    <div className="text-center text-sm text-muted-foreground">
+                        Wrong number?{" "}
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem("pending_phone");
+                                router.push("/auth/signup");
+                            }}
+                            className="text-primary hover:underline font-medium"
+                        >
+                            Go back
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>

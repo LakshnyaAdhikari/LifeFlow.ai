@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, Phone, Lock, AlertCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Phone, Lock, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -14,10 +14,7 @@ export default function LoginPage() {
     const [error, setError] = useState("");
 
     const normalizePhone = (phone: string) => {
-        // Remove spaces and dashes
         phone = phone.replace(/\s/g, '').replace(/-/g, '');
-
-        // Add +91 if not present
         if (!phone.startsWith('+91')) {
             if (phone.startsWith('91')) {
                 phone = '+' + phone;
@@ -25,7 +22,6 @@ export default function LoginPage() {
                 phone = '+91' + phone;
             }
         }
-
         return phone;
     };
 
@@ -37,7 +33,6 @@ export default function LoginPage() {
         try {
             const normalizedPhone = normalizePhone(formData.phone);
 
-            // Try simplified login first (for development)
             const res = await fetch("http://127.0.0.1:8000/auth/login-simple", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -51,18 +46,12 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (res.ok) {
-                // Store tokens
                 localStorage.setItem("access_token", data.access_token);
                 localStorage.setItem("refresh_token", data.refresh_token);
                 localStorage.setItem("user_id", data.user_id);
-
-                // Set cookie for middleware
                 document.cookie = `access_token=${data.access_token}; path=/; max-age=3600; SameSite=Lax`;
-
-                // Redirect to home (protected)
                 router.push("/home");
             } else {
-                // If simplified login fails, try regular login
                 if (data.detail?.includes("not verified")) {
                     localStorage.setItem("pending_phone", normalizedPhone);
                     router.push("/auth/verify-otp");
@@ -79,74 +68,77 @@ export default function LoginPage() {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-6">
-            <div className="w-full max-w-md space-y-8">
-                {/* Header */}
+        <main className="min-h-screen bg-background text-foreground flex flex-col items-center p-6 transition-colors duration-500">
+            {/* Header */}
+            <div className="w-full max-w-6xl flex justify-between items-center mb-12">
+                <button
+                    onClick={() => router.push("/")}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to home
+                </button>
+                <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        LifeFlow.ai
+                    </span>
+                </div>
+                <div className="w-[100px]"></div> {/* Spacer */}
+            </div>
+
+            <div className="w-full max-w-md space-y-8 mt-10">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                        Welcome Back
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-400">
-                        Sign in to your LifeFlow account
+                    <h1 className="text-3xl font-bold">Welcome Back</h1>
+                    <p className="text-muted-foreground">
+                        Sign in to continue your journey
                     </p>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 space-y-5">
-
+                <div className="bg-card border-2 border-border rounded-xl p-8 shadow-sm">
+                    <form onSubmit={handleLogin} className="space-y-6">
                         {/* Phone Number */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Phone Number
-                            </label>
+                            <label className="text-sm font-semibold">Phone Number</label>
                             <div className="relative">
-                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="tel"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="9876543210 or +919876543210"
-                                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
+                                    placeholder="Enter your phone number"
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
-                            <p className="text-xs text-slate-500">
-                                Enter 10-digit number (with or without +91)
-                            </p>
                         </div>
 
                         {/* Password */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Password
-                            </label>
+                            <label className="text-sm font-semibold">Password</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     placeholder="Enter your password"
-                                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
                         </div>
 
-                        {/* Error Message */}
                         {error && (
-                            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                            <div className="flex items-start gap-2 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200">
+                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                             </div>
                         )}
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
@@ -160,22 +152,20 @@ export default function LoginPage() {
                                 </>
                             )}
                         </button>
-                    </div>
+                    </form>
+                </div>
 
-                    {/* Sign Up Link */}
-                    <div className="text-center">
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                            Don't have an account?{" "}
-                            <button
-                                type="button"
-                                onClick={() => router.push("/auth/signup")}
-                                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                            >
-                                Sign up
-                            </button>
-                        </p>
-                    </div>
-                </form>
+                <div className="text-center">
+                    <p className="text-muted-foreground">
+                        Don't have an account?{" "}
+                        <button
+                            onClick={() => router.push("/auth/signup")}
+                            className="text-primary hover:underline font-bold"
+                        >
+                            Create one
+                        </button>
+                    </p>
+                </div>
             </div>
         </main>
     );
