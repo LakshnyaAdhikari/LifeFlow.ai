@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, Phone, Lock, User, AlertCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Phone, Lock, User, AlertCircle } from "lucide-react";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -16,10 +16,7 @@ export default function SignupPage() {
     const [error, setError] = useState("");
 
     const normalizePhone = (phone: string) => {
-        // Remove spaces and dashes
         phone = phone.replace(/\s/g, '').replace(/-/g, '');
-
-        // Add +91 if not present
         if (!phone.startsWith('+91')) {
             if (phone.startsWith('91')) {
                 phone = '+' + phone;
@@ -27,7 +24,6 @@ export default function SignupPage() {
                 phone = '+91' + phone;
             }
         }
-
         return phone;
     };
 
@@ -35,7 +31,6 @@ export default function SignupPage() {
         e.preventDefault();
         setError("");
 
-        // Validation
         const normalizedPhone = normalizePhone(formData.phone);
 
         if (!normalizedPhone.match(/^\+91[6-9]\d{9}$/)) {
@@ -74,31 +69,9 @@ export default function SignupPage() {
             const data = await res.json();
 
             if (res.ok) {
-                // Store phone for OTP verification
                 localStorage.setItem("pending_phone", normalizedPhone);
-
-                // For development: auto-login with simplified endpoint
-                const loginRes = await fetch("http://127.0.0.1:8000/auth/login-simple", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        phone: normalizedPhone,
-                        password: formData.password,
-                        skip_otp: true
-                    })
-                });
-
-                if (loginRes.ok) {
-                    const loginData = await loginRes.json();
-                    localStorage.setItem("access_token", loginData.access_token);
-                    localStorage.setItem("refresh_token", loginData.refresh_token);
-                    localStorage.setItem("user_id", loginData.user_id);
-                    document.cookie = `access_token=${loginData.access_token}; path=/; max-age=3600; SameSite=Lax`;
-                    router.push("/home");
-                } else {
-                    // Fallback to OTP verification
-                    router.push("/auth/verify-otp");
-                }
+                // Redirect to OTP verification
+                router.push("/auth/verify-otp");
             } else {
                 setError(data.detail || "Signup failed. Please try again.");
             }
@@ -111,35 +84,45 @@ export default function SignupPage() {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-6">
-            <div className="w-full max-w-md space-y-8">
-                {/* Header */}
+        <main className="min-h-screen bg-background text-foreground flex flex-col items-center p-6 transition-colors duration-500">
+            {/* Header */}
+            <div className="w-full max-w-6xl flex justify-between items-center mb-12">
+                <button
+                    onClick={() => router.push("/")}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to home
+                </button>
+                <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        LifeFlow.ai
+                    </span>
+                </div>
+                <div className="w-[100px]"></div> {/* Spacer */}
+            </div>
+
+            <div className="w-full max-w-md space-y-8 mt-10">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                        Create Your Account
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-400">
-                        Join LifeFlow to get personalized legal guidance
+                    <h1 className="text-3xl font-bold">Join LifeFlow</h1>
+                    <p className="text-muted-foreground">
+                        Create an account to start your guided journey
                     </p>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleSignup} className="space-y-6">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 space-y-5">
-
+                <div className="bg-card border-2 border-border rounded-xl p-8 shadow-sm">
+                    <form onSubmit={handleSignup} className="space-y-6">
                         {/* Full Name */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Full Name
-                            </label>
+                            <label className="text-sm font-semibold">Full Name</label>
                             <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="text"
                                     value={formData.fullName}
                                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                     placeholder="Enter your full name"
-                                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
@@ -147,38 +130,31 @@ export default function SignupPage() {
 
                         {/* Phone Number */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Phone Number
-                            </label>
+                            <label className="text-sm font-semibold">Phone Number</label>
                             <div className="relative">
-                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="tel"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="9876543210 or +919876543210"
-                                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
+                                    placeholder="e.g. 9876543210"
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
-                            <p className="text-xs text-slate-500">
-                                Enter 10-digit number (with or without +91)
-                            </p>
                         </div>
 
                         {/* Password */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Password
-                            </label>
+                            <label className="text-sm font-semibold">Password</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    placeholder="At least 6 characters"
-                                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
+                                    placeholder="Min 6 characters"
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
@@ -186,35 +162,31 @@ export default function SignupPage() {
 
                         {/* Confirm Password */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Confirm Password
-                            </label>
+                            <label className="text-sm font-semibold">Confirm Password</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="password"
                                     value={formData.confirmPassword}
                                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                    placeholder="Re-enter your password"
-                                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 ring-blue-500 outline-none"
+                                    placeholder="Confirm your password"
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
                         </div>
 
-                        {/* Error Message */}
                         {error && (
-                            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                            <div className="flex items-start gap-2 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200">
+                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                             </div>
                         )}
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
@@ -228,22 +200,20 @@ export default function SignupPage() {
                                 </>
                             )}
                         </button>
-                    </div>
+                    </form>
+                </div>
 
-                    {/* Login Link */}
-                    <div className="text-center">
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                            Already have an account?{" "}
-                            <button
-                                type="button"
-                                onClick={() => router.push("/auth/login")}
-                                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                            >
-                                Sign in
-                            </button>
-                        </p>
-                    </div>
-                </form>
+                <div className="text-center">
+                    <p className="text-muted-foreground">
+                        Already have an account?{" "}
+                        <button
+                            onClick={() => router.push("/auth/login")}
+                            className="text-primary hover:underline font-bold"
+                        >
+                            Log in
+                        </button>
+                    </p>
+                </div>
             </div>
         </main>
     );

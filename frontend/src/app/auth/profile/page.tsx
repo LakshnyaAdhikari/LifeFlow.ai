@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, MapPin, User, Globe, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, MapPin, User, Globe, Users, AlertCircle } from "lucide-react";
 
 export default function ProfileSetupPage() {
     const router = useRouter();
@@ -60,59 +60,71 @@ export default function ProfileSetupPage() {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-6">
-            <div className="w-full max-w-2xl space-y-8">
-                {/* Header */}
+        <main className="min-h-screen bg-background text-foreground flex flex-col items-center p-6 transition-colors duration-500">
+            {/* Header */}
+            <div className="w-full max-w-6xl flex justify-between items-center mb-12">
+                <button
+                    onClick={() => router.push("/home")}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Skip to dashboard
+                </button>
+                <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        LifeFlow.ai
+                    </span>
+                </div>
+                <div className="w-[100px]"></div> {/* Spacer */}
+            </div>
+
+            <div className="w-full max-w-2xl space-y-8 mt-10">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                        Let's personalize your journey
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-400">
+                    <h1 className="text-3xl font-bold">Personalize Your Journey</h1>
+                    <p className="text-muted-foreground">
                         This helps us provide jurisdiction-specific guidance and appropriate support.
                     </p>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleUpdate} className="space-y-6">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 grid md:grid-cols-2 gap-6">
-
+                <div className="bg-card border-2 border-border rounded-xl p-8 shadow-sm">
+                    <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Location State */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" /> State
+                            <label className="text-sm font-semibold flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-primary" /> State
                             </label>
                             <input
                                 type="text"
                                 value={formData.location_state}
                                 onChange={(e) => setFormData({ ...formData, location_state: e.target.value })}
                                 placeholder="e.g. Maharashtra"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:ring-2 ring-blue-500 outline-none"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                             />
                         </div>
 
                         {/* Location City */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <Globe className="w-4 h-4" /> City
+                            <label className="text-sm font-semibold flex items-center gap-2">
+                                <Globe className="w-4 h-4 text-primary" /> City
                             </label>
                             <input
                                 type="text"
                                 value={formData.location_city}
                                 onChange={(e) => setFormData({ ...formData, location_city: e.target.value })}
                                 placeholder="e.g. Mumbai"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:ring-2 ring-blue-500 outline-none"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                             />
                         </div>
 
                         {/* Age Range */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <User className="w-4 h-4" /> Age Range
+                            <label className="text-sm font-semibold flex items-center gap-2">
+                                <User className="w-4 h-4 text-primary" /> Age Range
                             </label>
                             <select
                                 value={formData.age_range}
                                 onChange={(e) => setFormData({ ...formData, age_range: e.target.value })}
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:ring-2 ring-blue-500 outline-none"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors appearance-none"
                             >
                                 <option value="">Select range</option>
                                 {ageRanges.map(range => (
@@ -123,13 +135,13 @@ export default function ProfileSetupPage() {
 
                         {/* Language */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <Globe className="w-4 h-4" /> Preferred Language
+                            <label className="text-sm font-semibold flex items-center gap-2">
+                                <Globe className="w-4 h-4 text-primary" /> Preferred Language
                             </label>
                             <select
                                 value={formData.preferred_language}
                                 onChange={(e) => setFormData({ ...formData, preferred_language: e.target.value })}
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:ring-2 ring-blue-500 outline-none"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors appearance-none"
                             >
                                 {languages.map(lang => (
                                     <option key={lang.code} value={lang.code}>{lang.name}</option>
@@ -139,56 +151,48 @@ export default function ProfileSetupPage() {
 
                         {/* Family Status */}
                         <div className="space-y-2 md:col-span-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <Users className="w-4 h-4" /> Family Status
+                            <label className="text-sm font-semibold flex items-center gap-2">
+                                <Users className="w-4 h-4 text-primary" /> Family Status
                             </label>
                             <input
                                 type="text"
                                 value={formData.family_status}
                                 onChange={(e) => setFormData({ ...formData, family_status: e.target.value })}
                                 placeholder="e.g. Head of family, living with parents, etc."
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:ring-2 ring-blue-500 outline-none"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                             />
                         </div>
 
-                        {/* Error Message */}
                         {error && (
-                            <div className="md:col-span-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
-                                {error}
+                            <div className="md:col-span-2 flex items-start gap-2 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200">
+                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                             </div>
                         )}
 
-                        {/* Submit Buttons */}
-                        <div className="md:col-span-2 flex gap-4">
-                            <button
-                                type="button"
-                                onClick={() => router.push("/home")}
-                                className="flex-1 px-4 py-3 rounded-lg font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all text-slate-600 dark:text-slate-400"
-                            >
-                                Skip for now
-                            </button>
+                        <div className="md:col-span-2 pt-4">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-[2] bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-lg font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                                className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-sm"
                             >
                                 {loading ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                        Saving...
+                                        Saving details...
                                     </>
                                 ) : (
                                     <>
-                                        Start Journey
+                                        Finish Setup & Start Journey
                                         <ArrowRight className="w-5 h-5" />
                                     </>
                                 )}
                             </button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
 
-                <p className="text-center text-xs text-slate-500">
+                <p className="text-center text-xs text-muted-foreground">
                     You can update these details anytime in your profile settings.
                 </p>
             </div>
