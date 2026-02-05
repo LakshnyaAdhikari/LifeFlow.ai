@@ -1,6 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 from app.database import get_db, engine, Base
 from app.models.core import (
     User, WorkflowTemplate, WorkflowVersion, WorkflowInstance, 
