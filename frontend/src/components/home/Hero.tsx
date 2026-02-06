@@ -1,14 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { Search, ArrowRight, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, ArrowRight, Sparkles, UserPlus } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeroProps {
     onSearch: (query: string) => void;
 }
 
 export default function Hero({ onSearch }: HeroProps) {
+    const { user } = useAuth();
     const [query, setQuery] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
+
+    useEffect(() => {
+        if (query.length > 0) {
+            setIsTyping(true);
+        } else {
+            setIsTyping(false);
+        }
+    }, [query]);
 
     const quickStarters = [
         "Aadhaar update",
@@ -75,6 +86,22 @@ export default function Hero({ onSearch }: HeroProps) {
                                 <ArrowRight className="w-4 h-4" />
                             </button>
                         </form>
+
+                        {/* Signup Prompt - show only when typing and NOT logged in */}
+                        {isTyping && !user && (
+                            <div className="absolute -top-14 right-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                <div className="relative">
+                                    <div className="bg-primary/10 backdrop-blur-md border border-primary/20 px-4 py-2 rounded-xl shadow-lg flex items-center gap-2 whitespace-nowrap">
+                                        <UserPlus className="w-4 h-4 text-primary" />
+                                        <p className="text-sm font-semibold text-primary">
+                                            Sign up to LifeFlow.ai for personalized guidance
+                                        </p>
+                                    </div>
+                                    {/* Arrow pointing down */}
+                                    <div className="absolute -bottom-1 right-12 w-3 h-3 bg-primary/10 border-r border-b border-primary/20 rotate-45 backdrop-blur-md"></div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Suggestion Chips */}

@@ -4,14 +4,20 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronDown, Menu, X, User, HelpCircle, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isExploreOpen, setIsExploreOpen] = useState(false);
+    const { user, logout } = useAuth();
     const router = useRouter();
 
-    // Mock auth state - will be connected to AuthContext later
-    const isLoggedIn = true;
+    const isLoggedIn = !!user;
+
+    const handleLogout = () => {
+        logout();
+        setIsMenuOpen(false);
+    };
 
     const navLinks = [
         { name: "How LifeFlow Works", href: "/#how-it-works" },
@@ -102,10 +108,16 @@ export default function Navbar() {
                                     </button>
                                     {/* Profile Dropdown Placeholder */}
                                     <div className="absolute right-0 mt-2 w-48 p-2 bg-card border border-border rounded-xl shadow-xl hidden group-hover:block animate-in fade-in slide-in-from-top-2">
-                                        <button className="w-full flex items-center gap-2 px-4 py-2 text-sm rounded-lg hover:bg-muted">
+                                        <button
+                                            onClick={() => router.push("/auth/profile")}
+                                            className="w-full flex items-center gap-2 px-4 py-2 text-sm rounded-lg hover:bg-muted"
+                                        >
                                             <Settings className="w-4 h-4" /> Profile
                                         </button>
-                                        <button className="w-full flex items-center gap-2 px-4 py-2 text-sm rounded-lg hover:bg-muted text-red-500">
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full flex items-center gap-2 px-4 py-2 text-sm rounded-lg hover:bg-muted text-red-500"
+                                        >
                                             <LogOut className="w-4 h-4" /> Logout
                                         </button>
                                     </div>
@@ -123,7 +135,7 @@ export default function Navbar() {
                                     href="/auth/signup"
                                     className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-all shadow-sm"
                                 >
-                                    Get Started
+                                    Sign Up
                                 </Link>
                             </div>
                         )}
@@ -178,7 +190,10 @@ export default function Navbar() {
                                     >
                                         <LayoutDashboard className="w-5 h-5" /> My Situations
                                     </Link>
-                                    <button className="flex items-center gap-2 py-2 text-base font-medium text-red-500">
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center gap-2 py-2 text-base font-medium text-red-500"
+                                    >
                                         <LogOut className="w-5 h-5" /> Logout
                                     </button>
                                 </>
