@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2, KeyRound, AlertCircle, RefreshCcw } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function VerifyOTPPage() {
+    const { login: authLogin } = useAuth();
     const router = useRouter();
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
@@ -51,13 +53,11 @@ export default function VerifyOTPPage() {
             const data = await res.json();
 
             if (res.ok) {
-                localStorage.setItem("access_token", data.access_token);
-                localStorage.setItem("refresh_token", data.refresh_token);
-                localStorage.setItem("user_id", data.user_id);
+                authLogin(data.access_token, data.refresh_token, data.user_id.toString());
                 document.cookie = `access_token=${data.access_token}; path=/; max-age=3600; SameSite=Lax`;
                 localStorage.removeItem("pending_phone");
 
-                router.push("/auth/profile");
+                router.push("/home");
             } else {
                 setError(data.detail || "Verification failed. Please check the code.");
             }

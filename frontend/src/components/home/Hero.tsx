@@ -6,9 +6,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface HeroProps {
     onSearch: (query: string) => void;
+    showSignupPrompt?: boolean;
 }
 
-export default function Hero({ onSearch }: HeroProps) {
+export default function Hero({ onSearch, showSignupPrompt = true }: HeroProps) {
     const { user } = useAuth();
     const [query, setQuery] = useState("");
     const [isTyping, setIsTyping] = useState(false);
@@ -87,8 +88,8 @@ export default function Hero({ onSearch }: HeroProps) {
                             </button>
                         </form>
 
-                        {/* Signup Prompt - show only when typing and NOT logged in */}
-                        {isTyping && !user && (
+                        {/* Signup Prompt - show only when typing, NOT logged in, and enabled */}
+                        {isTyping && !user && showSignupPrompt && (
                             <div className="absolute -top-14 right-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <div className="relative">
                                     <div className="bg-primary/10 backdrop-blur-md border border-primary/20 px-4 py-2 rounded-xl shadow-lg flex items-center gap-2 whitespace-nowrap">
