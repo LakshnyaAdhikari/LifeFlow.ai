@@ -20,6 +20,7 @@ bcrypt>=4.0.1
 
 # LLM & AI
 openai>=1.6.0
+google-generativeai>=0.3.0  # FREE Gemini API
 anthropic>=0.8.0  # Optional: Claude fallback
 tiktoken>=0.5.2  # Token counting
 
