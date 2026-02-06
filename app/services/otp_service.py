@@ -9,8 +9,8 @@ class OTPService:
     """Service for generating and verifying OTP codes"""
     
     OTP_LENGTH = 6
-    OTP_EXPIRY_MINUTES = 5
-    MAX_ATTEMPTS = 3
+    OTP_EXPIRY_MINUTES = 15
+    MAX_ATTEMPTS = 5
     
     @staticmethod
     def generate_otp() -> str:

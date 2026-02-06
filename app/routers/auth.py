@@ -59,6 +59,9 @@ class VerifyOTPRequest(BaseModel):
     phone: str
     otp_code: str
 
+class ResendOTPRequest(BaseModel):
+    phone: str
+
 class ProfileUpdateRequest(BaseModel):
     location_state: Optional[str] = None
     location_city: Optional[str] = None
@@ -376,6 +379,33 @@ def verify_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Verification failed: {str(e)}"
+        )
+
+@router.post("/send-otp")
+def send_otp(payload: ResendOTPRequest, db: Session = Depends(get_db)):
+    """Resend OTP to user's phone"""
+    try:
+        phone = normalize_phone(payload.phone)
+        user_auth = db.query(UserAuth).filter(UserAuth.phone == phone).first()
+        
+        if not user_auth:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+            
+        # Generate and send new OTP
+        otp = OTPService.create_otp(db, user_auth.id, phone)
+        OTPService.send_otp_sms(phone, otp.otp_code)
+        
+        return {"message": "OTP sent successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Resend OTP error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to resend OTP: {str(e)}"
         )
 
 @router.get("/me")
