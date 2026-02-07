@@ -168,11 +168,11 @@ class IngestionPipeline:
         for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
             chunk_record = KnowledgeChunk(
                 document_id=doc.id,
-                content=chunk["content"],
+                text=chunk["content"],
                 chunk_index=i,
-                metadata=chunk.get("metadata", {}),
+                chunk_metadata=chunk.get("metadata", {}),
                 embedding=embedding,  # Store as JSON for SQLite
-                embedding_model="text-embedding-3-large",
+                embedding_model="all-MiniLM-L6-v2",
                 quality_score=self._calculate_quality_score(chunk["content"])
             )
             
@@ -188,11 +188,11 @@ class IngestionPipeline:
             vector_metadata.append({
                 "chunk_id": chunk_record.id,
                 "document_id": doc.id,
-                "content": chunk_record.content,
+                "content": chunk_record.text,
                 "source_authority": doc.source_authority,
                 "domain": doc.domain.name,
                 "title": doc.title,
-                **chunk_record.metadata
+                **chunk_record.chunk_metadata
             })
         
         # Add to vector database

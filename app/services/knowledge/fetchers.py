@@ -31,7 +31,7 @@ class DocumentFetcher:
     def __init__(self, authority: str, domain: str):
         self.authority = authority
         self.domain = domain
-        self.client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
+        self.client = httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=False)
     
     async def fetch(self, url: str, title: str, metadata: Optional[Dict[str, Any]] = None) -> FetchedDocument:
         """Fetch document from URL"""
@@ -283,6 +283,47 @@ class ParivahanFetcher(DocumentFetcher):
         ]
 
 
+class GenericFetcher(DocumentFetcher):
+    """
+    Generic document fetcher for other authorities
+    """
+    
+    def __init__(self, authority: str, domain: str = "General"):
+        super().__init__(authority=authority, domain=domain)
+    
+    async def fetch(self, url: str, title: str, metadata: Optional[Dict[str, Any]] = None) -> FetchedDocument:
+        """Fetch document generically"""
+        try:
+            logger.info(f"Fetching document from {self.authority}: {title}")
+            
+            # Add user agent to avoid blocking
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+            
+            response = await self.client.get(url, headers=headers)
+            response.raise_for_status()
+            
+            content_type = response.headers.get("content-type", "").lower()
+            
+            return FetchedDocument(
+                url=url,
+                content=response.content,
+                content_type=content_type,
+                title=title,
+                source_authority=self.authority,
+                domain=self.domain,
+                metadata={
+                    **(metadata or {}),
+                    "fetched_at": datetime.utcnow().isoformat(),
+                    "content_length": len(response.content)
+                }
+            )
+        
+        except Exception as e:
+            logger.error(f"Failed to fetch document from {self.authority}: {e}")
+            raise
+
 def get_fetcher(authority: str) -> DocumentFetcher:
     """Get fetcher for authority"""
     fetchers = {
@@ -294,7 +335,9 @@ def get_fetcher(authority: str) -> DocumentFetcher:
     }
     
     fetcher_class = fetchers.get(authority)
-    if not fetcher_class:
-        raise ValueError(f"No fetcher available for authority: {authority}")
+    if fetcher_class:
+        return fetcher_class()
     
-    return fetcher_class()
+    # Return generic fetcher for others
+    logger.info(f"Using generic fetcher for authority: {authority}")
+    return GenericFetcher(authority=authority)

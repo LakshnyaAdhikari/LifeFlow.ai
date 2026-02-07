@@ -1,0 +1,29 @@
+domains:
+  - name: "Identity Documents"
+    sources:
+      - authority: "UIDAI"
+        documents:
+          - title: "Update Aadhaar Details (Online & Offline)"
+            url: "https://uidai.gov.in/en/my-aadhaar/update-aadhaar.html"
+            type: "html"
+      - authority: "Passport Seva"
+        documents:
+          - title: "Passport Application FAQs"
+            url: "https://www.passportindia.gov.in/AppOnlineProject/online/faqMainPage"
+            type: "html"
+
+  - name: "Consumer Protection"
+    sources:
+      - authority: "Government of India"
+        documents:
+          - title: "Consumer Protection Act 2019 (Summary)"
+            url: "https://consumeraffairs.nic.in/en/the-consumer-protection-act-2019"
+            type: "html"
+
+  - name: "Insurance"
+    sources:
+      - authority: "IRDAI"
+        documents:
+          - title: "Master Circular on Protection of Policyholders' Interests 2024"
+            url: "https://irdai.gov.in/document-detail?documentId=5083599"
+            type: "html"

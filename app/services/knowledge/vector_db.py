@@ -32,7 +32,7 @@ class VectorDatabase:
     For production, replace with Pinecone or Milvus
     """
     
-    def __init__(self, dimension: int = 3072, index_path: str = "data/vector_index"):
+    def __init__(self, dimension: int = 384, index_path: str = "data/vector_index"):
         """
         Initialize vector database
         

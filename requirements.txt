@@ -24,6 +24,15 @@ google-generativeai>=0.3.0  # FREE Gemini API
 anthropic>=0.8.0  # Optional: Claude fallback
 tiktoken>=0.5.2  # Token counting
 
+# Knowledge Ingestion Dependencies
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+PyPDF2>=3.0.0
+pdfplumber>=0.10.0
+aiohttp>=3.9.0
+pyyaml>=6.0
+tenacity>=8.2.0
+
 # Vector Database
 faiss-cpu>=1.7.4  # Development
 pinecone-client>=2.2.4  # Production (optional)

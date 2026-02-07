@@ -34,25 +34,42 @@ class LLMClient:
     Unified LLM client supporting multiple providers (OpenAI, Gemini)
     """
     
-    def __init__(self, config: Optional[LLMConfig] = None):
-        # Get provider from environment or config
-        provider = os.getenv("LLM_PROVIDER", "gemini").lower()
+    def __init__(self, config: Optional[LLMConfig] = None, provider: Optional[str] = None):
+        # Get provider from arg, config, or environment
+        if provider:
+            self.provider = provider
+        elif config:
+            self.provider = config.provider
+        else:
+            self.provider = os.getenv("LLM_PROVIDER", "local").lower() # Default to local if not set
         
         if config is None:
-            config = LLMConfig(provider=provider)
+            config = LLMConfig(provider=self.provider)
         
         self.config = config
-        self.provider = self.config.provider
         
         # Initialize the appropriate client
         if self.provider == "openai":
             self._init_openai()
         elif self.provider == "gemini":
             self._init_gemini()
+        elif self.provider == "local":
+            self._init_local()
         else:
-            raise ValueError(f"Unsupported LLM provider: {self.provider}")
+            logger.warning(f"Unsupported LLM provider: {self.provider}, defaulting to local")
+            self.provider = "local"
+            self._init_local()
         
-        logger.info(f"Initialized LLM client with provider: {self.provider}, model: {self.config.model}")
+        logger.info(f"Initialized LLM client with provider: {self.provider}")
+
+    def _init_local(self):
+        """Initialize local embedding model"""
+        try:
+            from sentence_transformers import SentenceTransformer
+            self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+            logger.info("Initialized local embedding model: all-MiniLM-L6-v2")
+        except ImportError:
+            raise ImportError("sentence-transformers not installed. Run: pip install sentence-transformers")
     
     def _init_openai(self):
         """Initialize OpenAI client"""
@@ -238,6 +255,18 @@ class LLMClient:
             return await self._generate_embedding_openai(text, model or "text-embedding-3-large")
         elif self.provider == "gemini":
             return await self._generate_embedding_gemini(text, model or "models/embedding-001")
+        elif self.provider == "local":
+            return self._generate_embedding_local(text)
+
+    def _generate_embedding_local(self, text: str) -> List[float]:
+        """Generate embedding using local model"""
+        try:
+            embedding = self.embedding_model.encode(text)
+            return embedding.tolist()
+        except Exception as e:
+            logger.error(f"Local embedding generation failed: {e}")
+            raise
+
     
     async def _generate_embedding_openai(self, text: str, model: str) -> List[float]:
         """Generate embedding using OpenAI"""
@@ -259,13 +288,13 @@ class LLMClient:
     async def _generate_embedding_gemini(self, text: str, model: str) -> List[float]:
         """Generate embedding using Gemini"""
         try:
-            result = self.client.embed_content(
+            result = self.client.models.embed_content(
                 model=model,
-                content=text,
-                task_type="retrieval_document"
+                contents=text,
+                config={"task_type": "retrieval_document"}
             )
             
-            embedding = result['embedding']
+            embedding = result.embeddings[0].values
             logger.debug(f"Generated Gemini embedding with {len(embedding)} dimensions")
             
             return embedding
@@ -273,7 +302,7 @@ class LLMClient:
         except Exception as e:
             logger.error(f"Gemini embedding generation failed: {e}")
             raise
-    
+
     async def generate_embeddings_batch(
         self,
         texts: List[str],
@@ -287,7 +316,23 @@ class LLMClient:
             return await self._generate_embeddings_batch_openai(texts, model or "text-embedding-3-large", batch_size)
         elif self.provider == "gemini":
             return await self._generate_embeddings_batch_gemini(texts, model or "models/embedding-001", batch_size)
-    
+        elif self.provider == "local":
+            return self._generate_embeddings_batch_local(texts, batch_size)
+
+    def _generate_embeddings_batch_local(self, texts: List[str], batch_size: int) -> List[List[float]]:
+        """Generate embeddings batch using local model"""
+        embeddings = []
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i + batch_size]
+            try:
+                batch_embeddings = self.embedding_model.encode(batch)
+                embeddings.extend(batch_embeddings.tolist())
+                logger.info(f"Generated local embeddings for batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}")
+            except Exception as e:
+                logger.error(f"Local batch embedding generation failed: {e}")
+                raise
+        return embeddings
+
     async def _generate_embeddings_batch_openai(self, texts: List[str], model: str, batch_size: int) -> List[List[float]]:
         """Generate embeddings batch using OpenAI"""
         embeddings = []
@@ -301,7 +346,7 @@ class LLMClient:
                     input=batch
                 )
                 
-                batch_embeddings = [item.embedding for item in response.data]
+                batch_embeddings = [d.embedding for d in response.data]
                 embeddings.extend(batch_embeddings)
                 
                 logger.info(f"Generated OpenAI embeddings for batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}")
@@ -311,7 +356,7 @@ class LLMClient:
                 raise
         
         return embeddings
-    
+
     async def _generate_embeddings_batch_gemini(self, texts: List[str], model: str, batch_size: int) -> List[List[float]]:
         """Generate embeddings batch using Gemini"""
         embeddings = []
@@ -321,13 +366,14 @@ class LLMClient:
             
             try:
                 # Gemini supports batch embedding
-                result = self.client.embed_content(
+                result = self.client.models.embed_content(
                     model=model,
-                    content=batch,
-                    task_type="retrieval_document"
+                    contents=batch,
+                    config={"task_type": "retrieval_document"}
                 )
                 
-                batch_embeddings = result['embedding'] if isinstance(result['embedding'][0], list) else [result['embedding']]
+                # Extract embeddings from response object
+                batch_embeddings = [e.values for e in result.embeddings]
                 embeddings.extend(batch_embeddings)
                 
                 logger.info(f"Generated Gemini embeddings for batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}")
@@ -344,12 +390,8 @@ _llm_client: Optional[LLMClient] = None
 
 
 def get_llm_client() -> LLMClient:
-    """
-    Get or create global LLM client instance
-    """
+    """Get singleton LLM client"""
     global _llm_client
-    
-    if _llm_client is None:
-        _llm_client = LLMClient()
-    
+    if not _llm_client:
+        _llm_client = LLMClient(provider="local")
     return _llm_client
