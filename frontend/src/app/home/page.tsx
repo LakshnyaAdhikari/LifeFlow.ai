@@ -58,24 +58,39 @@ export default function Home() {
     if (!query.trim()) return;
     const token = localStorage.getItem("access_token");
 
+    console.log("🔍 handleSearch called with query:", query);
+    console.log("🔑 Token:", token ? "Present" : "Missing");
+
     try {
+      console.log("📡 Sending request to /intake/resolve...");
       const res = await fetch("http://127.0.0.1:8000/intake/resolve", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ user_message: query }),
       });
+
+      console.log("📥 Response status:", res.status, res.statusText);
 
       if (res.ok) {
         const data = await res.json();
+        console.log("✅ Response data:", data);
         if (data.situation_id) {
           router.push(`/situation/${data.situation_id}`);
+        } else {
+          console.warn("⚠️ No situation_id in response");
+          alert("Response received but no situation ID. Check console for details.");
         }
+      } else {
+        const errorText = await res.text();
+        console.error("❌ API Error:", res.status, errorText);
+        alert(`API Error ${res.status}: ${errorText.substring(0, 200)}`);
       }
     } catch (e) {
-      console.error("Resolve failed:", e);
+      console.error("💥 Request failed:", e);
+      alert(`Request failed: ${e}`);
     }
   };
 

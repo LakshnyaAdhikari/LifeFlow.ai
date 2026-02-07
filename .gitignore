@@ -27,6 +27,8 @@ wheels/
 # Database
 *.db
 *.sqlite3
+lifeflow.db
+
 
 # Logs and Debug
 *.log

@@ -13,6 +13,7 @@ from loguru import logger
 from app.database import get_db
 from app.routers.auth import get_current_user
 from app.models import User
+from app.models.situation import UserSituation
 from app.services.intake.domain_classifier import get_domain_classifier, DomainClassification
 from app.services.safety.legal_filter import LegalBoundaryDetector, RiskAssessment
 
@@ -28,13 +29,14 @@ class IntakeRequest(BaseModel):
 
 class IntakeResponse(BaseModel):
     """Response with domain classification and risk assessment"""
+    situation_id: Optional[int] = None  # ID of created situation
     primary_domain: str
     secondary_domain: Optional[str] = None
-    related_domains: List[str]
+    related_domains: List[str] = []
     confidence: float
     user_friendly_summary: str
-    suggested_keywords: List[str]
-    reasoning: Optional[str] = None
+    suggested_keywords: List[str] = []
+    reasoning: str
     risk_assessment: Optional[RiskAssessment] = None
 
 
@@ -65,15 +67,25 @@ async def resolve_domain(
             domain=classification.primary_domain
         )
         
-        # 3. Log query for learning (future: improve classification)
-        # TODO: Store in user_queries table for feedback loop
+        # 3. Create Situation record
+        situation = UserSituation(
+            user_id=current_user.id,
+            title=payload.user_message[:100],  # Use first 100 chars as title
+            primary_domain=classification.primary_domain,
+            status="active"
+        )
+        db.add(situation)
+        db.commit()
+        db.refresh(situation)
         
         logger.info(
             f"Domain resolved: {classification.primary_domain} "
             f"(confidence: {classification.confidence:.2f}, risk: {risk_assessment.risk_score})"
+            f" - Created situation {situation.id}"
         )
         
         return IntakeResponse(
+            situation_id=situation.id,
             primary_domain=classification.primary_domain,
             secondary_domain=classification.secondary_domain,
             related_domains=classification.related_domains,
