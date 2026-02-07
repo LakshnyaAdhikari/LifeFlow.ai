@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2, Phone, Lock, AlertCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
+    const { login: authLogin } = useAuth();
     const router = useRouter();
     const [formData, setFormData] = useState({
         phone: "",
@@ -46,9 +48,7 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (res.ok) {
-                localStorage.setItem("access_token", data.access_token);
-                localStorage.setItem("refresh_token", data.refresh_token);
-                localStorage.setItem("user_id", data.user_id);
+                authLogin(data.access_token, data.refresh_token, data.user_id.toString());
                 document.cookie = `access_token=${data.access_token}; path=/; max-age=3600; SameSite=Lax`;
                 router.push("/home");
             } else {

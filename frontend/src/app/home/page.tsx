@@ -20,6 +20,8 @@ interface Situation {
   updated_at: string;
 }
 
+import Hero from "@/components/home/Hero";
+
 export default function Home() {
   const { user } = useAuth();
   const router = useRouter();
@@ -28,7 +30,7 @@ export default function Home() {
 
   useEffect(() => {
     loadSituations();
-  }, []);
+  }, [user]); // Reload if user changes
 
   const loadSituations = async () => {
     const token = localStorage.getItem("access_token");
@@ -84,35 +86,42 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-grow">
-        {/* Welcome Header */}
-        <section className="bg-primary/5 py-12 border-b border-primary/10">
+        {/* Personalized Welcome & Search */}
+        <section className="bg-primary/5 pt-12 pb-16 border-b border-primary/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">
-                  Welcome back, {user?.full_name?.split(' ')[0] || "User"}
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  How can LifeFlow assist you today?
-                </p>
-              </div>
+            <div className="text-center mb-10 space-y-4">
+              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                Welcome back,{" "}
+                <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  {user?.full_name?.split(" ")[0] || "User"}
+                </span>
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                What situation can LifeFlow help you navigate today?
+              </p>
+            </div>
 
-              {latestSituation && (
+            <div className="max-w-3xl mx-auto mb-12">
+              <Hero onSearch={handleSearch} showSignupPrompt={false} />
+            </div>
+
+            {latestSituation && (
+              <div className="max-w-2xl mx-auto">
                 <div
                   onClick={() => router.push(`/situation/${latestSituation.id}`)}
-                  className="bg-card border-2 border-primary/20 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-primary transition-all cursor-pointer flex items-center gap-4 group"
+                  className="bg-card border-2 border-primary/20 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary transition-all cursor-pointer flex items-center gap-4 group"
                 >
-                  <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                    <LayoutDashboard className="w-6 h-6" />
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <LayoutDashboard className="w-5 h-5" />
                   </div>
                   <div className="flex-grow min-w-0">
-                    <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">Continue Previous Situation</p>
-                    <h4 className="font-bold truncate">{latestSituation.title}</h4>
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Continue Previous Situation</p>
+                    <h4 className="font-bold truncate text-sm">{latestSituation.title}</h4>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </section>
 
