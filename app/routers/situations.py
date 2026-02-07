@@ -17,6 +17,7 @@ from app.models import User
 from app.models.situation import UserSituation, SituationInteraction
 from app.services.situation.context_builder import SituationContextBuilder, SituationContext
 from app.services.intake.domain_classifier import get_domain_classifier
+from app.services.intake.question_generator import get_clarification_generator
 
 
 router = APIRouter(prefix="/situations", tags=["situations"])
@@ -201,6 +202,25 @@ async def get_situation(
         
         if not situation:
             raise HTTPException(status_code=404, detail="Situation not found")
+        
+        # Lazy Load Questions if missing
+        if not situation.clarification_questions:
+            logger.info(f"Situation {situation.id} has no questions. Genererating lazily...")
+            try:
+                generator = get_clarification_generator()
+                questions = await generator.generate_questions(
+                    query=situation.title, # Use title as proxy for query
+                    domain=situation.primary_domain
+                )
+                
+                # Save to DB
+                situation.clarification_questions = [q.dict() for q in questions]
+                db.commit()
+                db.refresh(situation)
+                logger.info(f"Lazily generated {len(questions)} questions")
+            except Exception as e:
+                logger.error(f"Lazy generation failed: {e}")
+                # Don't fail the request, just return empty/default
         
         # Build context
         context_builder = SituationContextBuilder(db)

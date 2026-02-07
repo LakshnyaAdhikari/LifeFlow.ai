@@ -75,23 +75,16 @@ async def resolve_domain(
         db.commit()
         db.refresh(situation)
         
-        # 4. Generate Clarifying Questions [NEW]
-        # This replaces immediate RAG generation
-        generator = get_clarification_generator()
-        questions = await generator.generate_questions(
-            query=payload.user_message,
-            domain=classification.primary_domain
-        )
-        
-        # Save questions to DB
-        situation.clarification_questions = [q.dict() for q in questions]
-        db.commit()
+        # 4. Generate Clarifying Questions [LAZY LOADING]
+        # We now generate these on-demand in GET /situations/{id}
+        # This makes the initial redirect instant
+        questions = []
         
         logger.info(
             f"Domain resolved: {classification.primary_domain} "
             f"(confidence: {classification.confidence:.2f}, risk: {risk_assessment.risk_score})"
             f" - Created situation {situation.id}"
-            f" - Generated {len(questions)} clarifying questions"
+            f" - Questions deferred to lazy load"
         )
         
         return IntakeResponse(
@@ -104,7 +97,7 @@ async def resolve_domain(
             suggested_keywords=classification.suggested_keywords,
             reasoning=classification.reasoning,
             risk_assessment=risk_assessment,
-            clarifying_questions=questions
+            clarifying_questions=[] # Empty list, will be populated on clarification page load
         )
     
     except Exception as e:

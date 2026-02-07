@@ -97,10 +97,11 @@ export default function ClarifyPage() {
                 // Success! Redirect to dashboard
                 router.push(`/situation/${situation.id}`);
             } else {
-                console.error("Failed to generate guidance");
+                const errorText = await res.text();
+                console.error("Failed to generate guidance:", res.status, errorText);
                 setSubmitting(false);
                 setShowFinalizing(false);
-                alert("Something went wrong generating guidance. Please try skipping or reloading.");
+                alert(`Error: ${res.status} ${res.statusText}\n${errorText}`);
             }
         } catch (e) {
             console.error("Error submitting answers:", e);
