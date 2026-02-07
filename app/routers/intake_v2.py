@@ -14,18 +14,7 @@ from app.database import get_db
 from app.routers.auth import get_current_user
 from app.models import User
 from app.models.situation import UserSituation
-from app.services.intake.domain_classifier import get_domain_classifier, DomainClassification
-from app.services.safety.legal_filter import LegalBoundaryDetector, RiskAssessment
-
-
-router = APIRouter(prefix="/intake", tags=["intake"])
-
-
-class IntakeRequest(BaseModel):
-    """Request to resolve user query to domain"""
-    user_message: str
-    context: Optional[dict] = None  # Additional context if available
-
+from app.services.intake.question_generator import get_clarification_generator, ClarificationQuestion
 
 class IntakeResponse(BaseModel):
     """Response with domain classification and risk assessment"""
@@ -38,6 +27,7 @@ class IntakeResponse(BaseModel):
     suggested_keywords: List[str] = []
     reasoning: str
     risk_assessment: Optional[RiskAssessment] = None
+    clarifying_questions: List[ClarificationQuestion] = []  # [NEW] Structured questions
 
 
 @router.post("/resolve", response_model=IntakeResponse)
@@ -78,10 +68,23 @@ async def resolve_domain(
         db.commit()
         db.refresh(situation)
         
+        # 4. Generate Clarifying Questions [NEW]
+        # This replaces immediate RAG generation
+        generator = get_clarification_generator()
+        questions = await generator.generate_questions(
+            query=payload.user_message,
+            domain=classification.primary_domain
+        )
+        
+        # Save questions to DB
+        situation.clarification_questions = [q.dict() for q in questions]
+        db.commit()
+        
         logger.info(
             f"Domain resolved: {classification.primary_domain} "
             f"(confidence: {classification.confidence:.2f}, risk: {risk_assessment.risk_score})"
             f" - Created situation {situation.id}"
+            f" - Generated {len(questions)} clarifying questions"
         )
         
         return IntakeResponse(
@@ -93,7 +96,8 @@ async def resolve_domain(
             user_friendly_summary=classification.user_friendly_summary,
             suggested_keywords=classification.suggested_keywords,
             reasoning=classification.reasoning,
-            risk_assessment=risk_assessment
+            risk_assessment=risk_assessment,
+            clarifying_questions=questions
         )
     
     except Exception as e:

@@ -13,7 +13,9 @@ from app.services.knowledge.vector_db import get_vector_db, SearchResult
 from app.services.llm.client import get_llm_client
 from app.services.safety.legal_filter import SafetyFilter, GUIDANCE_SYSTEM_PROMPT
 from app.services.confidence.triangulated import TriangulatedConfidence, ConfidenceBasedResponseStrategy
+from app.services.confidence.triangulated import TriangulatedConfidence, ConfidenceBasedResponseStrategy
 from app.models.knowledge import UserQuery, GuidanceSession
+from app.models.situation import UserSituation
 
 
 class Suggestion(BaseModel):
@@ -55,7 +57,8 @@ class GuidanceEngine:
         domain: str,
         user_id: int,
         situation_id: Optional[int] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
+        clarification_answers: Optional[List[Dict[str, str]]] = None  # [NEW]
     ) -> GuidanceResponse:
         """
         Generate guidance for user query
@@ -69,22 +72,41 @@ class GuidanceEngine:
         6. Calculate confidence
         7. Apply response strategy
         """
-        logger.info(f"Generating guidance for query: {query[:100]}...")
+        # Refine query if clarification answers are provided
+        refined_query = query
+        if clarification_answers:
+            answers_text = "\n".join([
+                f"Q: {a.get('question_text', '')} A: {a.get('answer', '')}" 
+                for a in clarification_answers
+            ])
+            refined_query = f"{query}\n\nUser Context:\n{answers_text}"
+            logger.info(f"Refined query with clarification: {refined_query[:100]}...")
+        
+        logger.info(f"Generating guidance for query: {refined_query[:100]}...")
         
         context = context or {}
         
         try:
-            # 1. Log query
+            # 1. Log query (Use refined query to capture full context)
             user_query = UserQuery(
                 user_id=user_id,
-                query_text=query,
+                query_text=refined_query,
                 classified_domain=domain
             )
             self.db.add(user_query)
             self.db.commit()
             
-            # 2. Generate query embedding
-            query_embedding = await self.llm_client.generate_embedding(query)
+            # 1.5 Update UserSituation with clarification answers if applicable
+            if situation_id and clarification_answers:
+                situation = self.db.query(UserSituation).filter(UserSituation.id == situation_id).first()
+                if situation:
+                    # Convert Pydantic/Dict objects to dicts for JSON storage if needed
+                    # Assuming they are dicts from the router
+                    situation.clarification_answers = clarification_answers
+                    self.db.commit()
+            
+            # 2. Generate query embedding using refined query
+            query_embedding = await self.llm_client.generate_embedding(refined_query)
             
             # 3. Search vector database
             search_results = self.vector_db.search(

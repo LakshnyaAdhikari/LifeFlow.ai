@@ -19,12 +19,20 @@ from app.services.guidance.rag_engine import GuidanceEngine, GuidanceResponse
 router = APIRouter(prefix="/guidance", tags=["guidance"])
 
 
+
+class ClarificationAnswer(BaseModel):
+    question_id: str
+    question_text: str
+    answer: str
+
+
 class GuidanceRequest(BaseModel):
     """Request for guidance"""
     query: str
     domain: str
     situation_id: Optional[int] = None
     context: Optional[Dict[str, Any]] = None
+    clarification_answers: List[ClarificationAnswer] = []  # [NEW]
 
 
 class FeedbackRequest(BaseModel):
@@ -64,7 +72,8 @@ async def get_suggestions(
             domain=payload.domain,
             user_id=current_user.id,
             situation_id=payload.situation_id,
-            context=payload.context
+            context=payload.context,
+            clarification_answers=payload.clarification_answers  # [NEW]
         )
         
         logger.info(

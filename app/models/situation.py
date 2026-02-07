@@ -40,6 +40,10 @@ class UserSituation(Base):
     # Multi-Domain Support
     domain_states = Column(JSON, default=dict)  # {domain: {status, completed_steps, ...}}
     
+    # Clarification Flow [NEW]
+    clarification_questions = Column(JSON, default=list)
+    clarification_answers = Column(JSON, default=list)
+    
     # Status
     status = Column(String(50), default="active")  # "active", "resolved", "escalated", "paused"
     priority = Column(String(50), default="normal")  # "urgent", "normal", "low"
