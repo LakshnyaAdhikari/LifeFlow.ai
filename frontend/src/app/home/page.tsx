@@ -78,7 +78,8 @@ export default function Home() {
         const data = await res.json();
         console.log("✅ Response data:", data);
         if (data.situation_id) {
-          router.push(`/situation/${data.situation_id}`);
+          // Redirect to clarification flow to refine guidance
+          router.push(`/intake/clarify/${data.situation_id}`);
         } else {
           console.warn("⚠️ No situation_id in response");
           alert("Response received but no situation ID. Check console for details.");
