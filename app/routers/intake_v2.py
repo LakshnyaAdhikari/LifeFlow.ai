@@ -15,6 +15,13 @@ from app.routers.auth import get_current_user
 from app.models import User
 from app.models.situation import UserSituation
 from app.services.intake.question_generator import get_clarification_generator, ClarificationQuestion
+from app.services.intake.domain_classifier import get_domain_classifier, DomainClassification
+from app.services.safety.legal_filter import LegalBoundaryDetector, RiskAssessment
+
+class IntakeRequest(BaseModel):
+    user_message: str
+
+router = APIRouter(prefix="/intake", tags=["intake"])
 
 class IntakeResponse(BaseModel):
     """Response with domain classification and risk assessment"""

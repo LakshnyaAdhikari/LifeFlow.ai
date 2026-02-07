@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Brain, SkipForward, CheckCircle2, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/layout/Navbar";
@@ -20,7 +20,8 @@ interface Situation {
     clarification_questions?: ClarificationQuestion[];
 }
 
-export default function ClarifyPage({ params }: { params: { id: string } }) {
+export default function ClarifyPage() {
+    const params = useParams();
     const router = useRouter();
     const [situation, setSituation] = useState<Situation | null>(null);
     const [loading, setLoading] = useState(true);
@@ -29,8 +30,10 @@ export default function ClarifyPage({ params }: { params: { id: string } }) {
     const [showFinalizing, setShowFinalizing] = useState(false);
 
     useEffect(() => {
-        loadSituation();
-    }, [params.id]);
+        if (params?.id) {
+            loadSituation();
+        }
+    }, [params?.id]);
 
     const loadSituation = async () => {
         const token = localStorage.getItem("access_token");
