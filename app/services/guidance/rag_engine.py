@@ -29,7 +29,7 @@ class Suggestion(BaseModel):
 class GuidanceResponse(BaseModel):
     """Complete guidance response"""
     suggestions: List[Suggestion]
-    sources: List[Dict[str, str]]
+    sources: List[Dict[str, Any]]
     confidence: Dict[str, Any]
     caveats: List[str] = []
     cross_domain_insights: List[str] = []
@@ -99,12 +99,15 @@ class GuidanceEngine:
             knowledge_context = self._build_knowledge_context(search_results)
             
             # 5. Generate suggestions using LLM
+            import time
+            s_start = time.time()
             raw_guidance = await self._generate_suggestions(
                 query=query,
                 domain=domain,
                 knowledge_context=knowledge_context,
                 user_context=context
             )
+            logger.info(f"⏱️ Suggestions generation took {time.time() - s_start:.2f}s")
             
             # 6. Extract sources
             sources = self._extract_sources(search_results)
@@ -293,7 +296,7 @@ Generate 3-5 suggestions ordered by priority.
         
         return guidance
     
-    def _extract_sources(self, search_results: List[SearchResult]) -> List[Dict[str, str]]:
+    def _extract_sources(self, search_results: List[SearchResult]) -> List[Dict[str, Any]]:
         """Extract source information"""
         sources = []
         seen_docs = set()

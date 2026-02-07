@@ -26,6 +26,17 @@ from contextlib import asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create tables on startup
     Base.metadata.create_all(bind=engine)
+    
+    # Warmup Layout: Load heavy models into memory
+    from app.services.llm.client import get_llm_client
+    from app.services.knowledge.vector_db import get_vector_db
+    from loguru import logger
+    
+    logger.info("🔥 Warming up AI models (this may take a few seconds)...")
+    get_llm_client() # Loads SentenceTransformer
+    get_vector_db()  # Loads FAISS index
+    logger.info("✅ AI models loaded and ready!")
+    
     yield
 
 app = FastAPI(title="LifeFlow.ai API", description="Procedural Intelligence Platform", lifespan=lifespan)

@@ -37,6 +37,18 @@ refactor_output.txt
 verify_refactor_result.txt
 refactor_log.txt
 test_error.txt
+backend_log.txt
+server_log.txt
+ingestion.log
+*_latency_results*.txt
+available_models.txt
+models.txt
+all_models.txt
+db_dump.txt
+signup_error.txt
+
+# User Data
+*.csv
 
 # Temporary/Test Scripts (Agent Created)
 cleanup_db.py

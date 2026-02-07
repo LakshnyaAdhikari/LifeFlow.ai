@@ -15,7 +15,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 class LLMConfig(BaseModel):
     """LLM configuration"""
     provider: str = "gemini"  # "openai" or "gemini"
-    model: str = "models/gemini-2.5-flash"  # Verified available model
+    model: str = "models/gemini-2.5-flash-lite"  # Verified fast & available
     temperature: float = 0.7
     max_tokens: int = 1500
     api_key: Optional[str] = None
@@ -99,7 +99,7 @@ class LLMClient:
         
         self.client = genai.Client(api_key=api_key)
         if self.config.model == "gpt-4-turbo-preview":  # Default was set for OpenAI
-            self.config.model = "models/gemini-2.5-flash"  # Use verified available model
+            self.config.model = "models/gemini-2.5-flash-lite"  # Use verified available model
     
     @retry(
         stop=stop_after_attempt(3),
@@ -192,6 +192,10 @@ class LLMClient:
             if response_format:
                 full_prompt += "\n\nRespond with valid JSON only."
             
+            import time
+            start = time.time()
+            logger.info(f"⚡ Generating content with model: {self.config.model}")
+            
             # Generate content using new API
             response = self.client.models.generate_content(
                 model=self.config.model,
@@ -202,12 +206,13 @@ class LLMClient:
                 }
             )
             
+            duration = time.time() - start
+            logger.info(f"✅ Gemini generation complete in {duration:.2f}s")
+            
             content = response.text
             
             # Estimate tokens (free tier doesn't provide exact count)
             tokens_used = len(full_prompt.split()) + len(content.split())
-            
-            logger.info(f"Gemini generation successful. Estimated tokens: {tokens_used}")
             
             return LLMResponse(
                 content=content,
@@ -254,7 +259,10 @@ class LLMClient:
         if self.provider == "openai":
             return await self._generate_embedding_openai(text, model or "text-embedding-3-large")
         elif self.provider == "gemini":
-            return await self._generate_embedding_gemini(text, model or "models/embedding-001")
+            # Fallback to local since models/embedding-001 is unstable/404
+            if not hasattr(self, 'embedding_model'):
+                self._init_local()
+            return self._generate_embedding_local(text)
         elif self.provider == "local":
             return self._generate_embedding_local(text)
 
@@ -315,7 +323,10 @@ class LLMClient:
         if self.provider == "openai":
             return await self._generate_embeddings_batch_openai(texts, model or "text-embedding-3-large", batch_size)
         elif self.provider == "gemini":
-            return await self._generate_embeddings_batch_gemini(texts, model or "models/embedding-001", batch_size)
+            # Fallback to local since models/embedding-001 is unstable/404
+            if not hasattr(self, 'embedding_model'):
+                self._init_local()
+            return self._generate_embeddings_batch_local(texts, batch_size)
         elif self.provider == "local":
             return self._generate_embeddings_batch_local(texts, batch_size)
 
@@ -393,5 +404,5 @@ def get_llm_client() -> LLMClient:
     """Get singleton LLM client"""
     global _llm_client
     if not _llm_client:
-        _llm_client = LLMClient(provider="local")
+        _llm_client = LLMClient(provider="gemini")
     return _llm_client
