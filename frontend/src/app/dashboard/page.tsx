@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
@@ -8,6 +8,7 @@ import Overview from "@/components/dashboard/Overview";
 import SituationsTab from "@/components/dashboard/Situations";
 import HistoryTab from "@/components/dashboard/History";
 import DependentManager from "@/components/dashboard/DependentManager";
+import SettingsTab from "@/components/dashboard/Settings";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -16,14 +17,13 @@ export default function DashboardPage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState("overview");
 
-    if (authLoading) return null; // Or a loading spinner
-
-    if (!user) {
-        if (typeof window !== "undefined") {
+    useEffect(() => {
+        if (!authLoading && !user) {
             router.push("/auth/login");
         }
-        return null;
-    }
+    }, [user, authLoading, router]);
+
+    if (authLoading || !user) return null; // Or a loading spinner
 
     const renderContent = () => {
         switch (activeTab) {
@@ -34,7 +34,7 @@ export default function DashboardPage() {
             case "documents": return <Placeholder tab="Documents & Records" />;
             case "insights": return <Placeholder tab="Insights & Analytics" />;
             case "personalization": return <Placeholder tab="Personalization Settings" />;
-            case "settings": return <Placeholder tab="Account Settings" />;
+            case "settings": return <SettingsTab />;
             default: return <Overview user={user} />;
         }
     };

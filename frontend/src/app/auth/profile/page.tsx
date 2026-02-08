@@ -63,19 +63,30 @@ export default function ProfileSetupPage() {
         <main className="min-h-screen bg-background text-foreground flex flex-col items-center p-6 transition-colors duration-500">
             {/* Header */}
             <div className="w-full max-w-6xl flex justify-between items-center mb-12">
-                <button
-                    onClick={() => router.push("/home")}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Skip to dashboard
-                </button>
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem("access_token");
+                            router.push("/");
+                        }}
+                        className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
+                    >
+                        Log Out
+                    </button>
+                    <button
+                        onClick={() => router.push("/home")}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Skip to dashboard
+                    </button>
+                </div>
                 <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                         LifeFlow.ai
                     </span>
                 </div>
-                <div className="w-[100px]"></div> {/* Spacer */}
+                <div className="w-[150px]"></div> {/* Spacer */}
             </div>
 
             <div className="w-full max-w-2xl space-y-8 mt-10">
