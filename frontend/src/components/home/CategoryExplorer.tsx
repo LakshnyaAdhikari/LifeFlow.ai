@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
     Fingerprint,
     ShieldCheck,
@@ -15,6 +16,7 @@ interface Category {
     title: string;
     items: string[];
     icon: any;
+    link?: string;
 }
 
 const categories: Category[] = [
@@ -23,6 +25,7 @@ const categories: Category[] = [
         title: "Identity & Govt Services",
         items: ["Aadhaar", "PAN Card", "Passport", "Driving Licence"],
         icon: Fingerprint,
+        link: "/services/identity",
     },
     {
         id: "insurance",
@@ -65,18 +68,32 @@ export default function CategoryExplorer() {
                     {categories.map((cat) => (
                         <div
                             key={cat.id}
-                            className="group bg-card border border-border rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col h-full"
+                            className="group bg-card border border-border rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col h-full relative"
                         >
                             <div className="flex justify-between items-start mb-6">
                                 <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
                                     <cat.icon className="w-6 h-6" />
                                 </div>
-                                <button className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground group-hover:text-primary">
-                                    <ArrowUpRight className="w-5 h-5" />
-                                </button>
+                                {cat.link ? (
+                                    <Link href={cat.link} className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground group-hover:text-primary z-10">
+                                        <ArrowUpRight className="w-5 h-5" />
+                                    </Link>
+                                ) : (
+                                    <button className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground group-hover:text-primary">
+                                        <ArrowUpRight className="w-5 h-5" />
+                                    </button>
+                                )}
                             </div>
 
-                            <h3 className="text-xl font-bold mb-4">{cat.title}</h3>
+                            <h3 className="text-xl font-bold mb-4">
+                                {cat.link ? (
+                                    <Link href={cat.link} className="hover:text-primary transition-colors">
+                                        {cat.title}
+                                    </Link>
+                                ) : (
+                                    cat.title
+                                )}
+                            </h3>
 
                             <div className="flex flex-wrap gap-2 mt-auto">
                                 {cat.items.map((item) => (
@@ -89,10 +106,24 @@ export default function CategoryExplorer() {
                                 ))}
                             </div>
 
-                            <button className="mt-8 flex items-center gap-2 text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                                View All Services
-                                <ChevronRight className="w-4 h-4" />
-                            </button>
+                            <div className="mt-8 flex items-center gap-2 text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                {cat.link ? (
+                                    <Link href={cat.link} className="flex items-center gap-2 hover:underline z-10">
+                                        View All Services
+                                        <ChevronRight className="w-4 h-4" />
+                                    </Link>
+                                ) : (
+                                    <button className="flex items-center gap-2">
+                                        View All Services
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Make the whole card clickable if link exists, but keep buttons interactive */}
+                            {cat.link && (
+                                <Link href={cat.link} className="absolute inset-0 z-0" aria-label={`View ${cat.title}`} />
+                            )}
                         </div>
                     ))}
                 </div>
