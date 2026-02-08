@@ -264,8 +264,20 @@ class LLMClient:
             response_format={"type": "json_object"} if self.provider == "openai" else None
         )
         
+        content = response.content.strip()
+        
+        # Strip markdown code blocks if present
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+            
+        content = content.strip()
+        
         try:
-            return json.loads(response.content)
+            return json.loads(content)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {e}")
             logger.error(f"Response content: {response.content}")

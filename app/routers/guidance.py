@@ -73,7 +73,7 @@ async def get_suggestions(
             user_id=current_user.id,
             situation_id=payload.situation_id,
             context=payload.context,
-            clarification_answers=payload.clarification_answers  # [NEW]
+            clarification_answers=[a.model_dump() for a in payload.clarification_answers]  # [NEW] Convert to dicts
         )
         
         logger.info(

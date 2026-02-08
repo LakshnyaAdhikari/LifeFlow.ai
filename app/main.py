@@ -33,7 +33,13 @@ async def lifespan(app: FastAPI):
     from loguru import logger
     
     logger.info("🔥 Warming up AI models (this may take a few seconds)...")
-    get_llm_client() # Loads SentenceTransformer
+    llm = get_llm_client() 
+    # Force initialization of embedding model
+    if hasattr(llm, '_init_local'):
+         # Even if provider is Gemini, we often use local embeddings. Ensure it's loaded.
+         if llm.provider == "gemini" or llm.provider == "local":
+             llm._init_local()
+             
     get_vector_db()  # Loads FAISS index
     logger.info("✅ AI models loaded and ready!")
     

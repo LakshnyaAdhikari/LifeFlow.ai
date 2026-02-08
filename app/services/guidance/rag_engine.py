@@ -106,14 +106,18 @@ class GuidanceEngine:
                     self.db.commit()
             
             # 2. Generate query embedding using refined query
+            logger.info("DEBUG: Step 2 - Generating embedding...")
             query_embedding = await self.llm_client.generate_embedding(refined_query)
+            logger.info("DEBUG: Step 2 - Embedding generated")
             
             # 3. Search vector database
+            logger.info("DEBUG: Step 3 - Searching vector DB...")
             search_results = self.vector_db.search(
                 query_embedding=query_embedding,
                 top_k=5,
                 filter_metadata={"domain": domain} if domain != "General" else None
             )
+            logger.info(f"DEBUG: Step 3 - Found {len(search_results)} results")
             
             logger.info(f"Retrieved {len(search_results)} relevant chunks")
             
@@ -123,19 +127,22 @@ class GuidanceEngine:
             # 5. Generate suggestions using LLM
             import time
             s_start = time.time()
+            logger.info("DEBUG: Step 5 - Calling LLM for suggestions...")
             raw_guidance = await self._generate_suggestions(
                 query=query,
                 domain=domain,
                 knowledge_context=knowledge_context,
                 user_context=context
             )
-            logger.info(f"⏱️ Suggestions generation took {time.time() - s_start:.2f}s")
+            logger.info(f"DEBUG: Step 5 - LLM returned in {time.time() - s_start:.2f}s")
             
             # 6. Extract sources
             sources = self._extract_sources(search_results)
             
             # 7. Apply safety filter
+            logger.info("DEBUG: Step 7 - Applying safety filter...")
             filtered_guidance = await self._apply_safety_filter(raw_guidance, sources, domain)
+            logger.info("DEBUG: Step 7 - Safety filter applied")
             
             # 8. Calculate confidence
             confidence = await self.confidence_calc.calculate(

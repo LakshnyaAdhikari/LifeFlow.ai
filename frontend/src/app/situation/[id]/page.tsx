@@ -208,8 +208,8 @@ export default function SituationPage() {
                             </div>
                         </div>
                         <div className="text-right text-sm text-muted-foreground">
-                            <p>Created: {new Date(situation.created_at).toLocaleDateString()}</p>
-                            <p>Updated: {new Date(situation.updated_at).toLocaleDateString()}</p>
+                            <p>Created: {situation.created_at ? new Date(situation.created_at).toLocaleDateString() : 'Unknown'}</p>
+                            <p>Updated: {situation.updated_at ? new Date(situation.updated_at).toLocaleDateString() : 'Never'}</p>
                         </div>
                     </div>
 
