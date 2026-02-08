@@ -327,15 +327,28 @@ Generate 3-5 suggestions ordered by priority.
     
     def _extract_sources(self, search_results: List[SearchResult]) -> List[Dict[str, Any]]:
         """Extract source information"""
+        from app.models.knowledge import KnowledgeDocument
+        
         sources = []
         seen_docs = set()
         
         for result in search_results:
             if result.document_id not in seen_docs:
+                # Fetch document to get URL
+                doc = self.db.query(KnowledgeDocument).filter(
+                    KnowledgeDocument.id == result.document_id
+                ).first()
+                
+                url = doc.source_url if doc else None
+                
+                # If URL is a local file, try to map it to a real URL if possible, or just keep it
+                # (Ideally, the DB should contain the real URL)
+                
                 sources.append({
                     "title": result.metadata.get("title", "Unknown"),
                     "authority": result.source_authority,
-                    "document_id": result.document_id
+                    "document_id": result.document_id,
+                    "url": url
                 })
                 seen_docs.add(result.document_id)
         

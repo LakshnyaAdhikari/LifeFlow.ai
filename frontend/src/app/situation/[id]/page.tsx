@@ -20,6 +20,7 @@ interface GuidanceResponse {
         title: string;
         authority: string;
         document_id: number;
+        url?: string;
     }>;
     confidence: {
         score: number;
@@ -389,26 +390,6 @@ export default function SituationPage() {
                             <p className="text-xs text-muted-foreground mb-4">
                                 {guidance.confidence.explanation}
                             </p>
-                            <div className="space-y-2 text-xs">
-                                <div className="flex justify-between">
-                                    <span>LLM Confidence:</span>
-                                    <span className="font-medium">
-                                        {(guidance.confidence.breakdown.llm * 100).toFixed(0)}%
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Retrieval Strength:</span>
-                                    <span className="font-medium">
-                                        {(guidance.confidence.breakdown.retrieval * 100).toFixed(0)}%
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Historical Accuracy:</span>
-                                    <span className="font-medium">
-                                        {(guidance.confidence.breakdown.historical * 100).toFixed(0)}%
-                                    </span>
-                                </div>
-                            </div>
                         </div>
                     )}
 
@@ -419,7 +400,18 @@ export default function SituationPage() {
                             <div className="space-y-3">
                                 {guidance.sources.map((source, index) => (
                                     <div key={index} className="text-sm">
-                                        <p className="font-medium">{source.title}</p>
+                                        {source.url && !source.url.startsWith("file://") ? (
+                                            <a
+                                                href={source.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-medium hover:underline text-primary"
+                                            >
+                                                {source.title}
+                                            </a>
+                                        ) : (
+                                            <p className="font-medium">{source.title}</p>
+                                        )}
                                         <p className="text-xs text-muted-foreground">{source.authority}</p>
                                     </div>
                                 ))}

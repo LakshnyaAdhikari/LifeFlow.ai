@@ -281,7 +281,8 @@ async def create_sample_documents():
     
     return [
         {
-            "url": "file://data/sample_docs/insurance_claim_rejection.html",
+            "url": "https://www.irdai.gov.in/admincms/cms/frmGeneral_Layout.aspx?page=PageNo234",
+            "file_path": "data/sample_docs/insurance_claim_rejection.html",
             "title": "Insurance Claim Rejection - Complete Guide",
             "authority": "IRDAI",
             "domain_name": "Insurance",
@@ -289,7 +290,8 @@ async def create_sample_documents():
             "metadata": {"category": "claim_rejection", "priority": "high", "is_sample": True}
         },
         {
-            "url": "file://data/sample_docs/aadhaar_update.html",
+            "url": "https://uidai.gov.in/en/ecosystem/authentication-devices-documents/qr-code-reader.html",
+            "file_path": "data/sample_docs/aadhaar_update.html",
             "title": "Aadhaar Update Process - Official Guide",
             "authority": "UIDAI",
             "domain_name": "Identity Documents",
@@ -325,7 +327,11 @@ async def ingest_sample_documents():
                 print(f"\n[{i}/{len(sample_docs)}] Processing: {doc_config['title']}")
                 
                 # Read file content
-                file_path = doc_config['url'].replace("file://", "")
+                if 'file_path' in doc_config:
+                     file_path = doc_config['file_path']
+                else:
+                     file_path = doc_config['url'].replace("file://", "")
+                
                 with open(file_path, 'rb') as f:
                     content = f.read()
                 
