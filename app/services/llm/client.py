@@ -69,18 +69,24 @@ class LLMClient:
             self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
             logger.info("Initialized local embedding model: all-MiniLM-L6-v2")
         except ImportError:
-            raise ImportError("sentence-transformers not installed. Run: pip install sentence-transformers")
-    
+            logger.warning("sentence-transformers not installed. Local embeddings disabled.")
+            self.embedding_model = None
+
     def _init_openai(self):
         """Initialize OpenAI client"""
         try:
             from openai import AsyncOpenAI
         except ImportError:
-            raise ImportError("OpenAI package not installed. Run: pip install openai")
+             # Fallback to mock if package missing
+            logger.warning("OpenAI package not installed. Switching to mock.")
+            self.provider = "mock"
+            return
         
         api_key = self.config.api_key or os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise ValueError("OpenAI API key not found. Set OPENAI_API_KEY environment variable.")
+            logger.warning("OpenAI API key not found. Switching to mock provider.")
+            self.provider = "mock"
+            return
         
         self.client = AsyncOpenAI(api_key=api_key)
         if self.config.model == "gemini-1.5-pro":  # Default was set for Gemini
@@ -91,11 +97,16 @@ class LLMClient:
         try:
             from google import genai
         except ImportError:
-            raise ImportError("Google GenAI package not installed. Run: pip install google-genai")
+            # Fallback to mock if package missing
+            logger.warning("Google GenAI package not installed. Switching to mock.")
+            self.provider = "mock"
+            return
         
         api_key = self.config.api_key or os.getenv("GEMINI_API_KEY")
         if not api_key:
-            raise ValueError("Gemini API key not found. Set GEMINI_API_KEY environment variable.")
+            logger.warning("Gemini API key not found. Switching to mock provider.")
+            self.provider = "mock"
+            return
         
         self.client = genai.Client(api_key=api_key)
         if self.config.model == "gpt-4-turbo-preview":  # Default was set for OpenAI
@@ -127,6 +138,18 @@ class LLMClient:
             return await self._generate_openai(prompt, system_prompt, temperature, max_tokens, response_format)
         elif self.provider == "gemini":
             return await self._generate_gemini(prompt, system_prompt, temperature, max_tokens, response_format)
+        elif self.provider == "mock":
+            return self._generate_mock(prompt)
+
+    def _generate_mock(self, prompt: str) -> LLMResponse:
+        """Generate mock response when keys are missing"""
+        logger.warning("Generating mock response (API key missing)")
+        return LLMResponse(
+            content="[AI DISABLED] logic is running in offline mode because API keys are missing. Please add GEMINI_API_KEY to .env to enable AI features.",
+            model="mock-fallback",
+            tokens_used=0,
+            confidence=0.0
+        )
     
     async def _generate_openai(
         self,
@@ -265,6 +288,9 @@ class LLMClient:
             return self._generate_embedding_local(text)
         elif self.provider == "local":
             return self._generate_embedding_local(text)
+        elif self.provider == "mock":
+             # Return dummy embedding of size 384 (standard size)
+            return [0.0] * 384
 
     def _generate_embedding_local(self, text: str) -> List[float]:
         """Generate embedding using local model"""
@@ -329,6 +355,9 @@ class LLMClient:
             return self._generate_embeddings_batch_local(texts, batch_size)
         elif self.provider == "local":
             return self._generate_embeddings_batch_local(texts, batch_size)
+        elif self.provider == "mock":
+            # Return dummy embeddings
+            return [[0.0] * 384 for _ in texts]
 
     def _generate_embeddings_batch_local(self, texts: List[str], batch_size: int) -> List[List[float]]:
         """Generate embeddings batch using local model"""
