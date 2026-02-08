@@ -102,25 +102,13 @@ export default function Navbar() {
                                 <button className="p-2 text-muted-foreground hover:text-primary transition-colors">
                                     <HelpCircle className="w-5 h-5" />
                                 </button>
-                                <div className="relative group">
-                                    <button className="p-2 bg-muted rounded-full text-muted-foreground hover:text-primary transition-colors">
+                                <div className="relative">
+                                    <button
+                                        onClick={() => router.push("/dashboard")}
+                                        className="p-2 bg-muted rounded-full text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                                    >
                                         <User className="w-5 h-5" />
                                     </button>
-                                    {/* Profile Dropdown Placeholder */}
-                                    <div className="absolute right-0 mt-2 w-48 p-2 bg-card border border-border rounded-xl shadow-xl hidden group-hover:block animate-in fade-in slide-in-from-top-2">
-                                        <button
-                                            onClick={() => router.push("/auth/profile")}
-                                            className="w-full flex items-center gap-2 px-4 py-2 text-sm rounded-lg hover:bg-muted"
-                                        >
-                                            <Settings className="w-4 h-4" /> Profile
-                                        </button>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="w-full flex items-center gap-2 px-4 py-2 text-sm rounded-lg hover:bg-muted text-red-500"
-                                        >
-                                            <LogOut className="w-4 h-4" /> Logout
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
                         ) : (

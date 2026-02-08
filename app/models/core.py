@@ -31,6 +31,7 @@ class User(Base):
     situations = relationship("UserSituation", back_populates="user")
     profile = relationship("UserProfile", back_populates="user", uselist=False)
     sessions = relationship("UserSession", back_populates="user")
+    dependents = relationship("UserDependent", back_populates="user")
 
 class WorkflowTemplate(Base):
     __tablename__ = "workflow_templates"

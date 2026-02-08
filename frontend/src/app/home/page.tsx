@@ -141,8 +141,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Categories Explorer */}
-        <CategoryExplorer />
 
         {/* Existing Situations Grid */}
         <section className="py-16 bg-background">
@@ -212,6 +210,9 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        {/* Categories Explorer */}
+        <CategoryExplorer />
 
         {/* Tools Section */}
         <AssistiveTools />

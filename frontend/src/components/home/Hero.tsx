@@ -81,7 +81,7 @@ export default function Hero({ onSearch, showSignupPrompt = true }: HeroProps) {
                             />
                             <button
                                 type="submit"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center gap-2"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center gap-2"
                             >
                                 Get Guidance
                                 <ArrowRight className="w-4 h-4" />

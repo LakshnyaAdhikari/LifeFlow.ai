@@ -20,7 +20,7 @@ export default function LandingPage() {
             const res = await fetch("http://127.0.0.1:8000/intake/resolve", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query }),
+                body: JSON.stringify({ user_message: query }),
             });
 
             if (res.ok) {
@@ -33,12 +33,12 @@ export default function LandingPage() {
                     router.push("/home");
                 }
             } else {
-                console.error("Resolve failed");
-                router.push("/home"); // Fallback
+                console.error("Resolve failed (likely unauthenticated)");
+                router.push("/auth/signup"); // Redirect to signup if search fails (e.g. 401)
             }
         } catch (err) {
             console.error("Search error:", err);
-            router.push("/home"); // Fallback
+            router.push("/auth/signup"); // Fallback
         }
     };
 

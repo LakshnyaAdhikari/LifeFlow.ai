@@ -61,6 +61,10 @@ app.include_router(guidance.router)
 from app.routers import migration
 app.include_router(migration.router)
 
+# Dashboard router
+from app.routers import dashboard
+app.include_router(dashboard.router)
+
 from fastapi.middleware.cors import CORSMiddleware
 
 # Add deprecation middleware

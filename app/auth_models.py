@@ -61,3 +61,18 @@ class UserSession(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     user = relationship("User", back_populates="sessions")
+
+class UserDependent(Base):
+    """Dependents and family members linked to the user"""
+    __tablename__ = "user_dependents"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    name = Column(String, nullable=False)
+    relation = Column(String, nullable=False) # Parent, Child, Spouse, Guardian
+    age = Column(Integer, nullable=True)
+    domain_specific_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="dependents")

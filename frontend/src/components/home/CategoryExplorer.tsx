@@ -15,7 +15,6 @@ interface Category {
     title: string;
     items: string[];
     icon: any;
-    color: string;
 }
 
 const categories: Category[] = [
@@ -24,35 +23,30 @@ const categories: Category[] = [
         title: "Identity & Govt Services",
         items: ["Aadhaar", "PAN Card", "Passport", "Driving Licence"],
         icon: Fingerprint,
-        color: "bg-blue-500",
     },
     {
         id: "insurance",
         title: "Insurance & Finance",
         items: ["Claim Rejection", "Policy Confusion", "Appeals"],
         icon: ShieldCheck,
-        color: "bg-teal-500",
     },
     {
         id: "property",
         title: "Property & Documentation",
         items: ["Registration", "Ownership Transfer", "Rental),"],
         icon: FileText,
-        color: "bg-amber-500",
     },
     {
         id: "family",
         title: "Family & Personal",
         items: ["Succession", "Marriage", "Certificates"],
         icon: Users,
-        color: "bg-rose-500",
     },
     {
         id: "work",
         title: "Workplace & Employment",
         items: ["PF / ESI Issues", "Termination", "Salary Disputes"],
         icon: Briefcase,
-        color: "bg-indigo-500",
     },
 ];
 
@@ -74,7 +68,7 @@ export default function CategoryExplorer() {
                             className="group bg-card border border-border rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col h-full"
                         >
                             <div className="flex justify-between items-start mb-6">
-                                <div className={`p-3 rounded-xl ${cat.color} bg-opacity-10 text-primary`}>
+                                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
                                     <cat.icon className="w-6 h-6" />
                                 </div>
                                 <button className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground group-hover:text-primary">

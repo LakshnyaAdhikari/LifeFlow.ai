@@ -90,9 +90,6 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        © {new Date().getFullYear()} LifeFlow AI. Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> for a better tomorrow.
-                    </p>
                     <div className="flex items-center gap-6">
                         <span className="flex items-center gap-2 text-xs text-muted-foreground">
                             <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
