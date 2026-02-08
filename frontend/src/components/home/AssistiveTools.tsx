@@ -77,7 +77,7 @@ export default function AssistiveTools() {
                             </p>
 
                             {!tool.isPlaceholder && (
-                                <button className="text-sm font-bold text-primary hover:underline transition-all">
+                                <button suppressHydrationWarning={true} className="text-sm font-bold text-primary hover:underline transition-all">
                                     Try it now →
                                 </button>
                             )}
