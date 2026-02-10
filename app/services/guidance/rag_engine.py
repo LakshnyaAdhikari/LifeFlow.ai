@@ -275,22 +275,45 @@ Generate 3-5 suggestions ordered by priority.
                 temperature=0.7
             )
             
+            # Validate response
+            if not isinstance(response, dict) or "suggestions" not in response or not response["suggestions"]:
+                logger.warning("LLM returned empty suggestions, using fallback.")
+                return self._get_fallback_suggestions(domain)
+            
             return response
         
         except Exception as e:
             logger.error(f"Failed to generate suggestions: {e}")
-            # Return fallback
-            return {
-                "suggestions": [
-                    {
-                        "title": "Gather relevant documents",
-                        "description": "Collect all documents related to your situation",
-                        "why_it_matters": "Having complete documentation helps in most procedures",
-                        "urgency": "medium",
-                        "can_skip": False
-                    }
-                ]
-            }
+            return self._get_fallback_suggestions(domain)
+
+    def _get_fallback_suggestions(self, domain: str) -> Dict[str, Any]:
+        """Return generic fallback suggestions based on domain"""
+        return {
+            "suggestions": [
+                {
+                    "title": "Gather Relevant Documents",
+                    "description": f"For {domain} matters, always keep your original documents handy.",
+                    "why_it_matters": "Documentation is the primary requirement for most procedures.",
+                    "urgency": "medium",
+                    "can_skip": False
+                },
+                {
+                    "title": "Visit Official Website",
+                    "description": "Check the official government portal for the latest updates.",
+                    "why_it_matters": "Rules and fees may change without notice.",
+                    "urgency": "high",
+                    "can_skip": False
+                },
+                {
+                    "title": "Contact Support / Helpline",
+                    "description": "If unsure, call the official helpline number.",
+                    "why_it_matters": "Direct confirmation can save time and prevent errors.",
+                    "urgency": "low",
+                    "can_skip": True
+                }
+            ],
+            "caveats": ["⚠️  We couldn't find specific guidance for your exact query, so we provided general best practices."]
+        }
     
     async def _apply_safety_filter(
         self,

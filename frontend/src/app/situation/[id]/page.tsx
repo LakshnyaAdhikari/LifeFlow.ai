@@ -234,30 +234,52 @@ export default function SituationPage() {
                 {/* Main Content */}
                 <div className="md:col-span-2 space-y-6">
                     {/* Ask Question */}
+                    {/* Structured Ask Form */}
                     <div className="bg-card border-2 border-border rounded-xl p-6">
                         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                             <MessageSquare className="w-5 h-5" />
                             Ask for Guidance
                         </h2>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && loadGuidance()}
-                                placeholder="What would you like to know?"
-                                className="flex-1 px-4 py-3 rounded-lg border-2 border-border bg-background focus:border-primary focus:outline-none"
-                                disabled={loadingGuidance}
-                            />
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">What is your main goal?</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g., Update Date of Birth in Aadhaar"
+                                    className="w-full px-4 py-2 rounded-lg border-2 border-border bg-background focus:border-primary focus:outline-none"
+                                    value={query} // reusing query state for 'goal' for simplicity in this turn
+                                    onChange={(e) => setQuery(e.target.value)}
+                                />
+                            </div>
+
+                            {/* We will reuse 'query' as the main input for now to preserve state logic, 
+                                but in a full refactor we would split state. 
+                                For this "quick fix" requested by user, we'll keep it simple but visually structured.
+                            */}
+
+                            <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground flex gap-2">
+                                <Lightbulb className="w-4 h-4 mt-0.5 text-yellow-500" />
+                                <p>
+                                    <strong>Tip:</strong> Be specific! Instead of "update aadhaar", try "update date of birth in aadhaar without birth certificate".
+                                </p>
+                            </div>
+
                             <button
                                 onClick={() => loadGuidance()}
                                 disabled={loadingGuidance || !query.trim()}
-                                className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                                className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                             >
                                 {loadingGuidance ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Analyzing thousands of rules...
+                                    </>
                                 ) : (
-                                    <Send className="w-5 h-5" />
+                                    <>
+                                        <Send className="w-5 h-5" />
+                                        Get Detailed Guidance
+                                    </>
                                 )}
                             </button>
                         </div>
@@ -399,13 +421,13 @@ export default function SituationPage() {
                             <h3 className="font-semibold mb-4">Authoritative Sources</h3>
                             <div className="space-y-3">
                                 {guidance.sources.map((source, index) => (
-                                    <div key={index} className="text-sm">
+                                    <div key={`${source.document_id}-${index}`} className="text-sm">
                                         {source.url && !source.url.startsWith("file://") ? (
                                             <a
                                                 href={source.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="font-medium hover:underline text-primary"
+                                                className="font-medium hover:underline text-primary block truncate"
                                             >
                                                 {source.title}
                                             </a>
