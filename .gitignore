@@ -84,6 +84,48 @@ frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
-frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+
+# Vector DB & Artifacts
+data/vector_index/
+*.pkl
+*.index
+*.pt
+*.onnx
+
+# Testing & Logs
+test_*.py
+scripts/test_*.py
+scripts/list_*.py
+scripts/read_*.py
+scripts/debug_*.py
+*_output.txt
+*_log.txt
+*_results.txt
+*_dump.txt
+*.csv
+.DS_Store
+
+# User-specific / generated
+user_sessions.csv
+users.csv
+backend_log.txt
+server_log.txt
+ingestion.log
+clarification_test_output.txt
+latency_results.txt
+signup_error.txt
+all_models.txt
+models.txt
+
+# One-off scripts
+check_instance_schema.py
+check_workflows.py
+export_db.py
+get_otp.py
+list_tables.py
+verify_phone.py
+view_users.py
+wipe_users.py
+bootstrap_knowledge.py
