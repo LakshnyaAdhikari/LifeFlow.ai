@@ -35,16 +35,22 @@ LifeFlow.ai is built on a modern, scalable microservices architecture:
 
 ## 💻 Tech Stack
 
+## 💻 Tech Stack
+
 ### Core Infrastructure
-*   **Language**: Python 3.9+, TypeScript
-*   **Frameworks**: FastAPI, Next.js 14
-*   **Database**: SQLAlchemy (ORM), SQLite/PostgreSQL
-*   **AI/ML**: LangChain, SentenceTransformers, Google Gemini / OpenAI
+*   **Languages**: Python 3.9+, TypeScript
+*   **Backend**: FastAPI (Async API Layer), Uvicorn (ASGI Server)
+*   **Frontend**: Next.js 16 (App Router)
+*   **Database**: SQLAlchemy (ORM), SQLite (Prototype) → PostgreSQL (Scalable Upgrade Path)
+*   **AI Engine**: Custom RAG Architecture
+    *   **SentenceTransformers** (all-MiniLM-L6-v2, 384-dim embeddings)
+    *   **FAISS** (IndexFlatIP, Cosine Similarity)
+    *   **Google Gemini** (LLM for reasoning)
 
 ### DevOps & Tooling
-*   **Containerization**: Docker support
-*   **Linting/Formatting**: ESLint, Black, Ruff
-*   **Testing**: Pytest, Jest
+*   **Containerization**: Docker-ready architecture
+*   **Code Quality**: ESLint, Black, Ruff
+*   **Testing**: Pytest (Backend), Jest (Frontend)
 
 ---
 
