@@ -434,7 +434,7 @@ async def ingest_sample_documents():
                         chunk_index=j,
                         metadata=chunk.get("metadata", {}),
                         embedding=embedding,
-                        embedding_model="text-embedding-3-large",
+                        embedding_model="all-MiniLM-L6-v2",
                         quality_score=0.8
                     )
                     db.add(chunk_record)
@@ -592,7 +592,7 @@ Next steps:
 4. Monitor confidence scores
 5. Collect user feedback
 
-The system is production-ready! 🚀
+The system is production-ready! 
     """)
 
 
