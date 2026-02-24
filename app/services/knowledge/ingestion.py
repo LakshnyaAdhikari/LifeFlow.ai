@@ -26,7 +26,7 @@ class IngestionPipeline:
         self.db = db
         self.vector_db = get_vector_db()
         self.llm_client = get_llm_client()
-        self.chunker = TextChunker(chunk_size=1000, chunk_overlap=200)
+        # Chunker is now adaptive per source type — see ingest_document
     
     @retry(
         stop=stop_after_attempt(3),
@@ -67,7 +67,7 @@ class IngestionPipeline:
             domain = self._get_or_create_domain(domain_name)
             
             # 2. Fetch document
-            fetcher = get_fetcher(authority)
+            fetcher = get_fetcher(authority, domain_name)
             fetched_doc = await fetcher.fetch(url, title, metadata)
             await fetcher.close()
             
@@ -97,34 +97,30 @@ class IngestionPipeline:
             self.db.commit()
             self.db.refresh(doc)
             
-            # 6. Process document
+            # 6. Process document — inject authority into metadata for weight tagging
             processor = get_processor(source_type)
+            fetched_doc.metadata["authority"] = authority
             processed = processor.process(fetched_doc.content, fetched_doc.metadata)
-            
+
             # 7. Store raw content (optional, for debugging)
             doc.raw_content = processed.content[:50000]  # Limit size
-            
-            # 8. Chunk text
+
+            # 8. Chunk text — use adaptive chunker (PDF=1500/250, HTML=1000/200)
+            chunker = TextChunker.for_source_type(source_type)
+            base_meta = {
+                "document_id": doc.id,
+                "source_authority": authority,
+                "domain": domain_name,
+                "title": title,
+                "authority_weight": processed.metadata.get("authority_weight", 1.0),
+                "doc_type": processed.metadata.get("doc_type", "information"),
+                "source_type": source_type,
+            }
+
             if processed.sections:
-                chunks = self.chunker.chunk_with_sections(
-                    processed.sections,
-                    base_metadata={
-                        "document_id": doc.id,
-                        "source_authority": authority,
-                        "domain": domain_name,
-                        "title": title
-                    }
-                )
+                chunks = chunker.chunk_with_sections(processed.sections, base_metadata=base_meta)
             else:
-                chunks = self.chunker.chunk_text(
-                    processed.content,
-                    metadata={
-                        "document_id": doc.id,
-                        "source_authority": authority,
-                        "domain": domain_name,
-                        "title": title
-                    }
-                )
+                chunks = chunker.chunk_text(processed.content, metadata=base_meta)
             
             logger.info(f"Created {len(chunks)} chunks")
             

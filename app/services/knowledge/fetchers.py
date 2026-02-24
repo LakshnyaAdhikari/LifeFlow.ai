@@ -283,29 +283,101 @@ class ParivahanFetcher(DocumentFetcher):
         ]
 
 
-class GenericFetcher(DocumentFetcher):
+class PlaywrightFetcher(DocumentFetcher):
     """
-    Generic document fetcher for other authorities
+    JavaScript-aware fetcher using Playwright headless Chromium.
+    Used for government portals that render content via JS (Parivahan, IncomeTax, Sarathi, etc.)
+    Falls back to httpx if Playwright fails.
     """
-    
+
+    # Selectors for boilerplate to remove before extracting text
+    NOISE_SELECTORS = [
+        "header", "footer", "nav", ".header", ".footer", ".navbar",
+        ".breadcrumb", "#cookie-banner", ".cookie", "script", "style",
+        ".social-links", ".sidebar", "[aria-hidden='true']"
+    ]
+
     def __init__(self, authority: str, domain: str = "General"):
         super().__init__(authority=authority, domain=domain)
-    
+
     async def fetch(self, url: str, title: str, metadata: Optional[Dict[str, Any]] = None) -> FetchedDocument:
-        """Fetch document generically"""
+        """Fetch document using Playwright, fall back to httpx if needed"""
+        logger.info(f"[Playwright] Fetching {title} from {url}")
+
+        # --- Try Playwright first ---
         try:
-            logger.info(f"Fetching document from {self.authority}: {title}")
-            
-            # Add user agent to avoid blocking
+            from playwright.async_api import async_playwright
+
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(
+                    headless=True,
+                    args=["--no-sandbox", "--disable-dev-shm-usage"]
+                )
+                context = await browser.new_context(
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+                    viewport={"width": 1280, "height": 900},
+                    java_script_enabled=True,
+                )
+                page = await context.new_page()
+
+                # Block images/fonts/media to speed up loading
+                await page.route("**/*.{png,jpg,jpeg,gif,svg,ico,woff,woff2,ttf,mp4,webm}",
+                                 lambda route: route.abort())
+
+                await page.goto(url, wait_until="domcontentloaded", timeout=45000)
+
+                # Extra wait for JS-heavy sites that inject content late
+                try:
+                    await page.wait_for_load_state("networkidle", timeout=15000)
+                except Exception:
+                    pass  # timeout is fine, we already have domcontentloaded
+
+                # Remove noisy elements before extracting text
+                for selector in self.NOISE_SELECTORS:
+                    try:
+                        await page.eval_on_selector_all(
+                            selector, "els => els.forEach(e => e.remove())"
+                        )
+                    except Exception:
+                        pass
+
+                # Get clean inner text
+                raw_text = await page.inner_text("body")
+                content_bytes = raw_text.encode("utf-8")
+
+                await browser.close()
+
+            if len(content_bytes) < 200:
+                raise ValueError(f"Playwright returned < 200 chars for {url}, trying httpx fallback")
+
+            logger.info(f"[Playwright] Success: {len(content_bytes)} chars for '{title}'")
+            return FetchedDocument(
+                url=url,
+                content=content_bytes,
+                content_type="text/plain; charset=utf-8; source=playwright",
+                title=title,
+                source_authority=self.authority,
+                domain=self.domain,
+                metadata={
+                    **(metadata or {}),
+                    "fetched_at": datetime.utcnow().isoformat(),
+                    "content_length": len(content_bytes),
+                    "fetch_method": "playwright",
+                }
+            )
+
+        except Exception as pw_error:
+            logger.warning(f"[Playwright] Failed for {url}: {pw_error}. Falling back to httpx.")
+
+        # --- httpx fallback ---
+        try:
             headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
             }
-            
             response = await self.client.get(url, headers=headers)
             response.raise_for_status()
-            
             content_type = response.headers.get("content-type", "").lower()
-            
+            logger.info(f"[httpx fallback] {len(response.content)} bytes for '{title}'")
             return FetchedDocument(
                 url=url,
                 content=response.content,
@@ -316,28 +388,40 @@ class GenericFetcher(DocumentFetcher):
                 metadata={
                     **(metadata or {}),
                     "fetched_at": datetime.utcnow().isoformat(),
-                    "content_length": len(response.content)
+                    "content_length": len(response.content),
+                    "fetch_method": "httpx_fallback",
                 }
             )
-        
         except Exception as e:
-            logger.error(f"Failed to fetch document from {self.authority}: {e}")
+            logger.error(f"[httpx fallback] Also failed for {url}: {e}")
             raise
 
-def get_fetcher(authority: str) -> DocumentFetcher:
-    """Get fetcher for authority"""
-    fetchers = {
+
+class GenericFetcher(PlaywrightFetcher):
+    """
+    Generic fetcher — now inherits Playwright for full JS rendering.
+    Kept for backwards compatibility with existing authority mappings.
+    """
+    pass
+
+def get_fetcher(authority: str, domain: str = "General") -> DocumentFetcher:
+    """
+    Get the best fetcher for a given authority.
+    All specific fetchers still exist for authority-level customisation.
+    Unknown authorities use PlaywrightFetcher (JS-aware) by default.
+    """
+    specific_fetchers = {
         "UIDAI": UIDAIFetcher,
         "IRDAI": IRDAIFetcher,
         "Passport Seva": PassportSevaFetcher,
-        "Income Tax": IncomeTaxFetcher,
+        "Income Tax Department": IncomeTaxFetcher,
         "Parivahan": ParivahanFetcher,
     }
-    
-    fetcher_class = fetchers.get(authority)
+
+    fetcher_class = specific_fetchers.get(authority)
     if fetcher_class:
         return fetcher_class()
-    
-    # Return generic fetcher for others
-    logger.info(f"Using generic fetcher for authority: {authority}")
-    return GenericFetcher(authority=authority)
+
+    # Default: Playwright fetcher handles all JS-heavy gov portals
+    logger.info(f"Using PlaywrightFetcher for: {authority}")
+    return PlaywrightFetcher(authority=authority, domain=domain)
