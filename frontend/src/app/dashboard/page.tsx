@@ -11,6 +11,7 @@ import DependentManager from "@/components/dashboard/DependentManager";
 import SettingsTab from "@/components/dashboard/Settings";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import BackButton from "@/components/layout/BackButton";
 
 export default function DashboardPage() {
     const { user, logout, loading: authLoading } = useAuth();
@@ -50,7 +51,10 @@ export default function DashboardPage() {
                     user={user}
                 />
                 <main className="flex-grow p-6 lg:p-12 overflow-x-hidden">
-                    <div className="max-w-5xl mx-auto">
+                    <div className="max-w-5xl mx-auto space-y-6">
+                        <div className="flex justify-start">
+                            <BackButton label="Home" />
+                        </div>
                         {renderContent()}
                     </div>
                 </main>

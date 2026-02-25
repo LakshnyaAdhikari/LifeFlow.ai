@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import CategoryExplorer from "@/components/home/CategoryExplorer";
-import AssistiveTools from "@/components/home/AssistiveTools";
 
 interface Situation {
   id: number;
@@ -20,11 +18,14 @@ interface Situation {
   updated_at: string;
 }
 
-import Hero from "@/components/home/Hero";
+import HomeHero from "@/components/home/HomeHero";
+
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Home() {
   const { user } = useAuth();
   const router = useRouter();
+  const { t } = useLanguage();
   const [loadingSituations, setLoadingSituations] = useState(true);
   const [situations, setSituations] = useState<Situation[]>([]);
 
@@ -102,56 +103,39 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-grow">
-        {/* Personalized Welcome & Search */}
-        <section className="bg-primary/5 pt-12 pb-16 border-b border-primary/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10 space-y-4">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                Welcome back,{" "}
-                <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  {user?.full_name?.split(" ")[0] || "User"}
-                </span>
-              </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                What situation can LifeFlow help you navigate today?
-              </p>
-            </div>
+        <HomeHero onSearch={handleSearch} />
 
-            <div className="max-w-3xl mx-auto mb-12">
-              <Hero onSearch={handleSearch} showSignupPrompt={false} />
-            </div>
-
-            {latestSituation && (
-              <div className="max-w-2xl mx-auto">
-                <div
-                  onClick={() => router.push(`/situation/${latestSituation.id}`)}
-                  className="bg-card border-2 border-primary/20 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary transition-all cursor-pointer flex items-center gap-4 group"
-                >
-                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                    <LayoutDashboard className="w-5 h-5" />
-                  </div>
-                  <div className="flex-grow min-w-0">
-                    <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Continue Previous Situation</p>
-                    <h4 className="font-bold truncate text-sm">{latestSituation.title}</h4>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          {latestSituation && (
+            <div className="max-w-2xl mx-auto mt-12 mb-16">
+              <div
+                onClick={() => router.push(`/situation/${latestSituation.id}`)}
+                className="bg-card border-2 border-primary/20 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary transition-all cursor-pointer flex items-center gap-4 group"
+              >
+                <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                  <LayoutDashboard className="w-5 h-5" />
                 </div>
+                <div className="flex-grow min-w-0">
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-wider">{t("home.continue_situation")}</p>
+                  <h4 className="font-bold truncate text-sm">{latestSituation.title}</h4>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+          )}
+        </div>
 
 
         {/* Existing Situations Grid */}
         <section className="py-16 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">Your Ongoing Journeys</h2>
+              <h2 className="text-2xl font-bold">{t("home.ongoing_journeys")}</h2>
               <button
                 onClick={() => router.push("/situations")}
                 className="text-sm font-bold text-primary hover:underline"
               >
-                View all
+                {t("home.view_all")}
               </button>
             </div>
 
@@ -177,7 +161,7 @@ export default function Home() {
                           ? "bg-red-100 text-red-700"
                           : "bg-blue-100 text-blue-700"
                       )}>
-                        {situation.priority}
+                        {situation.priority === "urgent" ? t("home.urgent") : situation.priority}
                       </span>
                     </div>
                     <h4 className="font-bold text-lg mb-2">{situation.title}</h4>
@@ -196,29 +180,24 @@ export default function Home() {
             ) : (
               <div className="text-center py-20 bg-card border-2 border-dashed border-border rounded-3xl">
                 <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                <h3 className="text-xl font-bold mb-2">No situations yet</h3>
+                <h3 className="text-xl font-bold mb-2">{t("home.no_situations")}</h3>
                 <p className="text-muted-foreground mb-8">
-                  Describe a situation or explore services to get started.
+                  {t("home.no_situations_desc")}
                 </p>
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="px-6 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all"
                 >
-                  Start New Intake
+                  {t("home.start_intake")}
                 </button>
               </div>
             )}
           </div>
         </section>
 
-        {/* Categories Explorer */}
-        <CategoryExplorer />
-
-        {/* Tools Section */}
-        <AssistiveTools />
       </main>
 
       <Footer />
-    </div>
+    </div >
   );
 }

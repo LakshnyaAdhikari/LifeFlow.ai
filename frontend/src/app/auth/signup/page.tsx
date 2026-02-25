@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2, Phone, Lock, User, AlertCircle } from "lucide-react";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export default function SignupPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         phone: "",
         password: "",
@@ -34,22 +37,22 @@ export default function SignupPage() {
         const normalizedPhone = normalizePhone(formData.phone);
 
         if (!normalizedPhone.match(/^\+91[6-9]\d{9}$/)) {
-            setError("Please enter a valid 10-digit Indian phone number");
+            setError(t("auth.errors.invalid_phone"));
             return;
         }
 
         if (formData.password.length < 6) {
-            setError("Password must be at least 6 characters");
+            setError(t("auth.errors.password_length"));
             return;
         }
 
         if (formData.password !== formData.confirmPassword) {
-            setError("Passwords do not match");
+            setError(t("auth.errors.password_mismatch"));
             return;
         }
 
         if (!formData.fullName.trim()) {
-            setError("Please enter your full name");
+            setError(t("auth.errors.name_required"));
             return;
         }
 
@@ -73,11 +76,11 @@ export default function SignupPage() {
                 // Redirect to OTP verification
                 router.push("/auth/verify-otp");
             } else {
-                setError(data.detail || "Signup failed. Please try again.");
+                setError(data.detail || t("auth.errors.generic_error"));
             }
         } catch (err) {
             console.error("Signup error:", err);
-            setError("Network error. Please check your connection and ensure backend is running.");
+            setError(t("auth.errors.network_error"));
         } finally {
             setLoading(false);
         }
@@ -92,7 +95,7 @@ export default function SignupPage() {
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    Back to home
+                    {t("auth.signup.back_to_home")}
                 </button>
                 <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -104,9 +107,9 @@ export default function SignupPage() {
 
             <div className="w-full max-w-md space-y-8 mt-10">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold">Join LifeFlow</h1>
+                    <h1 className="text-3xl font-bold">{t("auth.signup.title")}</h1>
                     <p className="text-muted-foreground">
-                        Create an account to start your guided journey
+                        {t("auth.signup.subtitle")}
                     </p>
                 </div>
 
@@ -114,14 +117,14 @@ export default function SignupPage() {
                     <form onSubmit={handleSignup} className="space-y-6">
                         {/* Full Name */}
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold">Full Name</label>
+                            <label className="text-sm font-semibold">{t("auth.signup.full_name")}</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="text"
                                     value={formData.fullName}
                                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                    placeholder="Enter your full name"
+                                    placeholder={t("auth.signup.full_name_placeholder")}
                                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
@@ -130,14 +133,14 @@ export default function SignupPage() {
 
                         {/* Phone Number */}
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold">Phone Number</label>
+                            <label className="text-sm font-semibold">{t("auth.signup.phone")}</label>
                             <div className="relative">
                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="tel"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="e.g. 9876543210"
+                                    placeholder={t("auth.signup.phone_placeholder")}
                                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
@@ -146,14 +149,14 @@ export default function SignupPage() {
 
                         {/* Password */}
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold">Password</label>
+                            <label className="text-sm font-semibold">{t("auth.signup.password")}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    placeholder="Min 6 characters"
+                                    placeholder={t("auth.signup.password_placeholder")}
                                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
@@ -162,14 +165,14 @@ export default function SignupPage() {
 
                         {/* Confirm Password */}
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold">Confirm Password</label>
+                            <label className="text-sm font-semibold">{t("auth.signup.confirm_password")}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="password"
                                     value={formData.confirmPassword}
                                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                    placeholder="Confirm your password"
+                                    placeholder={t("auth.signup.confirm_password_placeholder")}
                                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
@@ -191,11 +194,11 @@ export default function SignupPage() {
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Creating account...
+                                    {t("auth.signup.submitting")}
                                 </>
                             ) : (
                                 <>
-                                    Create Account
+                                    {t("auth.signup.submit")}
                                     <ArrowRight className="w-5 h-5" />
                                 </>
                             )}
@@ -205,12 +208,12 @@ export default function SignupPage() {
 
                 <div className="text-center">
                     <p className="text-muted-foreground">
-                        Already have an account?{" "}
+                        {t("auth.signup.already_have_account")}{" "}
                         <button
                             onClick={() => router.push("/auth/login")}
                             className="text-primary hover:underline font-bold"
                         >
-                            Log in
+                            {t("auth.signup.login_link")}
                         </button>
                     </p>
                 </div>
