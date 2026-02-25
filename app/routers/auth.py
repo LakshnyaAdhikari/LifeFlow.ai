@@ -15,6 +15,8 @@ from app.services.jwt_service import (
 )
 from app.services.otp_service import OTPService
 
+otp_service = OTPService()
+
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()
 
@@ -107,6 +109,17 @@ def get_current_user(
             detail=str(e)
         )
 
+# --- API Endpoints ---
+
+@router.get("/me")
+def get_me(current_user: User = Depends(get_current_user)):
+    """Get current authenticated user information"""
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "full_name": current_user.full_name
+    }
+
 def normalize_phone(phone: str) -> str:
     """Normalize phone number to +91XXXXXXXXXX format"""
     # Remove spaces and dashes
@@ -129,6 +142,7 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     Create a new user account
     Returns user_id and requires OTP verification before login
     """
+    print("🚀 Signup endpoint triggered")
     try:
         # Normalize phone
         phone = normalize_phone(payload.phone)
@@ -163,9 +177,8 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user_auth)
         
-        # Generate and send OTP
-        otp = OTPService.create_otp(db, user_auth.id, phone)
-        OTPService.send_otp_sms(phone, otp.otp_code)
+        # Generate and send OTP via Twilio Verify
+        otp_status = otp_service.send_otp(phone)
         
         return {
             "message": "Account created. Please verify your phone number.",
@@ -338,8 +351,9 @@ def verify_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
                 detail="User not found"
             )
         
-        # Verify OTP
-        if not OTPService.verify_otp(db, user_auth.id, payload.otp_code):
+        # Verify OTP via Twilio Verify
+        verify_status = otp_service.verify_otp(phone, payload.otp_code)
+        if verify_status != "approved":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or expired OTP"
@@ -394,9 +408,8 @@ def send_otp(payload: ResendOTPRequest, db: Session = Depends(get_db)):
                 detail="User not found"
             )
             
-        # Generate and send new OTP
-        otp = OTPService.create_otp(db, user_auth.id, phone)
-        OTPService.send_otp_sms(phone, otp.otp_code)
+        # Generate and send new OTP via Twilio Verify
+        otp_service.send_otp(phone)
         
         return {"message": "OTP sent successfully"}
     except HTTPException:

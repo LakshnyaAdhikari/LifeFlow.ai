@@ -47,43 +47,34 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="LifeFlow.ai API", description="Procedural Intelligence Platform", lifespan=lifespan)
 
-# Include routers
-from app.routers import auth
-app.include_router(auth.router)
-
-# New ML-driven intake router
-from app.routers import intake_v2
-app.include_router(intake_v2.router)
-
-# Situation lifecycle router
-from app.routers import situations
-app.include_router(situations.router)
-
-# Guidance (RAG) router
-from app.routers import guidance
-app.include_router(guidance.router)
-
-# Migration router (for transitioning from workflows to situations)
-from app.routers import migration
-app.include_router(migration.router)
-
-# Dashboard router
-from app.routers import dashboard
-app.include_router(dashboard.router)
-
+# Configure CORS to allow frontend requests
 from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Add deprecation middleware
 from app.middleware.deprecation import DeprecationMiddleware
 app.add_middleware(DeprecationMiddleware)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Include routers
+from app.routers import auth, intake_v2, situations, guidance, migration, dashboard
+app.include_router(auth.router)
+app.include_router(intake_v2.router)
+app.include_router(situations.router)
+app.include_router(guidance.router)
+app.include_router(migration.router)
+app.include_router(dashboard.router)
 
 # --- Pydantic Schemas for API ---
 class WorkflowCreate(BaseModel):
