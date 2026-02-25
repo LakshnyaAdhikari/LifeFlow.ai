@@ -1,0 +1,311 @@
+{
+    "navbar": {
+        "domains": "Domains",
+        "about": "About Us",
+        "contact": "Contact Us",
+        "dashboard": "Dashboard",
+        "login": "Sign In",
+        "signup": "Sign Up",
+        "language": "Language"
+    },
+    "hero": {
+        "title_part1": "When life gets",
+        "title_keyword": "complicated,",
+        "title_part2": "we make it simple.",
+        "subtitle": "Human-first AI guidance for India's legal and administrative hurdles.",
+        "search_placeholder": "I need help with Aadhaar update...",
+        "view_details": "Get Guidance",
+        "trending": "Trending:",
+        "guidance": {
+            "status_user": "Aadhaar update rejected. Twice.",
+            "status_ai_typing": "Analyzing rejection reason...",
+            "step_1": "1. Verify biometric lock status",
+            "step_2": "2. Check local Enrolment Center",
+            "step_3": "3. Book an appointment online",
+            "action_plan": "Action Plan Ready",
+            "scenario_1": {
+                "user": "My insurance claim was rejected without reason.",
+                "step_1": "1. Draft a formal inquiry letter",
+                "step_2": "2. File a grievance with IRDAI",
+                "step_3": "3. Escalate to Ombudsman"
+            },
+            "scenario_2": {
+                "user": "A govt official is asking for a 'fee' for registration.",
+                "step_1": "1. Record evidence legally",
+                "step_2": "2. Alert Anti-Corruption Bureau",
+                "step_3": "3. Use Right to Services Act"
+            }
+        },
+        "narrative": {
+            "slide_1": {
+                "headline": "When life gets legally complicated."
+            },
+            "slide_2": {
+                "headline": "From confusion to clarity."
+            },
+            "slide_3": {
+                "headline": "Clarity in three steps.",
+                "card_1": "Tell us what happened",
+                "card_2": "We analyze official rules",
+                "card_3": "You get clear next steps"
+            },
+            "slide_4": {
+                "headline": "Across the moments that matter."
+            },
+            "slide_5": {
+                "headline": "Grounded. Responsible. Built for you.",
+                "trust_1": "Verified Government Sources",
+                "trust_2": "Risk Awareness",
+                "trust_3": "Confidence Scoring",
+                "trust_4": "Citizen-First Design"
+            }
+        },
+        "chips": {
+            "aadhaar_issues": "Aadhaar Issues",
+            "pan_correction": "PAN Correction",
+            "insurance_claim": "Insurance Claim",
+            "property_rights": "Property Rights"
+        }
+    },
+    "stats": {
+        "legal_domains": "Legal Domains Covered",
+        "procedures": "Procedures Supported",
+        "accuracy": "AI Accuracy Rate",
+        "queries": "Queries Resolved"
+    },
+    "how_it_works": {
+        "title": "How LifeFlow Works",
+        "subtitle": "We've simplified the journey from confusion to resolution into three clear steps.",
+        "step1": {
+            "title": "Step 1: Describe Situation",
+            "description": "Tell us what's happening in your own words. No legal forms or complex jargon required."
+        },
+        "step2": {
+            "title": "Step 2: AI Understands Context",
+            "description": "Our engine analyzes your situation, identifies applicable laws, and determines your rights."
+        },
+        "step3": {
+            "title": "Step 3: Guided Support",
+            "description": "Receive a personalized step-by-step plan with document checklists and clear instructions."
+        }
+    },
+    "categories": {
+        "title": "What Can LifeFlow Help You With?",
+        "subtitle": "Explore our service domains. Hover over each card to see what you can achieve with LifeFlow.ai.",
+        "identity": {
+            "title": "Identity & Government Services",
+            "description": "Verify your persona. Guidance on Aadhaar updates, PAN corrections, Passport applications, and Government IDs."
+        },
+        "insurance": {
+            "title": "Insurance & Finance",
+            "description": "Navigate claim rejections, policy disputes, and financial appeals with clear, human-explained steps."
+        },
+        "property": {
+            "title": "Property & Documentation",
+            "description": "Simplify ownership transfers, rental agreements, and property registration without legal jargon."
+        },
+        "family": {
+            "title": "Family & Personal",
+            "description": "Manage marriage certificates, succession planning, and family documentation with sensitivity and clarity."
+        },
+        "work": {
+            "title": "Workplace & Employment",
+            "description": "Resolve PF/ESI issues, salary disputes, and termination concerns with expert procedural guidance."
+        },
+        "more": {
+            "title": "More for Exploration",
+            "description": "Sign up to unlock 10+ professional domains, AI journey tracking, and personalized life-flow guidance.",
+            "signup_cta": "Signup to explore more"
+        }
+    },
+    "home": {
+        "welcome": "Welcome back,",
+        "what_can_help": "What situation can LifeFlow help you navigate today?",
+        "continue_situation": "Continue Previous Situation",
+        "ongoing_journeys": "Your Ongoing Journeys",
+        "view_all": "View all",
+        "no_situations": "No situations yet",
+        "no_situations_desc": "Describe a situation or explore services to get started.",
+        "start_intake": "Start New Intake",
+        "urgent": "Urgent"
+    },
+    "footer": {
+        "description": "Empowering people to navigate life's administrative and legal challenges with clarity, guidance, and confidence.",
+        "product": "Product",
+        "resources": "Resources",
+        "support": "Support",
+        "legal": "Legal",
+        "links": {
+            "features": "Features",
+            "how_it_works": "How It Works",
+            "roadmap": "Roadmap",
+            "knowledge_hub": "Knowledge Hub",
+            "legal_guides": "Legal Guides",
+            "faq": "FAQ",
+            "contact": "Contact",
+            "feedback": "Feedback Form",
+            "report": "Report Issue",
+            "privacy": "Privacy Policy",
+            "disclaimer": "Disclaimer",
+            "terms": "Terms of Service"
+        },
+        "status_operational": "All Systems Operational",
+        "tagline": "Redefining guidance."
+    },
+    "about": {
+        "hero_badge": "Our Story",
+        "title_part1": "Life is complicated.",
+        "title_part2": "We simplify it.",
+        "subtitle": "LifeFlow.ai was built on a single belief — that navigating government systems, legal rights, and life's paperwork should never feel impossible.",
+        "mission_title": "Our Mission",
+        "mission_desc1": "Millions of people face bureaucratic and legal challenges every day. Most of them don't know where to start.",
+        "mission_desc2": "LifeFlow.ai exists to change that. We combine AI reasoning with domain expertise to give every person a clear, confident path forward.",
+        "stats": {
+            "domains": "Life domains supported",
+            "jargon_free": "Jargon-free guidance",
+            "support_24_7": "AI support available"
+        },
+        "values_title": "What We Stand For",
+        "cta_title": "Ready to simplify your life?",
+        "cta_subtitle": "Join thousands of people who've found clarity through LifeFlow.ai.",
+        "get_started": "Get Started Free"
+    },
+    "contact": {
+        "hero_badge": "Get in Touch",
+        "title": "Contact Us",
+        "subtitle": "Have a question, feedback, or want to partner with us? We'd love to hear from you.",
+        "email_us": "Email Us",
+        "response_times": "Response Times",
+        "form": {
+            "name": "Name",
+            "email": "Email",
+            "subject": "Subject",
+            "message": "Message",
+            "placeholder_name": "Your name",
+            "placeholder_email": "you@example.com",
+            "placeholder_subject": "How can we help?",
+            "placeholder_message": "Tell us more...",
+            "send": "Send Message",
+            "sent_title": "Message Sent!",
+            "sent_desc": "Thanks for reaching out. We'll get back to you within 24 hours."
+        }
+    },
+    "auth": {
+        "signup": {
+            "title": "Join LifeFlow",
+            "subtitle": "Create an account to start your guided journey",
+            "full_name": "Full Name",
+            "full_name_placeholder": "Enter your full name",
+            "phone": "Phone Number",
+            "phone_placeholder": "e.g. 9876543210",
+            "password": "Password",
+            "password_placeholder": "Min 6 characters",
+            "confirm_password": "Confirm Password",
+            "confirm_password_placeholder": "Confirm your password",
+            "submit": "Create Account",
+            "submitting": "Creating account...",
+            "already_have_account": "Already have an account?",
+            "login_link": "Log in",
+            "back_to_home": "Back to home"
+        },
+        "login": {
+            "title": "Welcome Back",
+            "subtitle": "Log in to continue your journey",
+            "phone": "Phone Number",
+            "password": "Password",
+            "submit": "Log In",
+            "submitting": "Logging in...",
+            "no_account": "Don't have an account?",
+            "signup_link": "Sign up"
+        },
+        "verify_otp": {
+            "title": "Verify Phone",
+            "subtitle": "We've sent a code to",
+            "otp_placeholder": "000000",
+            "submit": "Verify & Continue",
+            "submitting": "Verifying...",
+            "resend": "Resend Code",
+            "change_phone": "Change phone number"
+        },
+        "errors": {
+            "invalid_phone": "Please enter a valid 10-digit Indian phone number",
+            "password_length": "Password must be at least 6 characters",
+            "password_mismatch": "Passwords do not match",
+            "name_required": "Please enter your full name",
+            "network_error": "Network error. Please check your connection.",
+            "generic_error": "Something went wrong. Please try again."
+        }
+    },
+    "services": {
+        "identity": {
+            "title": "Select Your Document",
+            "subtitle": "Choose the document you need help with to start the guided process.",
+            "professional_title": "Professional Assistance",
+            "professional_desc": "Need a lawyer or agent to handle this for you? We can connect you with verified professionals.",
+            "professional_cta": "Find a professional",
+            "lost_identity_title": "Report Lost Identity",
+            "lost_identity_desc": "If your documents were stolen or lost, immediate action is required to prevent misuse.",
+            "lost_identity_cta": "Start urgent report"
+        },
+        "identity_hero": {
+            "title": "Identity & Government Services",
+            "subtitle": "Manage, correct, recover, or verify your official documents — with structured guidance.",
+            "search_placeholder": "What's going on with your document? (e.g., 'Lost Aadhaar')",
+            "stat1_label": "Aadhaar Issued",
+            "stat2_label": "Services Require ID",
+            "stat3_label": "Rejections via Errors"
+        },
+        "identity_modules": {
+            "select_issue": "Select Issue",
+            "urgent": "Urgent",
+            "aadhaar": {
+                "title": "Aadhaar Card",
+                "desc": "Unique 12-digit identity number issued by UIDAI.",
+                "issues": {
+                    "new": "New Enrollment",
+                    "update": "Update Address",
+                    "lost": "Lost Aadhaar",
+                    "lock": "Biometric Lock/Unlock",
+                    "mobile": "Link Mobile Number"
+                }
+            },
+            "pan": {
+                "title": "PAN Card",
+                "desc": "Permanent Account Number for financial transactions.",
+                "issues": {
+                    "correction": "Correction/Update",
+                    "reprint": "Reprint PAN",
+                    "link": "Link Aadhaar"
+                }
+            },
+            "passport": {
+                "title": "Passport",
+                "desc": "Official travel document issued by Gov of India.",
+                "issues": {
+                    "new": "New Passport",
+                    "renewal": "Renewal/Reissue",
+                    "tatkal": "Tatkal Scheme",
+                    "pcc": "PCC"
+                }
+            },
+            "voter": {
+                "title": "Voter ID",
+                "desc": "Electors Photo Identity Card (EPIC).",
+                "issues": {
+                    "new": "New Voter Registration",
+                    "correction": "Correction of Entries",
+                    "transfer": "Constituency Transfer"
+                }
+            },
+            "dl": {
+                "title": "Driving License",
+                "desc": "Official specific permission to drive vehicles.",
+                "issues": {
+                    "renewal": "Renewal",
+                    "address": "Address Change",
+                    "duplicate": "Duplicate DL"
+                }
+            }
+        }
+    }
+}
