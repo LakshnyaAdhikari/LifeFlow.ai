@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2, Phone, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export default function LoginPage() {
     const { login: authLogin } = useAuth();
     const router = useRouter();
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         phone: "",
         password: ""
@@ -56,12 +59,12 @@ export default function LoginPage() {
                     localStorage.setItem("pending_phone", normalizedPhone);
                     router.push("/auth/verify-otp");
                 } else {
-                    setError(data.detail || "Login failed. Please check your credentials.");
+                    setError(data.detail || t("auth.errors.generic_error"));
                 }
             }
         } catch (err) {
             console.error("Login error:", err);
-            setError("Network error. Please check your connection and ensure backend is running.");
+            setError(t("auth.errors.network_error"));
         } finally {
             setLoading(false);
         }
@@ -76,7 +79,7 @@ export default function LoginPage() {
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    Back to home
+                    {t("auth.signup.back_to_home")}
                 </button>
                 <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -88,9 +91,9 @@ export default function LoginPage() {
 
             <div className="w-full max-w-md space-y-8 mt-10">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold">Welcome Back</h1>
+                    <h1 className="text-3xl font-bold">{t("auth.login.title")}</h1>
                     <p className="text-muted-foreground">
-                        Sign in to continue your journey
+                        {t("auth.login.subtitle")}
                     </p>
                 </div>
 
@@ -98,14 +101,14 @@ export default function LoginPage() {
                     <form onSubmit={handleLogin} className="space-y-6">
                         {/* Phone Number */}
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold">Phone Number</label>
+                            <label className="text-sm font-semibold">{t("auth.login.phone")}</label>
                             <div className="relative">
                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="tel"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="Enter your phone number"
+                                    placeholder={t("auth.signup.phone_placeholder")}
                                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
@@ -114,14 +117,14 @@ export default function LoginPage() {
 
                         {/* Password */}
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold">Password</label>
+                            <label className="text-sm font-semibold">{t("auth.login.password")}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    placeholder="Enter your password"
+                                    placeholder={t("auth.signup.password_placeholder")}
                                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />
@@ -143,11 +146,11 @@ export default function LoginPage() {
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Signing in...
+                                    {t("auth.login.submitting")}
                                 </>
                             ) : (
                                 <>
-                                    Sign In
+                                    {t("auth.login.submit")}
                                     <ArrowRight className="w-5 h-5" />
                                 </>
                             )}
@@ -157,12 +160,12 @@ export default function LoginPage() {
 
                 <div className="text-center">
                     <p className="text-muted-foreground">
-                        Don't have an account?{" "}
+                        {t("auth.login.no_account")}{" "}
                         <button
                             onClick={() => router.push("/auth/signup")}
                             className="text-primary hover:underline font-bold"
                         >
-                            Create one
+                            {t("auth.login.signup_link")}
                         </button>
                     </p>
                 </div>

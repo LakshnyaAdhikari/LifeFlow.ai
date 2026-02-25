@@ -13,6 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 export const metadata: Metadata = {
   title: "LifeFlow | Your intelligent companion",
@@ -29,9 +31,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

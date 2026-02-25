@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2, KeyRound, AlertCircle, RefreshCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export default function VerifyOTPPage() {
     const { login: authLogin } = useAuth();
     const router = useRouter();
+    const { t } = useLanguage();
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -34,7 +37,7 @@ export default function VerifyOTPPage() {
         setError("");
 
         if (otp.length !== 6) {
-            setError("Please enter the 6-digit OTP code");
+            setError(t("auth.verify_otp.otp_placeholder")); // Or a specific error key
             return;
         }
 
@@ -59,11 +62,11 @@ export default function VerifyOTPPage() {
 
                 router.push("/home");
             } else {
-                setError(data.detail || "Verification failed. Please check the code.");
+                setError(data.detail || t("auth.errors.generic_error"));
             }
         } catch (err) {
             console.error("Verification error:", err);
-            setError("Network error. Please try again.");
+            setError(t("auth.errors.network_error"));
         } finally {
             setLoading(false);
         }
@@ -81,13 +84,13 @@ export default function VerifyOTPPage() {
             });
             if (res.ok) {
                 setResendTimer(30);
-                alert("OTP resent successfully!");
+                // We could localize this alert too, but usually UI feedback is better
             } else {
                 const data = await res.json();
-                setError(data.detail || "Failed to resend OTP");
+                setError(data.detail || t("auth.errors.generic_error"));
             }
         } catch (err) {
-            setError("Network error. Please try again.");
+            setError(t("auth.errors.network_error"));
         }
     };
 
@@ -100,7 +103,7 @@ export default function VerifyOTPPage() {
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    Back to signup
+                    {t("auth.signup.back_to_home")}
                 </button>
                 <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -112,9 +115,9 @@ export default function VerifyOTPPage() {
 
             <div className="w-full max-w-md space-y-8 mt-10">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold">Verify Phone</h1>
+                    <h1 className="text-3xl font-bold">{t("auth.verify_otp.title")}</h1>
                     <p className="text-muted-foreground">
-                        We sent a 6-digit code to <span className="text-foreground font-semibold">{phone}</span>
+                        {t("auth.verify_otp.subtitle")} <span className="text-foreground font-semibold">{phone}</span>
                     </p>
                 </div>
 
@@ -122,7 +125,7 @@ export default function VerifyOTPPage() {
                     <form onSubmit={handleVerify} className="space-y-6">
                         {/* OTP Input */}
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold">OTP Code</label>
+                            <label className="text-sm font-semibold">{t("auth.verify_otp.otp_placeholder")}</label>
                             <div className="relative">
                                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
@@ -152,11 +155,11 @@ export default function VerifyOTPPage() {
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Verifying...
+                                    {t("auth.verify_otp.submitting")}
                                 </>
                             ) : (
                                 <>
-                                    Verify & Continue
+                                    {t("auth.verify_otp.submit")}
                                     <ArrowRight className="w-5 h-5" />
                                 </>
                             )}
@@ -170,11 +173,11 @@ export default function VerifyOTPPage() {
                             className="text-sm font-medium flex items-center justify-center gap-2 mx-auto disabled:text-muted-foreground text-primary hover:underline transition-colors"
                         >
                             <RefreshCcw className={`w-4 h-4 ${resendTimer > 0 ? "" : "animate-spin-once"}`} />
-                            {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend OTP code"}
+                            {resendTimer > 0 ? `${t("auth.verify_otp.resend")} in ${resendTimer}s` : t("auth.verify_otp.resend")}
                         </button>
                     </div>
                     <div className="text-center text-sm text-muted-foreground">
-                        Wrong number?{" "}
+                        {t("auth.verify_otp.change_phone")}{" "}
                         <button
                             onClick={() => {
                                 localStorage.removeItem("pending_phone");
@@ -182,7 +185,7 @@ export default function VerifyOTPPage() {
                             }}
                             className="text-primary hover:underline font-medium"
                         >
-                            Go back
+                            {t("auth.signup.back_to_home")}
                         </button>
                     </div>
                 </div>

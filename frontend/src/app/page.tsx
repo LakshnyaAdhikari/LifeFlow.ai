@@ -3,9 +3,8 @@
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import Hero from "@/components/home/Hero";
+import LandingHero from "@/components/home/LandingHero";
 import CategoryExplorer from "@/components/home/CategoryExplorer";
-import AssistiveTools from "@/components/home/AssistiveTools";
 import HowItWorks from "@/components/home/HowItWorks";
 import StartupStats from "@/components/home/StartupStats";
 
@@ -48,7 +47,7 @@ export default function LandingPage() {
 
             <main className="flex-grow">
                 {/* Primary Engagement Zone */}
-                <Hero onSearch={handleSearch} />
+                <LandingHero onSearch={handleSearch} />
 
                 {/* Authority & Trust Builders */}
                 <StartupStats />
@@ -58,10 +57,6 @@ export default function LandingPage() {
 
                 {/* Product Education */}
                 <HowItWorks />
-
-
-                {/* Future Proofing & Tools */}
-                <AssistiveTools />
             </main>
 
             <Footer />
