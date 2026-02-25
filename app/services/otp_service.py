@@ -1,6 +1,12 @@
-from twilio.rest import Client
 import os
 from typing import Optional
+
+try:
+    from twilio.rest import Client
+    TWILIO_AVAILABLE = True
+except ImportError:
+    TWILIO_AVAILABLE = False
+    Client = None
 
 class OTPService:
     def __init__(self):
@@ -8,12 +14,19 @@ class OTPService:
         self.auth_token = os.getenv("TWILIO_AUTH_TOKEN")
         self.verify_sid = os.getenv("TWILIO_VERIFY_SERVICE_SID")
         
-        if self.account_sid and self.auth_token and self.verify_sid:
-            self.client = Client(self.account_sid, self.auth_token)
-            print("🚀 Twilio Verify Service initialized")
+        if TWILIO_AVAILABLE and self.account_sid and self.auth_token and self.verify_sid:
+            try:
+                self.client = Client(self.account_sid, self.auth_token)
+                print("🚀 Twilio Verify Service initialized")
+            except Exception as e:
+                print(f"⚠️ Failed to initialize Twilio client: {e}")
+                self.client = None
         else:
             self.client = None
-            print("🛑 [DEVELOPER MODE] Twilio credentials missing. Using MOCK OTP service.")
+            if not TWILIO_AVAILABLE:
+                print("🛑 [DEPENDENCY MISSING] 'twilio' library not found. Using MOCK OTP service.")
+            else:
+                print("🛑 [DEVELOPER MODE] Twilio credentials missing. Using MOCK OTP service.")
             print("💡 Use code '123456' to verify any number in local development.")
 
     def send_otp(self, phone: str) -> str:
