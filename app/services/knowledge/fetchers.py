@@ -404,12 +404,66 @@ class GenericFetcher(PlaywrightFetcher):
     """
     pass
 
-def get_fetcher(authority: str, domain: str = "General") -> DocumentFetcher:
+
+class LocalFileFetcher(DocumentFetcher):
     """
-    Get the best fetcher for a given authority.
-    All specific fetchers still exist for authority-level customisation.
-    Unknown authorities use PlaywrightFetcher (JS-aware) by default.
+    Fetcher for locally cached files (PDFs downloaded by download_pdfs.py).
+    Handles file:// URLs — reads bytes directly from disk.
+    This is the path used after automated PDF download.
     """
+
+    def __init__(self, authority: str = "Local", domain: str = "General"):
+        super().__init__(authority=authority, domain=domain)
+
+    async def fetch(self, url: str, title: str, metadata: Optional[Dict[str, Any]] = None) -> FetchedDocument:
+        """Read file bytes from local path extracted from file:// URL."""
+        # Convert file:// URL to local path
+        from urllib.parse import unquote
+        local_path = url.replace("file:///", "").replace("file://", "")
+        local_path = unquote(local_path)
+
+        import pathlib
+        path = pathlib.Path(local_path)
+
+        if not path.exists():
+            raise FileNotFoundError(f"Local file not found: {local_path}")
+
+        content = path.read_bytes()
+        logger.info(f"[LocalFileFetcher] Read {len(content) // 1024}KB from {path.name}")
+
+        return FetchedDocument(
+            url=url,
+            content=content,
+            content_type="application/pdf",
+            title=title,
+            source_authority=self.authority,
+            domain=self.domain,
+            metadata={
+                **(metadata or {}),
+                "local_path": str(path),
+                "fetch_method": "local_file",
+                "fetched_at": datetime.utcnow().isoformat(),
+                "content_length": len(content),
+            }
+        )
+
+    def get_priority_documents(self) -> List[Dict[str, str]]:
+        return []
+
+
+def get_fetcher(authority: str, domain: str = "General", url: str = "") -> DocumentFetcher:
+    """
+    Get the best fetcher for a given authority/URL combination.
+    Priority:
+      1. file:// URL → LocalFileFetcher (locally cached PDF)
+      2. Known authority → specific fetcher
+      3. Default → PlaywrightFetcher (JS-aware for all other gov portals)
+    """
+    # Local file takes highest priority — bypasses all network fetching
+    if url.startswith("file://"):
+        logger.info(f"Using LocalFileFetcher for local file: {url[:60]}")
+        return LocalFileFetcher(authority=authority, domain=domain)
+
     specific_fetchers = {
         "UIDAI": UIDAIFetcher,
         "IRDAI": IRDAIFetcher,
@@ -425,3 +479,4 @@ def get_fetcher(authority: str, domain: str = "General") -> DocumentFetcher:
     # Default: Playwright fetcher handles all JS-heavy gov portals
     logger.info(f"Using PlaywrightFetcher for: {authority}")
     return PlaywrightFetcher(authority=authority, domain=domain)
+

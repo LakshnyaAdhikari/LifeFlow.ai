@@ -1,0 +1,124 @@
+{
+  "irdai_policyholder_master_circular_2024.pdf": {
+    "title": "Master Circular on Protection of Policyholders Interests 2024",
+    "domain": "Insurance",
+    "authority": "IRDAI",
+    "doc_type": "master_circular",
+    "local_path": "data\\pdfs\\Insurance\\irdai_policyholder_master_circular_2024.pdf",
+    "status": "failed",
+    "checksum": null,
+    "downloaded_at": null,
+    "file_size_kb": null,
+    "circular_number": "IRDAI/PP&GR/CIR/MISC/117/9/2024"
+  },
+  "irdai_health_insurance_master_circular_2024.pdf": {
+    "title": "Master Circular on Health Insurance Products 2024",
+    "domain": "Insurance",
+    "authority": "IRDAI",
+    "doc_type": "master_circular",
+    "local_path": "data\\pdfs\\Insurance\\irdai_health_insurance_master_circular_2024.pdf",
+    "status": "failed",
+    "checksum": null,
+    "downloaded_at": null,
+    "file_size_kb": null
+  },
+  "rbi_integrated_ombudsman_scheme_2021.pdf": {
+    "title": "Reserve Bank Integrated Ombudsman Scheme 2021",
+    "domain": "Banking & Finance",
+    "authority": "RBI",
+    "doc_type": "regulation",
+    "local_path": "data\\pdfs\\Banking_Finance\\rbi_integrated_ombudsman_scheme_2021.pdf",
+    "status": "downloaded",
+    "checksum": "a354a73bc5a374661b8bdfb35a74501d17fd86eeeac05d00e6004e6d64d69a3e",
+    "downloaded_at": "2026-02-25T16:36:42.188798+00:00",
+    "file_size_kb": 261
+  },
+  "rbi_kyc_master_direction_2024.pdf": {
+    "title": "RBI Master Direction KYC 2016 (Updated 2024)",
+    "domain": "Banking & Finance",
+    "authority": "RBI",
+    "doc_type": "regulation",
+    "local_path": "data\\pdfs\\Banking_Finance\\rbi_kyc_master_direction_2024.pdf",
+    "status": "downloaded",
+    "checksum": "7ee5c336f273be6970e41f11c57aa9b5eb8ed31c433aeeca0831110e775fdab9",
+    "downloaded_at": "2026-02-25T16:36:55.777820+00:00",
+    "file_size_kb": 2001
+  },
+  "rbi_banking_ombudsman_booklet.pdf": {
+    "title": "RBI Booklet on Banking Ombudsman Scheme",
+    "domain": "Banking & Finance",
+    "authority": "RBI",
+    "doc_type": "handbook",
+    "local_path": "data\\pdfs\\Banking_Finance\\rbi_banking_ombudsman_booklet.pdf",
+    "status": "failed",
+    "checksum": null,
+    "downloaded_at": null,
+    "file_size_kb": null
+  },
+  "itr1_sahaj_instructions_ay2024_25.pdf": {
+    "title": "Instructions to ITR-1 Sahaj (AY 2024-25)",
+    "domain": "Taxation",
+    "authority": "Income Tax Department",
+    "doc_type": "form_instruction",
+    "local_path": "data\\pdfs\\Taxation\\itr1_sahaj_instructions_ay2024_25.pdf",
+    "status": "failed",
+    "checksum": null,
+    "downloaded_at": null,
+    "file_size_kb": null
+  },
+  "itr4_sugam_instructions_ay2024_25.pdf": {
+    "title": "Instructions to ITR-4 Sugam (AY 2024-25)",
+    "domain": "Taxation",
+    "authority": "Income Tax Department",
+    "doc_type": "form_instruction",
+    "local_path": "data\\pdfs\\Taxation\\itr4_sugam_instructions_ay2024_25.pdf",
+    "status": "failed",
+    "checksum": null,
+    "downloaded_at": null,
+    "file_size_kb": null
+  },
+  "epfo_information_handbook_rti.pdf": {
+    "title": "EPFO Information Handbook (RTI Act 2005)",
+    "domain": "Employment",
+    "authority": "EPFO",
+    "doc_type": "handbook",
+    "local_path": "data\\pdfs\\Employment\\epfo_information_handbook_rti.pdf",
+    "status": "failed",
+    "checksum": null,
+    "downloaded_at": null,
+    "file_size_kb": null
+  },
+  "epfo_composite_claim_form_aadhaar.pdf": {
+    "title": "Composite Claim Form Aadhaar - Instructions",
+    "domain": "Employment",
+    "authority": "EPFO",
+    "doc_type": "form_instruction",
+    "local_path": "data\\pdfs\\Employment\\epfo_composite_claim_form_aadhaar.pdf",
+    "status": "downloaded",
+    "checksum": "4e4c4227fa50e891487151206486071a8c29d0b8ed53242894fe1a017e58487e",
+    "downloaded_at": "2026-02-25T16:37:24.591305+00:00",
+    "file_size_kb": 440
+  },
+  "consumer_protection_act_2019.pdf": {
+    "title": "Consumer Protection Act 2019",
+    "domain": "Consumer Protection",
+    "authority": "Government of India",
+    "doc_type": "regulation",
+    "local_path": "data\\pdfs\\Consumer_Protection\\consumer_protection_act_2019.pdf",
+    "status": "failed",
+    "checksum": null,
+    "downloaded_at": null,
+    "file_size_kb": null
+  },
+  "uidai_enrolment_update_handbook.pdf": {
+    "title": "Aadhaar Enrolment and Update - Procedural Handbook",
+    "domain": "Identity Documents",
+    "authority": "UIDAI",
+    "doc_type": "handbook",
+    "local_path": "data\\pdfs\\Identity_Documents\\uidai_enrolment_update_handbook.pdf",
+    "status": "failed",
+    "checksum": null,
+    "downloaded_at": null,
+    "file_size_kb": null
+  }
+}

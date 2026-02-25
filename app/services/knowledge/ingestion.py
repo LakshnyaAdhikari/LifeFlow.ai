@@ -66,8 +66,8 @@ class IngestionPipeline:
             # 1. Get or create domain
             domain = self._get_or_create_domain(domain_name)
             
-            # 2. Fetch document
-            fetcher = get_fetcher(authority, domain_name)
+            # 2. Fetch document — pass url so LocalFileFetcher is used for file:// paths
+            fetcher = get_fetcher(authority, domain_name, url=url)
             fetched_doc = await fetcher.fetch(url, title, metadata)
             await fetcher.close()
             
