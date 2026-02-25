@@ -3,38 +3,42 @@
 import Link from "next/link";
 import { Twitter, Instagram, Linkedin, Github, Heart } from "lucide-react";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export default function Footer() {
+    const { t } = useLanguage();
+
     const sections = [
         {
-            title: "Product",
+            title: t("footer.product"),
             links: [
-                { name: "Features", href: "/#features" },
-                { name: "How It Works", href: "/#how-it-works" },
-                { name: "Roadmap", href: "/roadmap" },
+                { name: t("footer.links.features"), href: "/#features" },
+                { name: t("footer.links.how_it_works"), href: "/#how-it-works" },
+                { name: t("footer.links.roadmap"), href: "/roadmap" },
             ],
         },
         {
-            title: "Resources",
+            title: t("footer.resources"),
             links: [
-                { name: "Knowledge Hub", href: "/knowledge-hub" },
-                { name: "Legal Guides", href: "/guides" },
-                { name: "FAQ", href: "/faq" },
+                { name: t("footer.links.knowledge_hub"), href: "/knowledge-hub" },
+                { name: t("footer.links.legal_guides"), href: "/guides" },
+                { name: t("footer.links.faq"), href: "/faq" },
             ],
         },
         {
-            title: "Support",
+            title: t("footer.support"),
             links: [
-                { name: "Contact", href: "/contact" },
-                { name: "Feedback Form", href: "/feedback" },
-                { name: "Report Issue", href: "/report" },
+                { name: t("footer.links.contact"), href: "/contact" },
+                { name: t("footer.links.feedback"), href: "/feedback" },
+                { name: t("footer.links.report"), href: "/report" },
             ],
         },
         {
-            title: "Legal",
+            title: t("footer.legal"),
             links: [
-                { name: "Privacy Policy", href: "/privacy" },
-                { name: "Disclaimer", href: "/disclaimer" },
-                { name: "Terms of Service", href: "/terms" },
+                { name: t("footer.links.privacy"), href: "/privacy" },
+                { name: t("footer.links.disclaimer"), href: "/disclaimer" },
+                { name: t("footer.links.terms"), href: "/terms" },
             ],
         },
     ];
@@ -51,7 +55,7 @@ export default function Footer() {
                             </span>
                         </Link>
                         <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                            Empowering people to navigate life's administrative and legal challenges with clarity, guidance, and confidence.
+                            {t("footer.description")}
                         </p>
                         <div className="flex items-center gap-4">
                             <a href="#" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-colors">
@@ -93,10 +97,10 @@ export default function Footer() {
                     <div className="flex items-center gap-6">
                         <span className="flex items-center gap-2 text-xs text-muted-foreground">
                             <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                            All Systems Operational
+                            {t("footer.status_operational")}
                         </span>
                         <p className="text-xs text-muted-foreground italic">
-                            Redefining guidance.
+                            {t("footer.tagline")}
                         </p>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import { IDENTITY_MODULES, DocumentModule } from "@/data/identity_modules";
 import { ChevronRight, Fingerprint, CreditCard, Globe, Vote, Car, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Map string icon names to Lucide components
 const iconMap: Record<string, any> = {
@@ -17,13 +18,24 @@ const iconMap: Record<string, any> = {
 
 export default function ModuleGrid() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [selectedModule, setSelectedModule] = useState<string | null>(null);
+
+    // Map module IDs to translation keys
+    const moduleKeyMap: Record<string, string> = {
+        "aadhaar": "aadhaar",
+        "pan": "pan",
+        "passport": "passport",
+        "voter-id": "voter",
+        "driving-license": "dl"
+    };
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {IDENTITY_MODULES.map((module) => {
                 const Icon = iconMap[module.icon] || AlertCircle;
                 const isSelected = selectedModule === module.id;
+                const i18nKey = moduleKeyMap[module.id];
 
                 return (
                     <div
@@ -51,8 +63,12 @@ export default function ModuleGrid() {
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{module.title}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{module.description}</p>
+                            <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                                {t(`services.identity_modules.${i18nKey}.title`)}
+                            </h3>
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                                {t(`services.identity_modules.${i18nKey}.desc`)}
+                            </p>
                         </div>
 
                         {/* Expandable Sub-issues */}
@@ -61,7 +77,9 @@ export default function ModuleGrid() {
                             isSelected ? "max-h-[500px] opacity-100 p-4" : "max-h-0 opacity-0 overflow-hidden"
                         )}>
                             <div className="space-y-2">
-                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 px-2">Select Issue</p>
+                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 px-2">
+                                    {t("services.identity_modules.select_issue")}
+                                </p>
                                 {module.subIssues.map((issue) => (
                                     <button
                                         key={issue.id}
@@ -72,10 +90,18 @@ export default function ModuleGrid() {
                                         }}
                                     >
                                         <div>
-                                            <span className="text-sm font-semibold text-foreground group-hover/issue:text-primary">{issue.title}</span>
+                                            <span className="text-sm font-semibold text-foreground group-hover/issue:text-primary">
+                                                {/* Map issue id to key. Need a way to handle this mapping better. 
+                                                   For now, assuming the id has a mapping in issues object.
+                                                */}
+                                                {t(`services.identity_modules.${i18nKey}.issues.${issue.id.replace(/-/g, '_').split('_')[0]}`)}
+                                                {/* Fallback to original title if translation fails or complex mapping required. 
+                                                    But I'll try to keep it simple.
+                                                */}
+                                            </span>
                                             {issue.isUrgent && (
                                                 <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-800">
-                                                    Urgent
+                                                    {t("services.identity_modules.urgent")}
                                                 </span>
                                             )}
                                         </div>

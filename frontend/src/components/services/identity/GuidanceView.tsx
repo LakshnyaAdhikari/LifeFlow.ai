@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle, Clock, AlertTriangle, FileText, ArrowRight, Shield, Link as LinkIcon, Download } from "lucide-react";
+import BackButton from "@/components/layout/BackButton";
 
 export default function GuidanceView({
     moduleId,
@@ -26,7 +27,10 @@ export default function GuidanceView({
     ];
 
     return (
-        <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+        <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 space-y-6">
+            <div className="flex justify-start">
+                <BackButton />
+            </div>
 
             {/* Header / What Usually Happens */}
             <div className="mb-12 text-center">
