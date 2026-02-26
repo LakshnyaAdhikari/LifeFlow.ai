@@ -129,3 +129,32 @@ verify_phone.py
 view_users.py
 wipe_users.py
 bootstrap_knowledge.py
+
+# Diagnostic & Utility Scripts
+benchmark_rag.py
+benchmark_results_real.txt
+benchmark_results.txt
+benchmark_output.txt
+check_env_debug.py
+diagnose_models.py
+fix_urls.ps1
+inspect_models.py
+isolate_conflict.py
+metadata_matches.txt
+revert_urls.ps1
+search_logs_debug.py
+test_signup_debug.py
+test_twilio.py
+startup_debug.log
+env_output.txt
+_init_db.py
+
+# Universal Debug Patterns
+*_output.txt
+*_results.txt
+*_analysis.md
+*_progress.md
+debug_*.py
+test_*.py
+reproduce_*.py
+verify_*.py

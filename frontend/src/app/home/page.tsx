@@ -19,6 +19,7 @@ interface Situation {
 }
 
 import HomeHero from "@/components/home/HomeHero";
+import ScrollButton from "@/components/home/ScrollButton";
 
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -198,6 +199,7 @@ export default function Home() {
       </main>
 
       <Footer />
+      <ScrollButton />
     </div >
   );
 }

@@ -8,6 +8,9 @@
         "signup": "Sign Up",
         "language": "Language"
     },
+    "breadcrumb": {
+        "home": "Home"
+    },
     "hero": {
         "title_part1": "When life gets",
         "title_keyword": "complicated,",

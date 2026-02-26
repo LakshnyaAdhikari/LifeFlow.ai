@@ -7,6 +7,7 @@ import LandingHero from "@/components/home/LandingHero";
 import CategoryExplorer from "@/components/home/CategoryExplorer";
 import HowItWorks from "@/components/home/HowItWorks";
 import StartupStats from "@/components/home/StartupStats";
+import ScrollButton from "@/components/home/ScrollButton";
 
 export default function LandingPage() {
     const router = useRouter();
@@ -60,6 +61,7 @@ export default function LandingPage() {
             </main>
 
             <Footer />
+            <ScrollButton />
         </div>
     );
 }

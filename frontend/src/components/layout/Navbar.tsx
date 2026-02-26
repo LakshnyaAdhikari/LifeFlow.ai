@@ -24,7 +24,7 @@ import {
     Wifi,
     ChevronRight,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -160,6 +160,7 @@ export default function Navbar() {
 
     const { user, logout } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
     const { theme, setTheme } = useTheme();
 
     const domainsRef = useRef<HTMLDivElement>(null);
@@ -213,13 +214,22 @@ export default function Navbar() {
 
                         {/* Domains Dropdown */}
                         <div ref={domainsRef} className="relative">
-                            <button
-                                onClick={() => setDomainsOpen(!domainsOpen)}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                            >
-                                {t("navbar.domains")}
-                                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${domainsOpen ? "rotate-180" : ""}`} />
-                            </button>
+                            {pathname === "/home" ? (
+                                <Link
+                                    href="/domains"
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                                >
+                                    {t("navbar.domains")}
+                                </Link>
+                            ) : (
+                                <button
+                                    onClick={() => setDomainsOpen(!domainsOpen)}
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                                >
+                                    {t("navbar.domains")}
+                                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${domainsOpen ? "rotate-180" : ""}`} />
+                                </button>
+                            )}
 
                             {domainsOpen && (
                                 <div className="absolute left-0 top-full mt-2 w-[560px] bg-card border border-border rounded-2xl shadow-2xl shadow-black/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 z-50">
