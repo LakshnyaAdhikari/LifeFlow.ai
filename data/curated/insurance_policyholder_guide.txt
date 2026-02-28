@@ -1,0 +1,132 @@
+INSURANCE POLICYHOLDER RIGHTS AND CLAIMS IN INDIA — COMPREHENSIVE GUIDE
+Domain: Insurance
+Authority: Insurance Regulatory and Development Authority of India (IRDAI)
+Source: Compiled from IRDAI Protection of Policyholders Regulations 2024, Insurance Act 1938, IRDAI Master Circulars
+
+=== POLICYHOLDER RIGHTS UNDER IRDAI REGULATIONS 2024 ===
+
+The IRDAI (Protection of Policyholders' Interests, Operations and Allied Matters of Insurers) Regulations, 2024 came into force on April 1, 2024.
+
+KEY RIGHTS:
+1. RIGHT TO INFORMATION: Insurer must provide complete product information, terms and conditions, premium details, and claim process before purchase.
+2. RIGHT TO FREE-LOOK PERIOD: 30 days from receipt of policy to return it (15 days for offline purchase). Full refund minus proportionate risk premium and medical expenses.
+3. RIGHT TO POLICY IN PREFERRED LANGUAGE: Policy document must be available in language chosen by policyholder.
+4. RIGHT TO CLAIM SETTLEMENT: Insurer must settle or reject claim within 30 days of receipt of last necessary document.
+5. RIGHT TO GRIEVANCE REDRESSAL: Must have designated grievance officer. Must resolve in 15 days.
+6. RIGHT TO PORTABILITY: Switch health insurance to another insurer without losing accumulated benefits.
+
+=== HEALTH INSURANCE CLAIM PROCESS ===
+
+CASHLESS CLAIM:
+1. Get admitted to network hospital
+2. Hospital sends pre-authorization to TPA/insurer
+3. Insurer approves/rejects within 1 hour (emergency) or 6 hours (planned)
+4. Treatment happens — hospital settles directly with insurer
+5. Policyholder pays only deductible/co-pay/non-covered items
+
+REIMBURSEMENT CLAIM:
+1. Get treated at any hospital
+2. Collect all original bills, discharge summary, prescriptions
+3. Submit claim form with documents to insurer within 15-30 days
+4. Insurer processes and settles within 30 days
+5. Payment via NEFT/cheque
+
+DOCUMENTS NEEDED FOR HEALTH CLAIM:
+- Claim form (duly filled and signed)
+- Hospital discharge summary
+- All original hospital bills and receipts
+- Doctor's prescriptions
+- Investigation reports (blood tests, X-rays, scans)
+- Pre-authorization form (for cashless)
+- FIR copy (for accident cases)
+- KYC documents of policyholder
+- Policy copy
+- Bank details for reimbursement
+
+=== MOTOR INSURANCE CLAIM PROCESS ===
+
+OWN DAMAGE CLAIM:
+1. Inform insurer within 24 hours (for theft: FIR within 24 hours)
+2. Do not repair vehicle before survey
+3. Insurer appoints surveyor within 72 hours
+4. Surveyor inspects damage and submits report
+5. Take vehicle to network garage (cashless) or get repair done (reimbursement)
+6. Submit repair bills, photos, FIR (if applicable)
+7. Claim settled within 30 days of survey
+
+THIRD PARTY CLAIM:
+1. Under Section 166 of Motor Vehicles Act
+2. File claim with Motor Accident Claims Tribunal (MACT)
+3. No upper limit on compensation (Third Party liability is unlimited)
+4. Insurer pays compensation as per MACT order
+5. Compensation includes: Medical expenses, loss of income, pain and suffering, future loss
+
+=== LIFE INSURANCE CLAIM PROCESS ===
+
+DEATH CLAIM:
+1. Nominee/legal heir intimates insurer about death
+2. Submit: Claim form, death certificate, policy bond, claimant's ID, bank details
+3. If death within first 3 years: Insurer may investigate (Section 45 of Insurance Act)
+4. If death after 3 years: Policy cannot be questioned on any ground
+5. Insurer must settle within 30 days of receiving all documents
+6. If claim rejected, written reasons must be provided
+
+MATURITY/SURVIVAL CLAIM:
+1. Insurer sends intimation 3 months before maturity
+2. Submit: Discharge form, policy bond, ID proof, bank details
+3. Settlement within 30 days of due date
+
+=== INSURANCE OMBUDSMAN — COMPLAINT PROCESS ===
+
+If insurer does not resolve your complaint within 30 days:
+
+STEP 1: File complaint with insurer's Grievance Redressal Officer (in writing/email)
+STEP 2: Wait 15 days for resolution
+STEP 3: If unresolved, approach Insurance Ombudsman
+
+HOW TO FILE WITH OMBUDSMAN:
+1. Visit: ecoi.co.in (Council of Insurance Ombudsmen portal)
+2. Or visit the Ombudsman office in your jurisdiction (17 offices across India)
+3. File Form VI-A (available on the IGMS portal)
+4. Claim amount should not exceed Rs 50 lakh
+5. Complaint must be within 1 year of insurer's final response
+6. Ombudsman's recommendation is binding on insurer if accepted by complainant
+7. Decision within 3 months
+
+ALTERNATIVELY — IRDAI IGMS PORTAL:
+1. Visit: igms.irda.gov.in
+2. Register complaint online
+3. IRDAI forwards complaint to insurer
+4. Insurer must respond within 15 days
+5. Track complaint status online
+
+=== BIMA BHAROSA PORTAL ===
+
+Launched by IRDAI for policyholder protection:
+- URL: bimabharosa.irdai.gov.in
+- Features: Policy comparison, claim status tracking, complaint filing
+- Can search for any insurance policy issued in your name
+- View all policies across all insurers (linked to PAN/Aadhaar)
+
+=== KEY IRDAI REGULATIONS CONSUMERS SHOULD KNOW ===
+
+1. POLICY LAPSE AND REVIVAL: If premium unpaid for 30 days (grace period), policy lapses. Can be revived within 3-5 years by paying all dues + interest.
+
+2. ASSIGNMENT AND NOMINATION: Policyholder can assign policy or change nominee anytime. Nomination is not an assignment — legal heirs may still have claims.
+
+3. SURRENDER VALUE: Available after 3 years of premium payment (for traditional policies). Must disclose guaranteed and non-guaranteed surrender values at point of sale.
+
+4. COOLING-OFF PERIOD: 15-30 days to review and cancel any insurance policy (full refund minus proportionate risk premium).
+
+5. CLAIM SETTLEMENT RATIO (CSR): Insurer must publish CSR annually. Higher CSR = better claim settlement track record.
+
+6. UNIT LINKED INSURANCE PLANS (ULIPs): 5-year lock-in period. Charges (mortality, fund management, policy admin) must be disclosed upfront.
+
+=== IMPORTANT CONTACTS ===
+
+- IRDAI: irdai.gov.in
+- Bima Bharosa: bimabharosa.irdai.gov.in
+- IGMS Complaints: igms.irda.gov.in
+- Insurance Ombudsman: ecoi.co.in
+- Policyholder.gov.in: policyholder.gov.in
+- IRDAI Toll-free: 155255

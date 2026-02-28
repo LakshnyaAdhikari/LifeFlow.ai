@@ -1,0 +1,164 @@
+VEHICLE AND TRANSPORT SERVICES IN INDIA — COMPREHENSIVE GUIDE
+Domain: Vehicle & Transport
+Authority: Ministry of Road Transport and Highways / Parivahan / State RTOs
+Source: Compiled from Motor Vehicles Act 1988 (Amended 2019), Parivahan Portal, Sarathi Portal
+
+=== DRIVING LICENCE (DL) ===
+
+TYPES OF LICENCES:
+1. Learner's Licence (LL): Valid for 6 months. Can be applied for from age 16 (without gear, up to 50cc) or 18 (with gear).
+2. Permanent Driving Licence: Applied after 30 days of getting LL. Valid for 20 years or until age 50 (whichever is earlier), then renewed every 5 years.
+3. International Driving Permit (IDP): Valid for 1 year. Required for driving in other countries.
+
+HOW TO APPLY FOR LEARNER'S LICENCE:
+1. Visit Sarathi portal: sarathi.parivahan.gov.in
+2. Select your state
+3. Click "Apply for Learner's Licence"
+4. Fill Form 1 (Medical Certificate) — get from registered medical practitioner
+5. Fill Form 2 (Application for LL)
+6. Upload documents: Proof of age, proof of address, passport size photos
+7. Pay fee online: Rs 200 (LL application) + Rs 50 (LL test fee)
+8. Schedule appointment at RTO
+9. Pass LL test (written/computer-based MCQ test on traffic rules)
+10. LL issued instantly on passing
+
+HOW TO APPLY FOR PERMANENT DL:
+1. Must have held LL for at least 30 days (not more than 180 days)
+2. Visit Sarathi portal and apply for DL
+3. Fill Form 4 (Application for DL)
+4. Schedule driving test at RTO
+5. Pay fee: Rs 200 (DL test fee) + Rs 200 (DL issuance)
+6. Pass driving test at RTO
+7. Smart card DL issued and mailed to address
+
+DOCUMENTS REQUIRED:
+- Learner's Licence
+- Proof of age (birth certificate, school certificate, passport)
+- Proof of address (Aadhaar, passport, utility bill)
+- Medical certificate (Form 1) for transport vehicle DL
+- Passport size photographs
+
+RENEWAL OF DL:
+- Apply within 1 year before or after expiry
+- Apply online via Sarathi portal or in person at RTO
+- No driving test required for renewal (unless DL expired more than 5 years ago)
+- Fee: Rs 200 for renewal
+- If applied late (more than 1 year after expiry): additional late fee and may need to retake test
+
+=== VEHICLE REGISTRATION (RC) ===
+
+All motor vehicles must be registered under Section 39 of the Motor Vehicles Act, 1988.
+
+HOW TO REGISTER A NEW VEHICLE:
+1. Dealer provides temporary registration (valid 1 month)
+2. Apply at local RTO within 7 days of purchase
+3. Submit Form 20 (Application for Registration) with:
+   - Sale certificate from dealer
+   - Insurance certificate
+   - PUC (Pollution Under Control) certificate
+   - Proof of address
+   - PAN card or Form 60/61
+   - Invoice and road tax receipt
+4. Vehicle inspection at RTO
+5. Registration certificate issued (RC smart card mailed)
+
+REGISTRATION FEE:
+- Two-wheeler: Rs 300-600 (varies by state)
+- Four-wheeler: Rs 600-1500 (varies by state)
+- Road tax: 4-20% of vehicle cost (varies significantly by state)
+
+RC VALIDITY:
+- Private vehicles: 15 years initially, then renewable every 5 years
+- Commercial vehicles: 10 years initially, then renewable every 5 years
+- Electric vehicles: Exemptions available in many states
+
+=== TRANSFER OF VEHICLE OWNERSHIP ===
+
+When selling/buying a used vehicle:
+
+SELLER'S STEPS:
+1. File Form 29 (Notice of Transfer of Ownership) at RTO within 14 days
+2. Hand over RC, insurance certificate, PUC to buyer
+3. Sign transfer documents (Form 29 and Form 30)
+
+BUYER'S STEPS:
+1. File Form 30 (Application for Transfer of Ownership) at RTO within 30 days
+2. Submit: Form 29 (signed by seller), Form 30, RC, insurance, address proof, PAN
+3. Pay transfer fee: Rs 300-1000 (varies by state)
+4. If transferring between states: NOC from original RTO needed
+5. Re-registration in new state within 12 months
+
+=== E-CHALLAN — TRAFFIC FINES ===
+
+Under the Motor Vehicles (Amendment) Act, 2019, penalties were significantly increased:
+
+| Offense | Fine |
+|---|---|
+| Driving without licence | Rs 5,000 |
+| Driving without insurance | Rs 2,000 (and/or 3 months imprisonment) |
+| Over-speeding | Rs 1,000 - Rs 2,000 |
+| Dangerous driving | Rs 5,000 (and/or imprisonment up to 1 year) |
+| Drunk driving | Rs 10,000 (and/or imprisonment up to 6 months) |
+| Driving without seatbelt | Rs 1,000 |
+| Using mobile phone while driving | Rs 5,000 |
+| Not giving way to emergency vehicles | Rs 10,000 |
+| Driving without helmet (two-wheeler) | Rs 1,000 + 3-month suspension of DL |
+| Juvenile driving | Rs 25,000 + 3 years imprisonment for guardian |
+
+HOW TO PAY E-CHALLAN:
+1. Visit: echallan.parivahan.gov.in
+2. Enter challan number / vehicle number / DL number
+3. View pending challans
+4. Pay online via UPI, debit card, credit card, net banking
+5. Download payment receipt
+
+HOW TO CONTEST E-CHALLAN:
+1. Visit the designated authority (Traffic Police headquarters)
+2. File your representation with supporting evidence
+3. Adjudication officer will hear your case within 60 days
+
+=== VEHICLE FITNESS CERTIFICATE ===
+
+Required for commercial vehicles (and private vehicles older than 15 years from 2024 rules):
+- Commercial vehicles: Valid for 2 years
+- Private vehicles (over 15 years): Valid for 5 years
+
+HOW TO APPLY:
+1. Book appointment on Vahan portal (vahan.parivahan.gov.in)
+2. Take vehicle to Automated Testing Station (ATS) or RTO
+3. Tests: braking efficiency, emission levels, lights, horn, wipers, tyre condition
+4. Fee: Rs 200-400 (varies by vehicle type)
+5. Fitness certificate issued if vehicle passes all tests
+
+=== PERMIT FOR COMMERCIAL VEHICLES ===
+
+Types of permits:
+1. Contract Carriage Permit: For buses, taxis (within state)
+2. Stage Carriage Permit: For route buses
+3. Goods Carriage Permit: For goods vehicles
+4. National Permit: For interstate goods transport
+5. All India Tourist Permit: For tourist vehicles
+
+HOW TO APPLY:
+1. Apply online via Vahan portal
+2. Submit Form 48/46 (Application for Permit)
+3. Required documents: RC, fitness certificate, insurance, tax receipts
+4. Fee: Rs 5,000-25,000 depending on type and state
+
+=== IMPORTANT PORTALS AND CONTACTS ===
+
+- Parivahan (Vehicle services): parivahan.gov.in
+- Sarathi (DL services): sarathi.parivahan.gov.in
+- Vahan (RC services): vahan.parivahan.gov.in
+- E-Challan: echallan.parivahan.gov.in
+- NHAI helpline: 1033
+- Road accident helpline: 112
+
+=== MOTOR VEHICLES ACT 2019 AMENDMENT KEY CHANGES ===
+
+1. Hit and Run compensation increased from Rs 25,000 to Rs 2 lakh (death) / Rs 50,000 (injury)
+2. Good Samaritan protection: No civil or criminal liability for helping accident victims
+3. Motor Vehicle Accident Fund for cashless treatment at golden hour
+4. Electronic enforcement of traffic rules
+5. Vehicle recall provision added for manufacturing defects
+6. Central Motor Vehicles Rules amended to allow automated driving test

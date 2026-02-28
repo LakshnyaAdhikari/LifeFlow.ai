@@ -1,0 +1,135 @@
+CONSUMER PROTECTION IN INDIA — COMPREHENSIVE GUIDE
+Domain: Consumer Protection
+Authority: Government of India / CCPA / NCDRC
+Source: Compiled from Consumer Protection Act 2019, CCPA Guidelines, NCH Portal
+
+=== THE CONSUMER PROTECTION ACT, 2019 ===
+
+The Consumer Protection Act, 2019 (CPA 2019) replaced the older Consumer Protection Act, 1986. It received Presidential assent on August 9, 2019 and came into force on July 20, 2020.
+
+KEY DEFINITIONS:
+- Consumer: Any person who buys goods or hires/avails services for consideration (including online and electronic transactions). Does NOT include a person who buys goods for resale or commercial use.
+- Complaint: Any allegation made by a consumer regarding unfair trade practice, defective goods, deficient service, excessive pricing, or offering hazardous goods/services.
+- E-commerce: Buying or selling goods or services including digital products over a digital or electronic network.
+- Product Liability: The responsibility of a product manufacturer, service provider, or seller to compensate a consumer for any harm caused by a defective product or deficient service.
+
+=== CONSUMER RIGHTS (Section 2(9)) ===
+
+1. Right to Safety: Protection against goods and services that are hazardous to life and property.
+2. Right to be Informed: Access to information about quality, quantity, potency, purity, standard, and price of goods or services.
+3. Right to Choose: Access to a variety of goods and services at competitive prices.
+4. Right to be Heard: Consumer interests will receive due consideration at appropriate forums.
+5. Right to Seek Redressal: Right to fair settlement of genuine grievances.
+6. Right to Consumer Education: Right to acquire knowledge and skill to be an informed consumer.
+
+=== HOW TO FILE A CONSUMER COMPLAINT ===
+
+STEP 1: Try to resolve directly with the seller/service provider. Keep all receipts, bills, and correspondence.
+
+STEP 2: File complaint at National Consumer Helpline (NCH)
+- Call 1800-11-4000 (toll-free) or 1915
+- Online: consumerhelpline.gov.in
+- WhatsApp: Send "Hi" to 8800001915
+- The NCH will attempt mediation with the company
+
+STEP 3: If unresolved, file at Consumer Commission
+- District Commission: Claims up to Rs 1 crore
+- State Commission: Claims Rs 1 crore to Rs 10 crore
+- National Commission (NCDRC): Claims above Rs 10 crore
+- Online filing portal: edaakhil.nic.in (E-Daakhil)
+
+DOCUMENTS NEEDED:
+- Written complaint with details of the transaction
+- Copy of bill/receipt/invoice
+- Copy of warranty/guarantee card (if applicable)
+- Communication with the opposite party
+- Any evidence supporting the complaint
+- Details of relief/compensation sought
+- Filing fee (varies by claim amount)
+
+FILING FEES:
+- Up to Rs 5 lakh: Rs 200
+- Rs 5 lakh to Rs 10 lakh: Rs 400
+- Rs 10 lakh to Rs 20 lakh: Rs 600
+- Rs 20 lakh to Rs 50 lakh: Rs 1,000
+- Rs 50 lakh to Rs 1 crore: Rs 2,000
+- Rs 1 crore to Rs 2 crore: Rs 2,500
+- Rs 2 crore to Rs 5 crore: Rs 3,000
+- Rs 5 crore to Rs 10 crore: Rs 5,000
+- Above Rs 10 crore: Rs 7,500
+
+TIMELINE: Consumer Commissions must resolve complaints within 3 months (if no testing required) or 5 months (if testing required).
+
+=== CENTRAL CONSUMER PROTECTION AUTHORITY (CCPA) ===
+
+The CCPA was established under Section 10 of the CPA 2019 to protect consumer rights as a class.
+
+POWERS OF CCPA:
+1. Investigate and take action against unfair trade practices
+2. Issue safety notices for goods/services
+3. Order recall of dangerous goods or withdrawal of hazardous services
+4. File class action suits
+5. Pass orders for reimbursement of prices paid and discontinuation of unfair practices
+
+MISLEADING ADVERTISEMENTS:
+- CCPA can impose penalty of up to Rs 10 lakh on manufacturer/endorser for first offense
+- Up to Rs 50 lakh for subsequent offenses
+- Imprisonment up to 2 years for subsequent offenses
+- Endorser who makes false endorsement can be fined Rs 10 lakh to Rs 50 lakh
+
+=== E-COMMERCE CONSUMER PROTECTION ===
+
+Under the Consumer Protection (E-Commerce) Rules, 2020:
+1. E-commerce entities must display total price including taxes/fees
+2. Must have a customer care mechanism with officer designated for complaint resolution
+3. Must display details of registered office, customer care contacts
+4. Cannot manipulate prices to gain unreasonable profit
+5. Must have a clear cancellation and refund policy
+6. Consumers can file complaints for goods bought online at their own location's Consumer Commission
+
+=== PRODUCT LIABILITY (Chapter VI, Sections 82-87) ===
+
+Manufacturer is liable if:
+- Product contains manufacturing defect
+- Product is defective in design
+- Product deviates from specifications
+- Product does not conform to express warranty
+- Product lacks adequate instructions/warning
+
+Service Provider is liable if:
+- Service is faulty, imperfect, or deficient
+- Service provider acted negligently
+- Service does not conform to express warranty
+
+Product Seller is liable if:
+- Exercised substantial control over design/testing
+- Altered or modified the product
+- Made express warranty independent of manufacturer
+- Did not exercise reasonable care in assembly/inspection
+
+=== REMEDIES AVAILABLE ===
+
+Consumer Commissions can order:
+1. Removal of defects from goods
+2. Replacement of goods
+3. Refund of price paid
+4. Payment of compensation for loss or injury
+5. Discontinuation of unfair/restrictive trade practice
+6. Adequate costs to parties
+7. Punitive damages in appropriate cases
+
+=== APPEAL PROCESS ===
+
+- District Commission order → Appeal to State Commission within 45 days
+- State Commission order → Appeal to National Commission within 30 days
+- National Commission order → Appeal to Supreme Court within 30 days
+- Deposit required: 50% of awarded amount or Rs 25,000, whichever is less
+
+=== IMPORTANT CONTACT INFORMATION ===
+
+- National Consumer Helpline: 1800-11-4000 / 1915
+- E-Daakhil Online Filing: edaakhil.nic.in
+- NCDRC: ncdrc.nic.in
+- CCPA: ccpa.nic.in
+- Consumer Affairs Ministry: consumeraffairs.gov.in
+- UMANG App: Available for consumer complaints on mobile

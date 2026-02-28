@@ -1,0 +1,181 @@
+PROPERTY REGISTRATION AND LAND RECORDS IN INDIA — COMPREHENSIVE GUIDE
+Domain: Property
+Authority: Department of Land Resources / State Revenue Departments / RERA / NHB
+Source: Compiled from Registration Act 1908, Transfer of Property Act 1882, RERA Act 2016, NGDRS Portal
+
+=== PROPERTY REGISTRATION PROCESS ===
+
+Under the Registration Act, 1908, all transfers of immovable property above Rs 100 must be registered.
+
+STEP-BY-STEP PROCESS:
+
+1. PROPERTY VERIFICATION:
+   - Verify title deed and chain of ownership (last 30 years minimum)
+   - Check encumbrance certificate from Sub-Registrar office
+   - Verify property tax receipts are current
+   - Check approved building plan and occupancy certificate
+   - For agricultural land: verify land records (7/12 extract or equivalent)
+
+2. AGREEMENT PREPARATION:
+   - Draft sale deed/agreement through a lawyer
+   - Include: seller/buyer details, property description, survey number, area, boundaries, price
+   - Two witnesses required
+   - Stamp duty payment on stamp paper (varies by state, typically 5-7% of property value)
+
+3. STAMP DUTY PAYMENT:
+   - Pay before or on the date of registration
+   - Payment modes: e-stamping (shcilestamp.com), physical stamp paper, or online via NGDRS
+   - Rates vary significantly by state and property type:
+
+   | State | Residential | Commercial |
+   |---|---|---|
+   | Maharashtra | 5% (Mumbai 6%) | 6% |
+   | Karnataka | 5% | 5% |
+   | Tamil Nadu | 7% | 7% |
+   | Delhi | 4-6% (based on gender) | 6% |
+   | UP | 7% | 7% |
+   | Rajasthan | 5-6% | 5-6% |
+
+   - Women buyers often get 1-2% concession
+   - Registration fee: 1% of property value (in addition to stamp duty)
+
+4. DOCUMENT SUBMISSION AT SUB-REGISTRAR:
+   - Book appointment online via NGDRS portal or state portal
+   - Both buyer and seller must be present (or Power of Attorney holder)
+   - Submit: Sale deed (original + copies), ID proofs, address proofs, property documents
+   - Biometric verification (Aadhaar-based in most states)
+   - Photographs taken at office
+   - Registered deed returned within 30 minutes to 7 days
+
+5. MUTATION IN REVENUE RECORDS:
+   - After registration, apply for mutation (name change in land records)
+   - Apply at local municipal corporation or Revenue department
+   - Online portals available in most states
+   - Fee: Rs 25-500
+   - Timeline: 30-90 days
+
+=== NGDRS — NATIONAL GENERIC DOCUMENT REGISTRATION SYSTEM ===
+
+The NGDRS (ngdrs.gov.in) is a centralized platform for property registration currently operational in multiple states.
+
+FEATURES:
+- Online appointment booking
+- Document submission and tracking
+- e-Stamping integration
+- e-KYC verification
+- Property valuation guidance
+- Registration status tracking
+- Digital signed registered document download
+
+STATES ON NGDRS (as of 2024):
+Tamil Nadu, Andhra Pradesh, Telangana, Rajasthan, Madhya Pradesh, Jharkhand, Goa, Tripura, Mizoram, Manipur, and others
+
+=== LAND RECORDS DIGITIZATION (DILRMP) ===
+
+The Digital India Land Records Modernization Programme aims to:
+1. Computerize all land records
+2. Survey/re-survey of land
+3. Registration of deeds and documents
+4. Integration of textual and spatial data (maps)
+
+HOW TO CHECK LAND RECORDS ONLINE:
+- Visit bhulekh portal of your state:
+  - UP: upbhulekh.gov.in
+  - Maharashtra: bhulekh.mahabhumi.gov.in
+  - Karnataka: landrecords.karnataka.gov.in
+  - Rajasthan: apnakhata.raj.nic.in
+  - MP: mpbhulekh.gov.in
+
+INFORMATION AVAILABLE:
+- Khasra/Khatauni number
+- Owner name and details
+- Land area and classification
+- Survey number and plot number
+- Mutation history
+- Court case status (if any)
+- Encumbrance details
+
+=== RERA — REAL ESTATE REGULATORY AUTHORITY ===
+
+The Real Estate (Regulation and Development) Act, 2016 (RERA) protects homebuyers.
+
+KEY PROVISIONS:
+1. All projects above 500 sq.m or 8 apartments must be registered with RERA
+2. Builder must deposit 70% of buyer's money in separate escrow account
+3. No pre-launch sales allowed — only after RERA registration
+4. Carpet area must be clearly mentioned (not super built-up area)
+5. Builder must deliver possession within timeline promised
+6. If delayed, builder must pay interest to buyer at SBI prime + 2%
+7. Structural defect warranty: 5 years from possession
+8. Builder cannot change building plan without 2/3rd buyer consent
+
+HOW TO FILE RERA COMPLAINT:
+1. Visit your state's RERA portal (e.g., rera.maharashtra.gov.in)
+2. File complaint online against registered project
+3. Fee: Rs 1,000 (individual) to Rs 5,000 (association)
+4. Adjudicating officer must decide within 60 days
+5. Appeal to RERA Appellate Tribunal within 60 days
+6. Further appeal to High Court within 60 days
+
+DOCUMENTS NEEDED FOR RERA COMPLAINT:
+- Builder-buyer agreement
+- Payment receipts
+- Correspondence with builder
+- RERA registration number of project
+- Allotment letter
+- Any advertisement/brochure of the project
+
+=== HOME LOAN GUIDELINES ===
+
+RBI GUIDELINES FOR HOME LOANS:
+- LTV Ratio: Up to 75-90% depending on loan amount
+  - Up to Rs 30 lakh: Max 90% LTV
+  - Rs 30-75 lakh: Max 80% LTV
+  - Above Rs 75 lakh: Max 75% LTV
+- Prepayment: No prepayment charges for floating rate loans (as per RBI)
+- Processing fee: 0.25-1% of loan amount
+- Age limit: Typically 18-65 years
+- Maximum tenure: 30 years
+
+PRADHAN MANTRI AWAS YOJANA (PMAY):
+- Subsidy on home loan interest for first-time homebuyers
+- EWS/LIG (income up to Rs 6 lakh): 6.5% subsidy on Rs 6 lakh loan for 20 years
+- MIG-I (Rs 6-12 lakh): 4% subsidy on Rs 9 lakh loan for 20 years
+- MIG-II (Rs 12-18 lakh): 3% subsidy on Rs 12 lakh loan for 20 years
+- Apply through banks/HFCs
+- Check eligibility at pmaymis.gov.in
+
+HOME LOAN GRIEVANCE:
+- Contact bank's nodal officer first
+- If unresolved: File complaint at NHB (nhb.org.in)
+- Alternatively: RBI Ombudsman (cms.rbi.org.in)
+
+=== PROPERTY TAX ===
+
+- Payable annually to local municipal corporation
+- Based on property type, area, location, usage
+- Typically 0.5-2% of property value per year
+- Payment: Online via municipal corporation portal
+- Exemptions available for: Self-occupied residential property (in some states), agricultural land, religious/charitable properties
+
+=== IMPORTANT DOCUMENTS FOR PROPERTY TRANSACTIONS ===
+
+1. Sale Deed (registered)
+2. Title Deed / Mother Deed (proves ownership chain)
+3. Encumbrance Certificate (proves no loans/legal issues)
+4. Property Tax Receipts (proves taxes are paid)
+5. Approved Building Plan
+6. Occupancy Certificate / Completion Certificate
+7. Society/Association NOC (for resale in apartments)
+8. Power of Attorney (if applicable)
+9. Khata Certificate (in some states)
+10. 7/12 Extract (for agricultural/revenue land)
+
+=== IMPORTANT CONTACTS ===
+
+- NGDRS Portal: ngdrs.gov.in
+- DILRMP: dilrmp.gov.in
+- RERA (Central): rera.gov.in
+- NHB Complaints: nhb.org.in
+- PMAY: pmaymis.gov.in
+- Revenue courts of your state for land dispute resolution

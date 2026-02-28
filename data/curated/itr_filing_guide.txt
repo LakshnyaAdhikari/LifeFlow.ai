@@ -1,0 +1,147 @@
+INCOME TAX RETURN FILING IN INDIA — COMPREHENSIVE GUIDE
+Domain: Taxation
+Authority: Income Tax Department / CBDT
+Source: Compiled from Income Tax Act 1961, CBDT Notifications, Income Tax Portal Help
+
+=== WHICH ITR FORM TO FILE ===
+
+| ITR Form | Who Should File |
+|---|---|
+| ITR-1 (Sahaj) | Salaried individuals with income up to Rs 50 lakh. Sources: Salary, one house property, other income (interest, dividend), agricultural income up to Rs 5,000 |
+| ITR-2 | Individuals/HUFs with income from capital gains, more than one house property, foreign assets, income above Rs 50 lakh, or not eligible for ITR-1 |
+| ITR-3 | Individuals/HUFs having income from business or profession |
+| ITR-4 (Sugam) | Individuals/HUFs/Firms with presumptive income under Sections 44AD/44ADA/44AE. Turnover up to Rs 3 crore |
+| ITR-5 | Partnership firms, LLPs, AOPs, BOIs |
+| ITR-6 | Companies (other than those claiming Section 11 exemption) |
+| ITR-7 | Trusts, political parties, universities, scientific research institutions |
+
+=== HOW TO FILE ITR ONLINE ===
+
+STEP 1: Login to incometax.gov.in with PAN and password
+STEP 2: Go to e-File → Income Tax Returns → File Income Tax Return
+STEP 3: Select Assessment Year (AY 2025-26 for FY 2024-25)
+STEP 4: Choose filing type: Original / Revised
+STEP 5: Choose ITR form (the portal auto-suggests based on your profile)
+STEP 6: Fill or import pre-filled data (Form 16, AIS/TIS, 26AS)
+STEP 7: Verify all income details, deductions, and tax computations
+STEP 8: Pay any remaining tax due (via challan 280)
+STEP 9: Preview and submit the return
+STEP 10: e-Verify within 30 days (Aadhaar OTP / Net banking / DSC)
+
+=== KEY DEADLINES ===
+
+| Category | Deadline |
+|---|---|
+| Individual (no audit) | July 31 of Assessment Year |
+| Business (audit required) | October 31 of Assessment Year |
+| Transfer pricing cases | November 30 of Assessment Year |
+| Revised return | December 31 of Assessment Year |
+| Belated return | December 31 of Assessment Year (with penalty) |
+
+LATE FILING PENALTY:
+- Before December 31: Rs 5,000
+- After December 31: Rs 10,000
+- If income below Rs 5 lakh: Maximum Rs 1,000
+
+=== TAX DEDUCTED AT SOURCE (TDS) ===
+
+TDS is tax deducted by the payer before making payment. Key TDS rates:
+
+| Section | Payment Type | Threshold | TDS Rate |
+|---|---|---|---|
+| 192 | Salary | As per slabs | Slab rate |
+| 194A | Interest (bank FD) | Rs 40,000/year | 10% |
+| 194B | Lottery/game winnings | Rs 10,000 | 30% |
+| 194C | Contractor payments | Rs 30,000 (single) / Rs 1 lakh (aggregate) | 1-2% |
+| 194H | Commission/Brokerage | Rs 15,000 | 5% |
+| 194I | Rent | Rs 2,40,000/year | 10% (land/building) |
+| 194J | Professional fees | Rs 30,000 | 10% |
+| 194N | Cash withdrawal | Rs 1 crore | 2% |
+
+HOW TO CHECK TDS:
+1. Login to incometax.gov.in
+2. Go to e-File → View Filed Returns → View 26AS
+3. 26AS shows all TDS deducted against your PAN
+4. AIS (Annual Information Statement) shows comprehensive financial data
+5. TIS (Taxpayer Information Summary) shows derived information
+
+TDS REFUND:
+- If TDS deducted exceeds actual tax liability, file ITR to claim refund
+- Refund processed within 20-45 days of ITR processing
+- Interest on refund: 6% per annum (for delay beyond 1 month)
+
+=== INCOME TAX REFUND PROCESS ===
+
+HOW TO CHECK REFUND STATUS:
+1. Login to incometax.gov.in → e-File → Income Tax Returns → View Filed Returns
+2. Or visit: tin.tin.nsdl.com/oltas/refund-status
+3. Enter PAN and select Assessment Year
+4. Refund status: Sent to bank / Adjusted against demand / Under process
+
+COMMON REASONS FOR REFUND DELAY:
+1. Bank account not validated/pre-validated on income tax portal
+2. Mismatch between ITR and 26AS/AIS data
+3. ITR not e-verified
+4. Defective return (needs correction)
+5. Outstanding tax demand adjusted against refund
+
+HOW TO FIX:
+- Pre-validate bank account on incometax.gov.in → Profile → My Bank Accounts
+- Ensure PAN is linked to bank account
+- File revised return if errors found
+
+=== RESPONDING TO INCOME TAX NOTICES ===
+
+COMMON NOTICES AND HOW TO RESPOND:
+
+SECTION 139(9) — DEFECTIVE RETURN:
+- Respond within 15 days
+- Correct the defects and re-submit
+- Login → e-File → e-Proceedings → Find and respond
+
+SECTION 143(1) — INTIMATION:
+- Processed return summary. Check if there's demand or refund
+- If demand: Verify against your records, pay or file objection
+- Response deadline: 30 days
+
+SECTION 148 — REASSESSMENT:
+- Income escaped assessment. Serious notice
+- Must file return of income in response
+- Get professional help (CA)
+- Response deadline: 30 days (extendable)
+
+SECTION 245 — ADJUSTMENT AGAINST REFUND:
+- Department adjusting refund against past demand
+- If you disagree: File response within 30 days
+
+=== GST BASICS ===
+
+GST REGISTRATION:
+- Mandatory if turnover exceeds Rs 40 lakh (goods) / Rs 20 lakh (services)
+- Apply at gst.gov.in using Form GST REG-01
+- PAN-based registration
+- Typically issued within 7 working days
+- GSTIN: 15-digit unique identification number
+
+GST RETURN FILING:
+| Return | Due Date | Who |
+|---|---|---|
+| GSTR-1 (Outward supplies) | 11th of next month | All registered |
+| GSTR-3B (Summary return) | 20th of next month | All registered |
+| GSTR-9 (Annual return) | December 31 | Turnover > Rs 2 crore |
+| GSTR-4 (Composition) | April 30 | Composition dealers |
+
+GST REFUND:
+- Apply via gst.gov.in → Refunds → Application for Refund
+- Types: Excess payment, export refund, inverted duty structure
+- Processed within 60 days
+
+=== IMPORTANT CONTACTS ===
+
+- Income Tax Portal: incometax.gov.in
+- TRACES (TDS): tdscpc.gov.in
+- e-Filing helpdesk: 1800-103-0025
+- CPC helpline: 1800-425-2229
+- GST Portal: gst.gov.in
+- GST Helpdesk: 1800-103-4786
+- Aaykar Sampark Kendra: 1800-180-1961
