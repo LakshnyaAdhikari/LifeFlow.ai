@@ -1,36 +1,35 @@
 ## LifeFlow.ai Knowledge Sources
 ## Strategy: Depth > Breadth. Authority-dense PDFs first, HTML pages second.
 ## PDF chunks: 1500/250. HTML chunks: 1000/200. Authority weights applied per source.
-## Phase A MVP: 8 domains. Phase B/C: welfare/legal (future).
+## PDFs downloaded by scripts/download_pdfs.py → ingested from manifest.json
+## DO NOT add direct PDF URLs here — remote PDFs fail with 403 (Akamai WAF)
+## Phase A MVP: 8 domains
 
 domains:
 
   # ═══════════════════════════════════════════════════════
   # DOMAIN 1: Identity Documents
-  # PDFs: Aadhaar Regulations (amendment), Passport handbook
-  # HTML: UIDAI update pages, Passport FAQ, ECI, Parivahan
   # ═══════════════════════════════════════════════════════
   - name: "Identity Documents"
     sources:
       - authority: "UIDAI"
         documents:
-          - title: "Aadhaar Enrolment and Update Regulations 2016 (Amendment 2024)"
-            url: "https://uidai.gov.in/images/resource/UIDAI_Aadhaar_Enrolment_Update_Regulation_2016_amended_upto_25_Jan_2024.pdf"
-            type: "pdf"
-            doc_type: "regulation"
-          - title: "Update Aadhaar Details (Online and Offline)"
+          - title: "Update Aadhaar Details - Online"
             url: "https://uidai.gov.in/en/my-aadhaar/update-aadhaar.html"
             type: "html"
-          - title: "Virtual ID and Aadhaar Authentication Overview"
+          - title: "Virtual ID and Aadhaar Authentication"
             url: "https://uidai.gov.in/en/my-aadhaar/virtual-id-overview.html"
             type: "html"
           - title: "Aadhaar FAQ - Grievances and Support"
             url: "https://uidai.gov.in/en/contact-support/have-any-question.html"
             type: "html"
+          - title: "Aadhaar Enrolment - How to Enrol"
+            url: "https://uidai.gov.in/en/my-aadhaar/about-your-aadhaar.html"
+            type: "html"
 
       - authority: "Passport Seva"
         documents:
-          - title: "Passport Application FAQs"
+          - title: "Passport Application - Complete FAQ"
             url: "https://www.passportindia.gov.in/AppOnlineProject/online/faqMainPage"
             type: "html"
           - title: "Tatkal Passport Scheme"
@@ -39,54 +38,94 @@ domains:
           - title: "Passport Reissue and Renewal"
             url: "https://www.passportindia.gov.in/AppOnlineProject/online/renewalOfPassport"
             type: "html"
+          - title: "Passport Services for Minors"
+            url: "https://www.passportindia.gov.in/AppOnlineProject/online/minorServiceTypes"
+            type: "html"
 
       - authority: "Income Tax Department"
         documents:
-          - title: "PAN Services Guide"
+          - title: "PAN Services - How to Apply, Correct, Update"
             url: "https://incometaxindia.gov.in/Pages/pan.aspx"
             type: "html"
-          - title: "How to Link Aadhaar with PAN"
+          - title: "Link Aadhaar with PAN - Step by Step"
             url: "https://www.incometax.gov.in/iec/foportal/help/how-to-link-aadhaar"
             type: "html"
 
       - authority: "Election Commission of India"
         documents:
-          - title: "Voter ID - National Voters Service Portal"
+          - title: "Voter Registration and Voter ID Portal"
             url: "https://voters.eci.gov.in/"
             type: "html"
 
       - authority: "Parivahan"
         documents:
-          - title: "Driving Licence - All Services"
+          - title: "Driving Licence - All Services Overview"
             url: "https://parivahan.gov.in/parivahan/en/content/driving-licence-dl"
+            type: "html"
+          - title: "Learner Licence - How to Apply"
+            url: "https://parivahan.gov.in/parivahan/en/content/learners-licence"
+            type: "html"
+      - authority: "Identity (Wikipedia)"
+        documents:
+          - title: "Aadhaar System and History"
+            url: "https://en.wikipedia.org/wiki/Aadhaar"
+            type: "html"
+          - title: "Permanent Account Number (PAN)"
+            url: "https://en.wikipedia.org/wiki/Permanent_account_number"
+            type: "html"
+          - title: "Indian Passport"
+            url: "https://en.wikipedia.org/wiki/Indian_passport"
             type: "html"
 
 
   # ═══════════════════════════════════════════════════════
   # DOMAIN 2: Insurance
-  # PDFs: IRDAI Master Circulars 2024 (very high value - 60-120 chunks each)
+  # PDFs ingested via manifest (download_pdfs.py)
   # ═══════════════════════════════════════════════════════
   - name: "Insurance"
     sources:
       - authority: "IRDAI"
         documents:
-          - title: "Master Circular on Protection of Policyholders Interests 2024"
-            url: "https://irdai.gov.in/documents/37343/1000497/Master+Circular+on+Protection+of+Policyholders%27+interests+2024.pdf/6e3ffa82-a0f1-e944-7edb-dce5e0ec8f79"
-            type: "pdf"
-            doc_type: "master_circular"
-            circular_number: "IRDAI/PP&GR/CIR/MISC/117/9/2024"
-          - title: "IRDAI Master Circular on Health Insurance 2024"
-            url: "https://irdai.gov.in/documents/37343/0/Master+Circular+on+Health+Insurance+Products.pdf/1b7c7a18-b7c3-7285-b42a-1b7a6e4d3a89"
-            type: "pdf"
-            doc_type: "master_circular"
-          - title: "Insurance Ombudsman - Complaint Filing Process"
-            url: "https://www.irdai.gov.in/admincms/cms/frmGeneral_Layout.aspx?page=PageNo234"
+          - title: "Insurance Ombudsman - How to Complain"
+            url: "https://irdai.gov.in/web/guest/consumer-education"
             type: "html"
-          - title: "IRDAI Bima Bharosa - Policyholder Portal"
+          - title: "IRDAI Bima Bharosa Consumer Portal"
             url: "https://bimabharosa.irdai.gov.in/"
             type: "html"
-          - title: "IRDAI Policyholder FAQs"
-            url: "https://www.irdai.gov.in/admincms/cms/frmGeneral_Layout.aspx?page=PageNo235"
+          - title: "IRDAI Consumer Grievance - FAQ"
+            url: "https://www.irdai.gov.in/web/guest/faqs"
+            type: "html"
+          - title: "Health Insurance - Claim Settlement"
+            url: "https://www.irdai.gov.in/web/guest/health-insurance"
+            type: "html"
+          - title: "Life Insurance - Policyholder Rights"
+            url: "https://www.irdai.gov.in/web/guest/life-insurance"
+            type: "html"
+          - title: "Motor Insurance - Third Party Claims"
+            url: "https://www.irdai.gov.in/web/guest/motor-insurance"
+            type: "html"
+          - title: "Bima Lokpal - Insurance Ombudsman Offices"
+            url: "https://www.ecoi.co.in/en/home"
+            type: "html"
+
+      - authority: "Government of India"
+        documents:
+          - title: "Policyholder.gov.in - Rights and Entitlements"
+            url: "https://policyholder.gov.in/"
+            type: "html"
+      - authority: "Insurance (Wikipedia)"
+        documents:
+          - title: "Insurance Regulatory and Development Authority of India"
+            url: "https://en.wikipedia.org/wiki/Insurance_Regulatory_and_Development_Authority"
+            type: "html"
+          - title: "Life Insurance Corporation (LIC)"
+            url: "https://en.wikipedia.org/wiki/Life_Insurance_Corporation"
+            type: "html"
+          - title: "Health insurance in India"
+            url: "https://en.wikipedia.org/wiki/Health_insurance_in_India"
+            type: "html"
+          - title: "Motor vehicle insurance in India"
+            url: "https://en.wikipedia.org/wiki/Vehicle_insurance"
             type: "html"
 
 
@@ -97,83 +136,108 @@ domains:
     sources:
       - authority: "Government of India"
         documents:
-          - title: "Consumer Protection Act 2019 - Ministry of Consumer Affairs"
-            url: "https://consumeraffairs.nic.in/sites/default/files/CP%20Act%202019.pdf"
-            type: "pdf"
-            doc_type: "regulation"
-          - title: "National Consumer Helpline - How to File Complaint"
+          - title: "National Consumer Helpline - File Complaint"
             url: "https://consumerhelpline.gov.in/public/home.php"
             type: "html"
-          - title: "E-Daakhil - Online Consumer Forum"
+          - title: "E-Daakhil - Online Consumer Forum Portal"
             url: "https://edaakhil.nic.in/"
             type: "html"
+          - title: "Consumer Protection - Ministry Overview"
+            url: "https://consumeraffairs.gov.in/en"
+            type: "html"
+
+      - authority: "CCPA"
+        documents:
           - title: "CCPA - Central Consumer Protection Authority"
             url: "https://ccpa.nic.in/"
             type: "html"
-          - title: "NCDRC - National Consumer Disputes Redressal"
+          - title: "CCPA - Consumer Rights and Unfair Trade"
+            url: "https://ccpa.nic.in/consumer-rights"
+            type: "html"
+
+      - authority: "NCDRC"
+        documents:
+          - title: "NCDRC - File Consumer Complaint"
             url: "https://www.ncdrc.nic.in/"
+            type: "html"
+      - authority: "Consumer Protection (Wikipedia)"
+        documents:
+          - title: "Consumer Protection Act, 2019"
+            url: "https://en.wikipedia.org/wiki/Consumer_Protection_Act,_2019"
+            type: "html"
+          - title: "E-commerce in India"
+            url: "https://en.wikipedia.org/wiki/E-commerce_in_India"
+            type: "html"
+      - authority: "India Code"
+        documents:
+          - title: "The Consumer Protection Act, 2019"
+            url: "https://www.indiacode.nic.in/handle/123456789/15256?sam_handle=123456789/1362"
             type: "html"
 
 
   # ═══════════════════════════════════════════════════════
   # DOMAIN 4: Taxation
-  # PDFs: ITR-1 Sahaj Instructions, GST Registration User Manual
+  # PDF: ITR instructions via download_pdfs.py if working
+  # HTML: e-filing portal help section (Playwright-accessible)
   # ═══════════════════════════════════════════════════════
   - name: "Taxation"
     sources:
       - authority: "Income Tax Department"
         documents:
-          - title: "Instructions to ITR-1 Sahaj (AY 2024-25)"
-            url: "https://incometaxindia.gov.in/Forms/income-tax%20rules/103120000000007411.pdf"
-            type: "pdf"
-            doc_type: "form_instruction"
-          - title: "Instructions to ITR-2 (AY 2024-25)"
-            url: "https://incometaxindia.gov.in/Forms/income-tax%20rules/103120000000007412.pdf"
-            type: "pdf"
-            doc_type: "form_instruction"
-          - title: "How to File Return of Income - Online Guide"
+          - title: "How to File Income Tax Return Online"
             url: "https://www.incometax.gov.in/iec/foportal/help/how-to-file-return-of-income"
             type: "html"
-          - title: "Income Tax Refund Process"
+          - title: "Income Tax Refund - Status and Process"
             url: "https://www.incometax.gov.in/iec/foportal/help/individual/refund-1"
             type: "html"
           - title: "Responding to Income Tax Notices"
             url: "https://www.incometax.gov.in/iec/foportal/help/individual/notices-1"
             type: "html"
+          - title: "ITR-1 Sahaj - Who Should File"
+            url: "https://www.incometax.gov.in/iec/foportal/help/individual/itr-1"
+            type: "html"
+          - title: "Tax Deducted at Source - How TDS Works"
+            url: "https://www.incometax.gov.in/iec/foportal/help/individual/tds-1"
+            type: "html"
+          - title: "Income Tax FAQ - Common Questions"
+            url: "https://www.incometax.gov.in/iec/foportal/help/faq"
+            type: "html"
+          - title: "Income Tax Challan - Pay Online"
+            url: "https://www.incometax.gov.in/iec/foportal/help/individual/challan"
+            type: "html"
+          - title: "Budget 2024 Tax Changes Summary"
+            url: "https://incometaxindia.gov.in/Pages/budget.aspx"
+            type: "html"
 
       - authority: "CBIC"
         documents:
-          - title: "GST Registration - User Manual (CBIC Official)"
-            url: "https://tutorial.gst.gov.in/downloads/registration/GST%20Registration.pdf"
-            type: "pdf"
-            doc_type: "handbook"
-          - title: "GST Return Filing - User Manual"
-            url: "https://tutorial.gst.gov.in/downloads/registration/GST%20Return%20Filing.pdf"
-            type: "pdf"
-            doc_type: "handbook"
+          - title: "GST Registration - How to Register"
+            url: "https://www.gst.gov.in/help/helpmodules/registrationfaqnew"
+            type: "html"
+          - title: "GST Return Filing - GSTR-1 and GSTR-3B"
+            url: "https://www.gst.gov.in/help/helpmodules/returnsfaq"
+            type: "html"
+          - title: "GST - E-Invoice System"
+            url: "https://einvoice1.gst.gov.in/Others/FAQ"
+            type: "html"
+          - title: "GST Refund Process"
+            url: "https://www.gst.gov.in/help/helpmodules/refundfaq"
+            type: "html"
+          - title: "CBIC Central Excise and GST FAQ"
+            url: "https://cbic-gst.gov.in/gst-goods-services-rates.html"
+            type: "html"
 
 
   # ═══════════════════════════════════════════════════════
   # DOMAIN 5: Employment (EPFO)
-  # PDFs: EPFO Information Handbook (RTI), Form 31 instructions
+  # PDF: Composite Claim Form (downloaded via Playwright)
+  # HTML: EPFO portal pages
   # ═══════════════════════════════════════════════════════
   - name: "Employment"
     sources:
       - authority: "EPFO"
         documents:
-          - title: "EPFO Information Handbook (RTI Act 2005)"
-            url: "https://www.epfindia.gov.in/site_docs/PDFs/RTI_PDFs/InformationHandbook.pdf"
-            type: "pdf"
-            doc_type: "handbook"
-          - title: "Composite Claim Form (Aadhaar) - Instructions"
-            url: "https://www.epfindia.gov.in/site_docs/PDFs/Downloads_PDFs/Composite_Claim_Form_Aadhaar.pdf"
-            type: "pdf"
-            doc_type: "form_instruction"
-          - title: "Instructions for PF Advance (Form 31)"
-            url: "https://www.epfindia.gov.in/site_docs/PDFs/Downloads_PDFs/Form31_instruction.pdf"
-            type: "pdf"
-            doc_type: "form_instruction"
-          - title: "PF Withdrawal Online Process"
+          - title: "PF Withdrawal Online - Composite Claim"
             url: "https://www.epfindia.gov.in/site_en/Online_PF_Withdrawal.php"
             type: "html"
           - title: "UAN Activation and KYC Linking"
@@ -182,8 +246,17 @@ domains:
           - title: "EPFO Member FAQ"
             url: "https://www.epfindia.gov.in/site_en/FAQ.php"
             type: "html"
-          - title: "EPFIGMS - Grievance Filing Portal"
+          - title: "EPFIGMS - Register a Grievance"
             url: "https://epfigms.gov.in/"
+            type: "html"
+          - title: "Pension - EPS 1995 Benefits"
+            url: "https://www.epfindia.gov.in/site_en/Pension_EPS.php"
+            type: "html"
+          - title: "EPFO for Employers - Contribution and Compliance"
+            url: "https://www.epfindia.gov.in/site_en/For_Employers.php"
+            type: "html"
+          - title: "EPFO Transfer of PF Accounts"
+            url: "https://www.epfindia.gov.in/site_en/Transfer.php"
             type: "html"
 
       - authority: "Labour Ministry"
@@ -191,25 +264,52 @@ domains:
           - title: "Labour Laws - Acts and Rules"
             url: "https://labour.gov.in/acts-rules"
             type: "html"
+          - title: "ESIC - Employee State Insurance"
+            url: "https://www.esic.gov.in/for-employees"
+            type: "html"
+          - title: "Shram Suvidha - Labour Compliance Portal"
+            url: "https://shramsuvidha.gov.in/"
+            type: "html"
 
 
   # ═══════════════════════════════════════════════════════
   # DOMAIN 6: Property
-  # PDFs: DILRMP Programme PDF, state land record guides
   # ═══════════════════════════════════════════════════════
   - name: "Property"
     sources:
       - authority: "Dept of Land Resources"
         documents:
-          - title: "DILRMP Programme Guidelines"
-            url: "https://dolr.gov.in/sites/default/files/DILRMP%20Programme%20Guidelines.pdf"
-            type: "pdf"
-            doc_type: "regulation"
           - title: "Digital India Land Records Modernisation"
             url: "https://dilrmp.gov.in/"
             type: "html"
           - title: "NGDRS - Property Registration Portal"
             url: "https://ngdrs.gov.in/NGDRS/"
+            type: "html"
+
+      - authority: "NHB"
+        documents:
+          - title: "National Housing Bank - Home Loan Grievance"
+            url: "https://www.nhb.org.in/Complaint/Complaint.aspx"
+            type: "html"
+
+      - authority: "Government of India"
+        documents:
+          - title: "RERA - Real Estate Regulator"
+            url: "https://rera.gov.in/"
+            type: "html"
+          - title: "PMAY - Pradhan Mantri Awas Yojana"
+            url: "https://pmaymis.gov.in/"
+            type: "html"
+      - authority: "Property (Wikipedia)"
+        documents:
+          - title: "Real Estate (Regulation and Development) Act, 2016"
+            url: "https://en.wikipedia.org/wiki/Real_Estate_(Regulation_and_Development)_Act,_2016"
+            type: "html"
+          - title: "Stamp duty in India"
+            url: "https://en.wikipedia.org/wiki/Stamp_duty_in_India"
+            type: "html"
+          - title: "Property tax in India"
+            url: "https://en.wikipedia.org/wiki/Property_tax_in_India"
             type: "html"
 
 
@@ -232,30 +332,61 @@ domains:
           - title: "E-Challan - Traffic Fine Payment"
             url: "https://echallan.parivahan.gov.in/"
             type: "html"
+          - title: "Vehicle Fitness Certificate"
+            url: "https://parivahan.gov.in/parivahan/en/content/fitness-certificate"
+            type: "html"
+          - title: "Permit for Commercial Vehicles"
+            url: "https://parivahan.gov.in/parivahan/en/content/permit"
+            type: "html"
+      - authority: "Vehicle & Transport (Wikipedia)"
+        documents:
+          - title: "Motor Vehicles Act, 1988"
+            url: "https://en.wikipedia.org/wiki/Motor_Vehicles_Act,_1988"
+            type: "html"
+          - title: "Driving licence in India"
+            url: "https://en.wikipedia.org/wiki/Driving_licence_in_India"
+            type: "html"
+          - title: "Regional Transport Office (RTO)"
+            url: "https://en.wikipedia.org/wiki/Regional_Transport_Office"
+            type: "html"
+          - title: "Vehicle registration plates of India"
+            url: "https://en.wikipedia.org/wiki/Vehicle_registration_plates_of_India"
+            type: "html"
 
 
   # ═══════════════════════════════════════════════════════
   # DOMAIN 8: Banking & Finance
-  # PDFs: RBI Integrated Ombudsman Scheme 2021 (very high value)
+  # PDFs: RBI Ombudsman + KYC (both downloaded via manifest)
+  # HTML: RBI portal help pages
   # ═══════════════════════════════════════════════════════
   - name: "Banking & Finance"
     sources:
       - authority: "RBI"
         documents:
-          - title: "Reserve Bank Integrated Ombudsman Scheme 2021"
-            url: "https://rbidocs.rbi.org.in/rdocs/content/pdfs/RBIOS2021_121121.pdf"
-            type: "pdf"
-            doc_type: "regulation"
-          - title: "RBI Master Direction - KYC 2016 (Updated 2024)"
-            url: "https://rbidocs.rbi.org.in/rdocs/notification/PDFs/NOTI185DF992383D4D2497B906E40E5C6A3B09.PDF"
-            type: "pdf"
-            doc_type: "regulation"
-          - title: "Banking Ombudsman Complaint Filing"
+          - title: "Banking Ombudsman - File a Complaint"
             url: "https://bankingombudsman.rbi.org.in/"
             type: "html"
-          - title: "SACHET - Financial Fraud Alert"
+          - title: "SACHET - Report Financial Fraud"
             url: "https://sachet.rbi.org.in/"
             type: "html"
           - title: "RBI Consumer Education - Know Your Rights"
             url: "https://www.rbi.org.in/commonperson/English/Scripts/Notification.aspx?Id=1873"
+            type: "html"
+          - title: "RBI Regulated Entities - Complaint Portal"
+            url: "https://cms.rbi.org.in/"
+            type: "html"
+          - title: "RBI FAQ - Banking Ombudsman Scheme"
+            url: "https://www.rbi.org.in/Scripts/FAQView.aspx?Id=80"
+            type: "html"
+          - title: "RBI Grievance Redressal Framework"
+            url: "https://www.rbi.org.in/Scripts/BS_ViewMasterCirculardetails.aspx?id=10095"
+            type: "html"
+
+      - authority: "Government of India"
+        documents:
+          - title: "Jan Dhan Yojana - Financial Inclusion"
+            url: "https://pmjdy.gov.in/about"
+            type: "html"
+          - title: "Atal Pension Yojana"
+            url: "https://npscra.nsdl.co.in/scheme-details.php"
             type: "html"

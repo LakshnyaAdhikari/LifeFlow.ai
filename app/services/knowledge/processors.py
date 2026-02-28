@@ -204,8 +204,14 @@ class HTMLProcessor(DocumentProcessor):
         }
 
         try:
-            # Playwright returns plain text; detect via content_type flag
-            if "source=playwright" in content_type or "text/plain" in content_type:
+            # Check source_type or content_type for plain text
+            is_plain_text = (
+                enriched_metadata.get("source_type") == "txt" or
+                "source=playwright" in content_type or
+                "text/plain" in content_type
+            )
+            
+            if is_plain_text:
                 text = raw_content.decode("utf-8", errors="ignore")
                 cleaned_text = self._clean_plain_text(text)
                 sections = []
@@ -228,7 +234,9 @@ class HTMLProcessor(DocumentProcessor):
                 cleaned_text = self._clean_html_text(raw_text)
                 sections = self._extract_sections(soup)
 
-            enriched_metadata["source_type"] = "html"
+            if not is_plain_text:
+                enriched_metadata["source_type"] = "html"
+            
             logger.info(f"[HTMLProcessor] {len(cleaned_text)} chars, '{title}'")
 
             return ProcessedDocument(
@@ -248,9 +256,17 @@ class HTMLProcessor(DocumentProcessor):
         return "\n".join(lines).strip()
 
     def _clean_plain_text(self, text: str) -> str:
-        lines = [line.strip() for line in text.split("\n")]
-        lines = [line for line in lines if line and len(line) > 2]
-        # Remove duplicate consecutive lines (common in scraped content)
+        # Preserve paragraphs by normalizing multiple newlines to exactly two
+        text = text.replace("\r\n", "\n")
+        text = re.sub(r'\n{3,}', '\n\n', text)
+        lines = []
+        for line in text.split("\n"):
+            line = line.strip()
+            # Keep empty lines (paragraph breaks) or lines with content
+            if not line or len(line) > 2:
+                lines.append(line)
+        
+        # Remove duplicate consecutive lines
         deduped = []
         for line in lines:
             if not deduped or line != deduped[-1]:
@@ -287,6 +303,7 @@ class TextChunker:
         "pdf":  {"chunk_size": 1500, "overlap": 250},
         "html": {"chunk_size": 1000, "overlap": 200},
         "text": {"chunk_size": 1000, "overlap": 200},
+        "txt":  {"chunk_size": 1200, "overlap": 200},  # curated guides — denser than HTML
     }
 
     def __init__(
@@ -325,6 +342,26 @@ class TextChunker:
             para = para.strip()
             if not para:
                 continue
+
+            # If a single paragraph is larger than chunk_size, we need to split it
+            if len(para) > self.chunk_size:
+                # Force split by rough sentence boundaries (or just arbitrary length)
+                words = para.split(" ")
+                sub_para = ""
+                for word in words:
+                    if len(sub_para) + len(word) + 1 > self.chunk_size:
+                        if len(current_chunk) + len(sub_para) > self.chunk_size and len(current_chunk) >= self.min_chunk_size:
+                            chunk_meta = {**metadata, "chunk_index": len(chunks), "authority_weight": authority_weight}
+                            chunks.append({"content": current_chunk.strip(), "metadata": chunk_meta})
+                            overlap_text = current_chunk[-self.chunk_overlap:] if self.chunk_overlap > 0 else ""
+                            current_chunk = (overlap_text + " " + sub_para).strip()
+                        else:
+                            current_chunk = (current_chunk + " " + sub_para).strip() if current_chunk else sub_para
+                        sub_para = word
+                    else:
+                        sub_para = (sub_para + " " + word).strip() if sub_para else word
+                
+                para = sub_para # Leftover to flow into normal logic
 
             if len(current_chunk) + len(para) > self.chunk_size and len(current_chunk) >= self.min_chunk_size:
                 chunk_meta = {**metadata, "chunk_index": len(chunks), "authority_weight": authority_weight}
@@ -375,6 +412,7 @@ def get_processor(source_type: str) -> DocumentProcessor:
         "pdf":  PDFProcessor(),
         "html": HTMLProcessor(),
         "text": HTMLProcessor(),  # plain text also goes through HTMLProcessor
+        "txt":  HTMLProcessor(),  # curated .txt files — treated as plain text
     }
     processor = processors.get(source_type.lower())
     if not processor:

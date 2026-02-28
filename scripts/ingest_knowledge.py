@@ -149,6 +149,83 @@ async def ingest_from_manifest(pipeline: IngestionPipeline, manifest_path: str =
     return success, failed
 
 
+CURATED_FILE_MAP = {
+    "consumer_protection_guide.txt": {
+        "domain": "Consumer Protection",
+        "authority": "Government of India",
+        "title": "Consumer Protection in India — Comprehensive Guide",
+    },
+    "vehicle_transport_guide.txt": {
+        "domain": "Vehicle & Transport",
+        "authority": "Parivahan",
+        "title": "Vehicle and Transport Services — Comprehensive Guide",
+    },
+    "property_registration_guide.txt": {
+        "domain": "Property",
+        "authority": "Dept of Land Resources",
+        "title": "Property Registration and Land Records — Comprehensive Guide",
+    },
+    "insurance_policyholder_guide.txt": {
+        "domain": "Insurance",
+        "authority": "IRDAI",
+        "title": "Insurance Policyholder Rights and Claims — Comprehensive Guide",
+    },
+    "itr_filing_guide.txt": {
+        "domain": "Taxation",
+        "authority": "Income Tax Department",
+        "title": "Income Tax Return Filing — Comprehensive Guide",
+    },
+}
+
+
+async def ingest_from_curated(pipeline: IngestionPipeline, curated_dir: str = "data/curated"):
+    """Ingest curated .txt knowledge files from data/curated/ directory."""
+    curated_path = Path(curated_dir)
+    if not curated_path.exists():
+        print(f"\n[CURATED] Directory not found: {curated_dir}")
+        return 0, 0
+
+    txt_files = list(curated_path.glob("*.txt"))
+    if not txt_files:
+        print(f"\n[CURATED] No .txt files in {curated_dir}")
+        return 0, 0
+
+    success = 0
+    failed = 0
+    print(f"\n[CURATED] Found {len(txt_files)} curated text files")
+
+    for txt_file in txt_files:
+        meta = CURATED_FILE_MAP.get(txt_file.name, {})
+        domain = meta.get("domain", "General")
+        authority = meta.get("authority", "Government of India")
+        title = meta.get("title", txt_file.stem.replace("_", " ").title())
+
+        file_url = "file:///" + str(txt_file.resolve()).replace("\\", "/")
+        print(f"  [CURATED] {title[:55]}...", end="", flush=True)
+
+        try:
+            doc = await pipeline.ingest_document(
+                url=file_url,
+                title=title,
+                authority=authority,
+                domain_name=domain,
+                source_type="txt",
+                metadata={
+                    "doc_type": "curated_guide",
+                    "local_path": str(txt_file),
+                    "source": "curated",
+                }
+            )
+            success += 1
+            print(f" [OK] (ID: {doc.id})")
+        except Exception as e:
+            failed += 1
+            print(f" [FAIL] {str(e)[:80]}")
+            logger.error(f"Failed to ingest curated file {txt_file.name}: {e}")
+
+    return success, failed
+
+
 async def ingest_knowledge_base():
     db = SessionLocal()
     pipeline = IngestionPipeline(db)
@@ -169,6 +246,12 @@ async def ingest_knowledge_base():
         # Phase 2: Locally cached PDFs from manifest
         print("\n[PHASE 2] Local PDF Cache (data/pdfs/manifest.json)")
         s, f = await ingest_from_manifest(pipeline)
+        total_success += s
+        total_failed += f
+
+        # Phase 3: Curated text files from data/curated/
+        print("\n[PHASE 3] Curated Knowledge Files (data/curated/)")
+        s, f = await ingest_from_curated(pipeline)
         total_success += s
         total_failed += f
 

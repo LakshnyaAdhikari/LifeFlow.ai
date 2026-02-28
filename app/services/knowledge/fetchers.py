@@ -431,10 +431,20 @@ class LocalFileFetcher(DocumentFetcher):
         content = path.read_bytes()
         logger.info(f"[LocalFileFetcher] Read {len(content) // 1024}KB from {path.name}")
 
+        # Detect content type based on file extension
+        ext = path.suffix.lower()
+        content_type_map = {
+            ".pdf": "application/pdf",
+            ".txt": "text/plain; charset=utf-8",
+            ".html": "text/html",
+            ".htm": "text/html",
+        }
+        content_type = content_type_map.get(ext, "application/octet-stream")
+
         return FetchedDocument(
             url=url,
             content=content,
-            content_type="application/pdf",
+            content_type=content_type,
             title=title,
             source_authority=self.authority,
             domain=self.domain,
