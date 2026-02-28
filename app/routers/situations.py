@@ -235,6 +235,7 @@ async def get_situation(
                 "status": situation.status,
                 "priority": situation.priority,
                 "created_at": situation.created_at.isoformat(),
+                "updated_at": situation.updated_at.isoformat() if situation.updated_at else None,
                 "last_interaction": situation.last_interaction.isoformat(),
                 "clarification_questions": situation.clarification_questions or [],
                 "clarification_answers": situation.clarification_answers or []

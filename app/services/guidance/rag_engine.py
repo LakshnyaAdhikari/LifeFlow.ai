@@ -13,7 +13,6 @@ from app.services.knowledge.vector_db import get_vector_db, SearchResult
 from app.services.llm.client import get_llm_client
 from app.services.safety.legal_filter import SafetyFilter, GUIDANCE_SYSTEM_PROMPT
 from app.services.confidence.triangulated import TriangulatedConfidence, ConfidenceBasedResponseStrategy
-from app.services.confidence.triangulated import TriangulatedConfidence, ConfidenceBasedResponseStrategy
 from app.models.knowledge import UserQuery, GuidanceSession
 from app.models.situation import UserSituation
 
@@ -85,6 +84,11 @@ class GuidanceEngine:
         logger.info(f"Generating guidance for query: {refined_query[:100]}...")
         
         context = context or {}
+        if clarification_answers:
+            context = {
+                **context,
+                "clarification_answers": clarification_answers
+            }
         
         try:
             # 1. Log query (Use refined query to capture full context)
@@ -129,7 +133,7 @@ class GuidanceEngine:
             s_start = time.time()
             logger.info("DEBUG: Step 5 - Calling LLM for suggestions...")
             raw_guidance = await self._generate_suggestions(
-                query=query,
+                query=refined_query,
                 domain=domain,
                 knowledge_context=knowledge_context,
                 user_context=context
@@ -151,7 +155,7 @@ class GuidanceEngine:
                 domain=domain,
                 context={
                     "retrieved_docs": len(search_results),
-                    "query_length": len(query),
+                    "query_length": len(refined_query),
                     **context
                 }
             )
@@ -160,6 +164,9 @@ class GuidanceEngine:
             final_guidance = self.response_strategy.apply_strategy(
                 filtered_guidance,
                 confidence
+            )
+            final_guidance["suggestions"] = self._normalize_and_rank_suggestions(
+                final_guidance.get("suggestions", [])
             )
             
             # 10. Create guidance session
@@ -204,6 +211,47 @@ class GuidanceEngine:
         except Exception as e:
             logger.error(f"Failed to generate guidance: {e}")
             raise
+
+    def _normalize_urgency(self, urgency: str) -> str:
+        """Normalize urgency values from LLM output into high/medium/low."""
+        if not urgency:
+            return "medium"
+
+        value = urgency.strip().lower()
+
+        if value in {"high", "critical", "urgent", "now", "immediate"}:
+            return "high"
+        if value in {"low", "optional", "later", "can_wait", "can wait"}:
+            return "low"
+        return "medium"
+
+    def _normalize_and_rank_suggestions(self, suggestions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Apply deterministic ordering so UI doesn't feel random:
+        1) high > medium > low urgency
+        2) non-skippable before skippable
+        """
+        urgency_rank = {"high": 0, "medium": 1, "low": 2}
+        normalized: List[Dict[str, Any]] = []
+
+        for suggestion in suggestions:
+            if not isinstance(suggestion, dict):
+                continue
+
+            normalized_item = {
+                **suggestion,
+                "urgency": self._normalize_urgency(suggestion.get("urgency", "medium")),
+                "can_skip": bool(suggestion.get("can_skip", False))
+            }
+            normalized.append(normalized_item)
+
+        normalized.sort(
+            key=lambda s: (
+                urgency_rank.get(s.get("urgency", "medium"), 1),
+                1 if s.get("can_skip", False) else 0
+            )
+        )
+        return normalized
     
     def _build_knowledge_context(self, search_results: List[SearchResult]) -> str:
         """Build context string from search results"""

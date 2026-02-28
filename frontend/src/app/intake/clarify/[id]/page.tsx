@@ -94,6 +94,8 @@ export default function ClarifyPage() {
             });
 
             if (res.ok) {
+                const guidanceData = await res.json();
+                sessionStorage.setItem(`guidance:${situation.id}`, JSON.stringify(guidanceData));
                 // Success! Redirect to dashboard
                 router.push(`/situation/${situation.id}`);
             } else {
