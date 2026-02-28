@@ -58,7 +58,7 @@ export default function Home() {
     }
   };
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, shouldSaveToHistory: boolean = true) => {
     if (!query.trim()) return;
     const token = localStorage.getItem("access_token");
 
@@ -82,8 +82,10 @@ export default function Home() {
         const data = await res.json();
         console.log("✅ Response data:", data);
         
-        // Save search to history
-        await saveSearchToHistory(query, data.domain || "General");
+        // Save search to history only if it's a new search (not replayed from history)
+        if (shouldSaveToHistory) {
+          await saveSearchToHistory(query, data.domain || "General");
+        }
         
         if (data.situation_id) {
           // Redirect directly to situation guidance page (skip clarification flow)
@@ -108,7 +110,8 @@ export default function Home() {
     const searchQuery = searchParams.get("search");
     if (searchQuery) {
       console.log("📌 Auto-searching from search history:", searchQuery);
-      handleSearch(decodeURIComponent(searchQuery));
+      // Pass false to prevent saving the same search again to history
+      handleSearch(decodeURIComponent(searchQuery), false);
     }
   }, [searchParams]);
 
