@@ -93,7 +93,7 @@ export default function ChangePassword() {
                 <p className="text-muted-foreground">Secure your account with a new password</p>
             </div>
 
-            <div className="max-w-md bg-card border border-border rounded-2xl p-8 shadow-sm">
+            <div className="w-full max-w-2xl mx-auto bg-card border border-border rounded-2xl p-8 shadow-sm">
                 {/* Step Indicator */}
                 <div className="flex justify-between mb-8">
                     {["phone", "otp", "password"].map((s, i) => (
