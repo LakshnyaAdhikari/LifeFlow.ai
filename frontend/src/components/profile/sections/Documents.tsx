@@ -2,7 +2,7 @@
 
 import { 
     Upload, FileText, Download, Trash2, Plus, File,
-    CreditCard, Award, Ticket, Heart, BookOpen, Car, Home, Shield
+    CreditCard, Award, Ticket, Heart, BookOpen, Car, Home, Shield, Camera, X
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -32,6 +32,13 @@ export default function Documents() {
     const [loading, setLoading] = useState(true);
     const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
     const fileInputRefs = useRef<Record<string, HTMLInputElement>>({});
+    const cameraInputRefs = useRef<Record<string, HTMLInputElement>>({});
+    const [cameraActive, setCameraActive] = useState<string | null>(null);
+    const [showCameraModal, setShowCameraModal] = useState(false);
+    const [activeCategoryForCamera, setActiveCategoryForCamera] = useState<string | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
 
     useEffect(() => {
         // TODO: Fetch documents from API
@@ -82,6 +89,30 @@ export default function Documents() {
         }
     };
 
+    const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>, categoryId: string) => {
+        const files = e.target.files;
+        if (files && files[0]) {
+            const file = files[0];
+            const newDoc: DocumentItem = {
+                id: `${categoryId}_${Date.now()}`,
+                category: categoryId,
+                fileName: `Capture_${new Date().getTime()}.jpg`,
+                uploadDate: new Date().toLocaleDateString(),
+                fileSize: (file.size / 1024).toFixed(2) + " KB",
+            };
+
+            const updatedDocuments = [...documents, newDoc];
+            setDocuments(updatedDocuments);
+            
+            // Save to localStorage for persistence
+            localStorage.setItem("user_documents", JSON.stringify(updatedDocuments));
+            
+            console.log("Camera Captured:", newDoc);
+            setCameraActive(null);
+            // TODO: Upload to API backend
+        }
+    };
+
     const handleDelete = (id: string) => {
         const updatedDocuments = documents.filter(doc => doc.id !== id);
         setDocuments(updatedDocuments);
@@ -94,6 +125,68 @@ export default function Documents() {
 
     const getCategoryLabel = (categoryId: string) => {
         return documentCategories.find(cat => cat.id === categoryId)?.label || "Unknown";
+    };
+
+    const openCameraModal = async (categoryId: string) => {
+        setActiveCategoryForCamera(categoryId);
+        setShowCameraModal(true);
+        
+        // Request camera access
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+            streamRef.current = stream;
+            
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+            alert("Unable to access camera. Please check your permissions.");
+            setShowCameraModal(false);
+        }
+    };
+
+    const closeCameraModal = () => {
+        // Stop camera stream
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        setShowCameraModal(false);
+        setActiveCategoryForCamera(null);
+    };
+
+    const capturePhoto = () => {
+        if (!videoRef.current || !canvasRef.current || !activeCategoryForCamera) return;
+
+        const context = canvasRef.current.getContext("2d");
+        if (!context) return;
+
+        canvasRef.current.width = videoRef.current.videoWidth;
+        canvasRef.current.height = videoRef.current.videoHeight;
+        context.drawImage(videoRef.current, 0, 0);
+
+        // Convert canvas to blob and save
+        canvasRef.current.toBlob((blob) => {
+            if (!blob) return;
+
+            const newDoc: DocumentItem = {
+                id: `${activeCategoryForCamera}_${Date.now()}`,
+                category: activeCategoryForCamera,
+                fileName: `Camera_${new Date().getTime()}.jpg`,
+                uploadDate: new Date().toLocaleDateString(),
+                fileSize: (blob.size / 1024).toFixed(2) + " KB",
+            };
+
+            const updatedDocuments = [...documents, newDoc];
+            setDocuments(updatedDocuments);
+            localStorage.setItem("user_documents", JSON.stringify(updatedDocuments));
+
+            console.log("Photo captured:", newDoc);
+            closeCameraModal();
+        }, "image/jpeg", 0.9);
     };
 
     return (
@@ -148,27 +241,49 @@ export default function Documents() {
                             {/* Category Content */}
                             {isExpanded && (
                                 <div className="p-4 bg-muted/20 border-t border-border space-y-3">
-                                    {/* Upload Button */}
-                                    <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-primary/30 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                                <Upload className="w-5 h-5 text-primary" />
+                                    {/* Upload Options - File and Camera side by side */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {/* File Upload */}
+                                        <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-primary/30 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
+                                            <div className="flex flex-col items-center gap-1">
+                                                <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                                    <Upload className="w-4 h-4 text-primary" />
+                                                </div>
+                                                <p className="font-medium text-foreground text-sm">Upload File</p>
+                                                <p className="text-xs text-muted-foreground text-center">Browse files</p>
                                             </div>
-                                            <div className="text-center">
-                                                <p className="font-medium text-foreground">Upload {category.label}</p>
-                                                <p className="text-xs text-muted-foreground mt-1">Click to browse or drag and drop</p>
+                                            <input
+                                                ref={(el) => {
+                                                    if (el) fileInputRefs.current[category.id] = el;
+                                                }}
+                                                type="file"
+                                                className="hidden"
+                                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                                onChange={(e) => handleUpload(e, category.id)}
+                                            />
+                                        </label>
+
+                                        {/* Camera Capture */}
+                                        <button 
+                                            onClick={() => openCameraModal(category.id)}
+                                            className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-cyan-300/50 dark:border-cyan-700/50 rounded-xl hover:border-cyan-500/70 hover:bg-cyan-500/5 transition-all cursor-pointer group"
+                                        >
+                                            <div className="flex flex-col items-center gap-1">
+                                                <div className="p-2.5 rounded-lg bg-cyan-100/50 dark:bg-cyan-950/30 group-hover:bg-cyan-200/50 dark:group-hover:bg-cyan-900/50 transition-colors">
+                                                    <Camera className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                                                </div>
+                                                <p className="font-medium text-foreground text-sm">Take Photo</p>
+                                                <p className="text-xs text-muted-foreground text-center">Use camera</p>
                                             </div>
-                                        </div>
-                                        <input
-                                            ref={(el) => {
-                                                if (el) fileInputRefs.current[category.id] = el;
-                                            }}
-                                            type="file"
-                                            className="hidden"
-                                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                                            onChange={(e) => handleUpload(e, category.id)}
-                                        />
-                                    </label>
+                                        </button>
+                                    </div>
+
+                                    {/* Info Note */}
+                                    <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-800/50 rounded-lg">
+                                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                                            💡 <strong>Tip:</strong> Camera works best on mobile devices. On desktop, you can select image files from your Downloads folder.
+                                        </p>
+                                    </div>
 
                                     {/* Documents List */}
                                     {categoryDocs.length > 0 ? (
@@ -229,6 +344,61 @@ export default function Documents() {
                         <span className="font-semibold">{documents.length} document{documents.length !== 1 ? "s" : ""}</span> stored in your account
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Your documents are securely saved and will persist even after closing the browser</p>
+                </div>
+            )}
+
+            {/* Camera Modal */}
+            {showCameraModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-card border border-border rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-border bg-gradient-to-r from-cyan-50/50 to-blue-50/50 dark:from-cyan-950/20 dark:to-blue-950/20">
+                            <h2 className="text-lg font-bold text-foreground">Take Photo</h2>
+                            <button
+                                onClick={closeCameraModal}
+                                className="p-2 rounded-lg hover:bg-muted transition-colors"
+                            >
+                                <X className="w-5 h-5 text-foreground" />
+                            </button>
+                        </div>
+
+                        {/* Video Stream */}
+                        <div className="p-6 bg-black rounded-lg mx-6 mt-6 mb-4">
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                className="w-full h-auto rounded-lg"
+                            />
+                        </div>
+
+                        {/* Hidden Canvas */}
+                        <canvas ref={canvasRef} className="hidden" />
+
+                        {/* Buttons */}
+                        <div className="flex gap-3 p-6 border-t border-border">
+                            <button
+                                onClick={closeCameraModal}
+                                className="flex-1 py-3 px-4 rounded-lg border border-border text-foreground hover:bg-muted transition-colors font-semibold"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={capturePhoto}
+                                className="flex-1 py-3 px-4 rounded-lg bg-cyan-600 dark:bg-cyan-700 text-white hover:bg-cyan-700 dark:hover:bg-cyan-800 transition-colors font-semibold flex items-center justify-center gap-2"
+                            >
+                                <Camera className="w-4 h-4" />
+                                Capture Photo
+                            </button>
+                        </div>
+
+                        {/* Info */}
+                        <div className="p-4 bg-blue-50/50 dark:bg-blue-950/20 border-t border-border text-center">
+                            <p className="text-xs text-blue-700 dark:text-blue-300">
+                                📸 Position your document clearly and click capture when ready
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
