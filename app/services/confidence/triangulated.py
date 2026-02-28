@@ -332,6 +332,7 @@ class ConfidenceBasedResponseStrategy:
                 "Given the complexity and our limited information about this specific situation, "
                 "consulting a qualified professional may be beneficial."
             ),
+            "why_it_matters": "Professional guidance can help you navigate complex or undocumented requirements.",
             "urgency": "medium",
             "can_skip": True
         }
