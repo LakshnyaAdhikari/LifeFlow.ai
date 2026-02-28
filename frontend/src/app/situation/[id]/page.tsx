@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     AlertCircle,
@@ -73,6 +73,12 @@ const formatDate = (value?: string | null) => {
     }
 };
 
+const getSuccessLikelihood = (score: number) => {
+    if (score >= 0.75) return "High";
+    if (score >= 0.5) return "Moderate";
+    return "Limited";
+};
+
 export default function SituationPage() {
     const params = useParams();
     const router = useRouter();
@@ -97,62 +103,16 @@ export default function SituationPage() {
         }
     }, [guidance?.suggestions?.length]);
 
-    useEffect(() => {
-        loadSituation();
-    }, [situationId]);
-
-    const loadSituation = async () => {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            router.push("/auth/login");
-            return;
+    const loadGuidance = useCallback(async (
+        params?: {
+            queryText?: string;
+            clarificationOverride?: ClarificationAnswer[];
+            baseSituation?: Situation;
         }
-
-        try {
-            const res = await fetch(`http://127.0.0.1:8000/situations/${situationId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) {
-                setError("Failed to load situation.");
-                setLoading(false);
-                return;
-            }
-
-            const data = await res.json();
-            const loadedSituation: Situation = data.situation;
-            setSituation(loadedSituation);
-
-            const cacheKey = `guidance:${situationId}`;
-            const cachedGuidance = sessionStorage.getItem(cacheKey);
-            if (cachedGuidance) {
-                try {
-                    const parsed = JSON.parse(cachedGuidance) as GuidanceResponse;
-                    setGuidance(parsed);
-                    sessionStorage.removeItem(cacheKey);
-                } catch {
-                    sessionStorage.removeItem(cacheKey);
-                    await loadGuidance(loadedSituation.title, loadedSituation.clarification_answers || [], loadedSituation);
-                }
-            } else {
-                await loadGuidance(loadedSituation.title, loadedSituation.clarification_answers || [], loadedSituation);
-            }
-        } catch (e) {
-            console.error(e);
-            setError("Error loading situation.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const loadGuidance = async (
-        queryText?: string,
-        clarificationOverride?: ClarificationAnswer[],
-        situationOverride?: Situation
     ) => {
-        const currentSituation = situationOverride || situation;
+        const queryText = params?.queryText;
+        const clarificationOverride = params?.clarificationOverride;
+        const currentSituation = params?.baseSituation;
         if (!currentSituation && !queryText) return;
 
         const token = localStorage.getItem("access_token");
@@ -191,7 +151,65 @@ export default function SituationPage() {
         } finally {
             setLoadingGuidance(false);
         }
-    };
+    }, [situationId]);
+
+    const loadSituation = useCallback(async () => {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            router.push("/auth/login");
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/situations/${situationId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                setError("Failed to load situation.");
+                setLoading(false);
+                return;
+            }
+
+            const data = await res.json();
+            const loadedSituation: Situation = data.situation;
+            setSituation(loadedSituation);
+
+            const cacheKey = `guidance:${situationId}`;
+            const cachedGuidance = sessionStorage.getItem(cacheKey);
+            if (cachedGuidance) {
+                try {
+                    const parsed = JSON.parse(cachedGuidance) as GuidanceResponse;
+                    setGuidance(parsed);
+                    sessionStorage.removeItem(cacheKey);
+                } catch {
+                    sessionStorage.removeItem(cacheKey);
+                    await loadGuidance({
+                        queryText: loadedSituation.title,
+                        clarificationOverride: loadedSituation.clarification_answers || [],
+                        baseSituation: loadedSituation
+                    });
+                }
+            } else {
+                await loadGuidance({
+                    queryText: loadedSituation.title,
+                    clarificationOverride: loadedSituation.clarification_answers || [],
+                    baseSituation: loadedSituation
+                });
+            }
+        } catch (e) {
+            console.error(e);
+            setError("Error loading situation.");
+        } finally {
+            setLoading(false);
+        }
+    }, [loadGuidance, router, situationId]);
+
+    useEffect(() => {
+        loadSituation();
+    }, [loadSituation]);
 
     const toggleRow = (index: number) => {
         setExpandedRows((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -223,6 +241,7 @@ export default function SituationPage() {
     }
 
     const nextAction = sortedSuggestions[0];
+    const successLikelihood = guidance ? getSuccessLikelihood(guidance.confidence.score) : "Unknown";
 
     return (
         <main className="min-h-screen bg-background px-4 py-6 text-foreground md:px-6">
@@ -284,7 +303,13 @@ export default function SituationPage() {
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     <button
-                                        onClick={() => loadGuidance(situation.title, situation.clarification_answers || [])}
+                                        onClick={() =>
+                                            loadGuidance({
+                                                queryText: situation.title,
+                                                clarificationOverride: situation.clarification_answers || [],
+                                                baseSituation: situation
+                                            })
+                                        }
                                         disabled={loadingGuidance}
                                         className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
                                     >
@@ -293,9 +318,15 @@ export default function SituationPage() {
                                     </button>
                                     <button
                                         onClick={() => router.push(`/intake/clarify/${situationId}`)}
+                                        className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
+                                    >
+                                        Review answers
+                                    </button>
+                                    <button
+                                        onClick={() => router.push(`/intake/clarify/${situationId}`)}
                                         className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                                     >
-                                        Update answers
+                                        Not matching your case?
                                     </button>
                                 </div>
                             </div>
@@ -331,8 +362,26 @@ export default function SituationPage() {
                                         <h3 className="text-xl font-semibold">{nextAction.title}</h3>
                                         <p className="mt-2 text-sm text-muted-foreground">{nextAction.description}</p>
                                         <p className="mt-3 rounded-lg bg-background p-3 text-sm">
-                                            <span className="font-semibold">Why it matters:</span> {nextAction.why_it_matters}
+                                            <span className="font-semibold">Why this is suggested:</span> {nextAction.why_it_matters}
                                         </p>
+                                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                                            <div className="rounded-lg border border-border bg-background p-3">
+                                                <p className="text-xs text-muted-foreground">Next best action</p>
+                                                <p className="mt-1 text-sm font-semibold">{nextAction.title}</p>
+                                            </div>
+                                            <div className="rounded-lg border border-border bg-background p-3">
+                                                <p className="text-xs text-muted-foreground">Expected time</p>
+                                                <p className="mt-1 text-sm font-semibold">
+                                                    {nextAction.estimated_time || "Depends on case and service window"}
+                                                </p>
+                                            </div>
+                                            <div className="rounded-lg border border-border bg-background p-3">
+                                                <p className="text-xs text-muted-foreground">Success likelihood</p>
+                                                <p className="mt-1 text-sm font-semibold">
+                                                    {successLikelihood} ({guidance ? (guidance.confidence.score * 100).toFixed(0) : "0"}%)
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
 
@@ -377,13 +426,43 @@ export default function SituationPage() {
                                                         <div className="space-y-3 border-t border-border px-4 pb-4 pt-3">
                                                             <p className="text-sm text-muted-foreground">{suggestion.description}</p>
                                                             <div className="rounded-lg bg-muted/40 p-3 text-sm">
-                                                                <span className="font-semibold">Why this step is important:</span> {suggestion.why_it_matters}
+                                                                <span className="font-semibold">Why this is suggested:</span> {suggestion.why_it_matters}
                                                             </div>
+                                                            <div className="rounded-lg bg-muted/40 p-3 text-sm">
+                                                                <span className="font-semibold">What happens if you skip:</span>{" "}
+                                                                {suggestion.can_skip
+                                                                    ? "Usually low impact, but it may reduce completeness for edge cases."
+                                                                    : "It can block or delay downstream steps and increase rework risk."}
+                                                            </div>
+                                                            {!!guidance.sources?.length && (
+                                                                <div className="rounded-lg border border-border p-3">
+                                                                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                                                        Referenced sources
+                                                                    </p>
+                                                                    <div className="space-y-1">
+                                                                        {guidance.sources.slice(0, 2).map((source, srcIndex) => (
+                                                                            <div key={`${suggestion.title}-${index}-src-${srcIndex}`} className="text-xs">
+                                                                                {source.url && !source.url.startsWith("file://") ? (
+                                                                                    <a
+                                                                                        href={source.url}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="font-medium text-primary hover:underline"
+                                                                                    >
+                                                                                        {source.title}
+                                                                                    </a>
+                                                                                ) : (
+                                                                                    <span className="font-medium">{source.title}</span>
+                                                                                )}
+                                                                                <p className="text-muted-foreground">{source.authority}</p>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                                 <CheckCircle2 className="h-3.5 w-3.5" />
-                                                                {suggestion.can_skip
-                                                                    ? "Optional step. Skip only if it does not apply."
-                                                                    : "Core step. Complete this before moving ahead."}
+                                                                {suggestion.can_skip ? "Marked optional by the model." : "Marked core for progress."}
                                                             </div>
                                                         </div>
                                                     )}
