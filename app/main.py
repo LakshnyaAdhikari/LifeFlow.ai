@@ -12,6 +12,7 @@ from app.models.core import (
 )
 from app.models.situation import UserSituation, SituationInteraction, UserFeedback
 from app.models.knowledge import KnowledgeDomain, KnowledgeDocument, KnowledgeChunk, UserQuery, GuidanceSession
+from app.models.search import SearchHistory
 from app.auth_models import UserAuth, OTPVerification, UserProfile, UserSession
 from app.infrastructure.sqlalchemy_repository import SqlAlchemyWorkflowRepository, SqlAlchemyAuditRepository
 from app.infrastructure.rag_adapter import FAISSRAGAdapter
@@ -68,13 +69,14 @@ from app.middleware.deprecation import DeprecationMiddleware
 app.add_middleware(DeprecationMiddleware)
 
 # Include routers
-from app.routers import auth, intake_v2, situations, guidance, migration, dashboard
+from app.routers import auth, intake_v2, situations, guidance, migration, dashboard, search_history
 app.include_router(auth.router)
 app.include_router(intake_v2.router)
 app.include_router(situations.router)
 app.include_router(guidance.router)
 app.include_router(migration.router)
 app.include_router(dashboard.router)
+app.include_router(search_history.router)
 
 # --- Pydantic Schemas for API ---
 class WorkflowCreate(BaseModel):
