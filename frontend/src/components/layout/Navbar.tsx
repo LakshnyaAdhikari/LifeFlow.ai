@@ -6,6 +6,7 @@ import {
     Menu,
     X,
     User,
+    ArrowLeft,
     LayoutDashboard,
     LogOut,
     Sun,
@@ -111,7 +112,7 @@ const languages = [
     { code: "ta", label: "தமிழ்" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ isProfilePage = false }: { isProfilePage?: boolean }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [domainsOpen, setDomainsOpen] = useState(false);
     const [langOpen, setLangOpen] = useState(false);
@@ -349,10 +350,20 @@ export default function Navbar() {
                             {isLoggedIn ? (
                                 <>
                                     <button
-                                        onClick={() => router.push("/dashboard")}
-                                        className="p-2 rounded-full bg-muted text-muted-foreground hover:text-primary transition-colors"
+                                        onClick={() => router.push(isProfilePage ? "/home" : "/profile")}
+                                        className={isProfilePage ? "px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2.5 bg-primary/10 text-primary hover:bg-primary/20 transition-all" : "px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all flex items-center gap-2"}
                                     >
-                                        <User className="w-4 h-4" />
+                                        {isProfilePage ? (
+                                            <>
+                                                <ArrowLeft className="w-5 h-5" />
+                                                <span className="hidden sm:inline">Back to Home</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="hidden sm:inline">{user?.full_name?.split(" ")[0] || "Profile"}</span>
+                                                <User className="w-4 h-4" />
+                                            </>
+                                        )}
                                     </button>
                                 </>
                             ) : (
