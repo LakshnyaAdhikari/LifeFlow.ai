@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { CheckCircle2, Shield, Search, FileText, Globe, User, HelpCircle, ArrowRight } from "lucide-react";
+import { CheckCircle2, Shield, Search, FileText, Globe, User, HelpCircle, ArrowRight, Mic, MicOff } from "lucide-react";
 
 interface NarrativeHeroProps {
     onSearch: (query: string) => void;
@@ -15,6 +15,8 @@ export default function NarrativeHero({ onSearch, isDark }: NarrativeHeroProps) 
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [query, setQuery] = useState("");
+    const [isListening, setIsListening] = useState(false);
+    const recognitionRef = useRef<any>(null);
 
     const slideCount = 5;
 
@@ -25,6 +27,62 @@ export default function NarrativeHero({ onSearch, isDark }: NarrativeHeroProps) 
         }, 4000);
         return () => clearInterval(interval);
     }, [isPaused]);
+
+    useEffect(() => {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => setIsListening(true);
+
+            recognition.onresult = (event: any) => {
+                let currentTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        currentTranscript += event.results[i][0].transcript;
+                    }
+                }
+                if (currentTranscript) {
+                    setQuery(prev => {
+                        const separator = prev && !prev.endsWith(' ') ? ' ' : '';
+                        return prev + separator + currentTranscript.trim() + ' ';
+                    });
+                }
+            };
+
+            recognition.onerror = (event: any) => {
+                console.error('Speech recognition error:', event.error);
+                setIsListening(false);
+            };
+
+            recognition.onend = () => setIsListening(false);
+
+            recognitionRef.current = recognition;
+        }
+
+        return () => {
+            if (recognitionRef.current) recognitionRef.current.stop();
+        };
+    }, []);
+
+    const toggleListening = () => {
+        if (!recognitionRef.current) {
+            alert("Speech recognition is not supported in this browser. Try Chrome or Edge.");
+            return;
+        }
+        if (isListening) {
+            recognitionRef.current.stop();
+        } else {
+            try {
+                recognitionRef.current.start();
+            } catch (e) {
+                console.error("Error starting recognition", e);
+            }
+        }
+    };
 
     const slides = [
         { id: 0, headline: "When life gets legally complicated." },
@@ -95,13 +153,26 @@ export default function NarrativeHero({ onSearch, isDark }: NarrativeHeroProps) 
                                 placeholder="Search legal queries..."
                                 className={`flex-grow pl-3 pr-3 py-4 bg-transparent border-none text-lg font-medium focus:outline-none focus:ring-0 ${isDark ? "text-white placeholder:text-white/20" : "text-slate-900 placeholder:text-slate-400"}`}
                             />
-                            <button
-                                type="submit"
-                                className="mr-2 px-6 py-2.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-400 border border-teal-500/30 rounded-[14px] font-medium text-sm flex items-center gap-2 transition-all active:scale-95"
-                            >
-                                Get Guidance
-                                <ArrowRight className="w-4 h-4" />
-                            </button>
+                            <div className="mr-2 flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={toggleListening}
+                                    className={`p-2.5 rounded-[14px] flex items-center justify-center transition-colors border ${isListening
+                                            ? (isDark ? "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30" : "bg-red-50 text-red-500 border-red-200 hover:bg-red-100")
+                                            : (isDark ? "bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white/70" : "bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600")
+                                        }`}
+                                    title={isListening ? "Stop listening" : "Start speaking"}
+                                >
+                                    {isListening ? <MicOff className="w-5 h-5 animate-pulse" /> : <Mic className="w-5 h-5" />}
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-400 border border-teal-500/30 rounded-[14px] font-medium text-sm flex items-center gap-2 transition-all active:scale-95"
+                                >
+                                    Get Guidance
+                                    <ArrowRight className="w-4 h-4" />
+                                </button>
+                            </div>
                         </form>
                     </div>
 
