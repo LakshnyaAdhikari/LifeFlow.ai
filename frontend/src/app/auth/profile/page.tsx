@@ -109,7 +109,7 @@ export default function ProfileSetupPage() {
                                 value={formData.location_state}
                                 onChange={(e) => setFormData({ ...formData, location_state: e.target.value })}
                                 placeholder="e.g. Maharashtra"
-                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-input text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
                             />
                         </div>
 
@@ -123,7 +123,7 @@ export default function ProfileSetupPage() {
                                 value={formData.location_city}
                                 onChange={(e) => setFormData({ ...formData, location_city: e.target.value })}
                                 placeholder="e.g. Mumbai"
-                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-input text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
                             />
                         </div>
 
@@ -135,7 +135,7 @@ export default function ProfileSetupPage() {
                             <select
                                 value={formData.age_range}
                                 onChange={(e) => setFormData({ ...formData, age_range: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors appearance-none"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-input text-foreground focus:border-primary focus:outline-none transition-colors appearance-none"
                             >
                                 <option value="">Select range</option>
                                 {ageRanges.map(range => (
@@ -152,7 +152,7 @@ export default function ProfileSetupPage() {
                             <select
                                 value={formData.preferred_language}
                                 onChange={(e) => setFormData({ ...formData, preferred_language: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors appearance-none"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-input text-foreground focus:border-primary focus:outline-none transition-colors appearance-none"
                             >
                                 {languages.map(lang => (
                                     <option key={lang.code} value={lang.code}>{lang.name}</option>
@@ -170,14 +170,14 @@ export default function ProfileSetupPage() {
                                 value={formData.family_status}
                                 onChange={(e) => setFormData({ ...formData, family_status: e.target.value })}
                                 placeholder="e.g. Head of family, living with parents, etc."
-                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-input text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
                             />
                         </div>
 
                         {error && (
-                            <div className="md:col-span-2 flex items-start gap-2 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200">
-                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                            <div className="md:col-span-2 flex items-start gap-2 p-4 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-300 dark:border-red-800">
+                                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
                             </div>
                         )}
 

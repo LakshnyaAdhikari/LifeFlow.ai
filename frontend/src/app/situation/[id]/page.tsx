@@ -228,11 +228,11 @@ export default function SituationPage() {
         <main className="min-h-screen bg-background px-4 py-6 text-foreground md:px-6">
             <div className="mx-auto w-full max-w-7xl">
                 <button
-                    onClick={() => router.push("/home")}
+                    onClick={() => router.push("/profile?section=search-history")}
                     className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeft className="h-4 w-4" />
-                    Back to Home
+                    Back to Search History
                 </button>
 
                 <section className="rounded-2xl border-2 border-border bg-card p-6">

@@ -126,4 +126,30 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Dark mode styling for select elements and options */
+  .dark select {
+    @apply bg-input text-foreground;
+  }
+
+  .dark select option {
+    @apply bg-card text-foreground;
+  }
+
+  /* Light mode styling for select elements and options */
+  select {
+    @apply text-foreground;
+  }
+
+  select option {
+    @apply bg-white text-black;
+  }
+
+  select option:checked {
+    @apply bg-primary text-white;
+  }
+
+  .dark select option:checked {
+    @apply bg-primary text-white;
+  }
 }

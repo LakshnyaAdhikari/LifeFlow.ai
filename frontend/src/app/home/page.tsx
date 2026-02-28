@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, MessageSquare, Loader2, FileText, Clock, ChevronRight, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { saveSearchToHistory } from "@/lib/searchHistoryApi";
 
 interface Situation {
   id: number;
@@ -26,6 +27,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function Home() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useLanguage();
   const [loadingSituations, setLoadingSituations] = useState(true);
   const [situations, setSituations] = useState<Situation[]>([]);
@@ -79,9 +81,13 @@ export default function Home() {
       if (res.ok) {
         const data = await res.json();
         console.log("✅ Response data:", data);
+        
+        // Save search to history
+        await saveSearchToHistory(query, data.domain || "General");
+        
         if (data.situation_id) {
-          // Redirect to clarification flow to refine guidance
-          router.push(`/intake/clarify/${data.situation_id}`);
+          // Redirect directly to situation guidance page (skip clarification flow)
+          router.push(`/situation/${data.situation_id}`);
         } else {
           console.warn("⚠️ No situation_id in response");
           alert("Response received but no situation ID. Check console for details.");
@@ -96,6 +102,15 @@ export default function Home() {
       alert(`Request failed: ${e}`);
     }
   };
+
+  // Handle search query parameter from search history navigation
+  useEffect(() => {
+    const searchQuery = searchParams.get("search");
+    if (searchQuery) {
+      console.log("📌 Auto-searching from search history:", searchQuery);
+      handleSearch(decodeURIComponent(searchQuery));
+    }
+  }, [searchParams]);
 
   const latestSituation = situations.length > 0 ? situations[0] : null;
 
