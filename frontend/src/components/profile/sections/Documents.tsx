@@ -5,6 +5,7 @@ import {
     CreditCard, Award, Ticket, Heart, BookOpen, Car, Home, Shield, Camera, X
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DocumentItem {
     id: string;
@@ -39,6 +40,7 @@ export default function Documents() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const { t } = useLanguage();
 
     useEffect(() => {
         // TODO: Fetch documents from API
@@ -192,8 +194,8 @@ export default function Documents() {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Documents</h1>
-                <p className="text-muted-foreground">Upload and organize your important documents by category</p>
+                <h1 className="text-3xl font-bold tracking-tight mb-2">{t("profile.documents.title")}</h1>
+                <p className="text-muted-foreground">{t("profile.documents.subtitle")}</p>
             </div>
 
             {/* Document Categories */}
@@ -281,7 +283,7 @@ export default function Documents() {
                                     {/* Info Note */}
                                     <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-800/50 rounded-lg">
                                         <p className="text-xs text-blue-700 dark:text-blue-300">
-                                            💡 <strong>Tip:</strong> Camera works best on mobile devices. On desktop, you can select image files from your Downloads folder.
+                                            {t("profile.documents.camera_tip")}
                                         </p>
                                     </div>
 
