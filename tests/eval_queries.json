@@ -1,0 +1,51 @@
+[
+    {
+        "query": "What are the exact form numbers and documents needed to apply for a duplicate PAN card?",
+        "domain": "Taxation",
+        "expected_sources": [
+            "Income Tax Department",
+            "UIDAI"
+        ],
+        "is_procedural": true
+    },
+    {
+        "query": "How do I file a grievance if my vehicle registration is delayed by the RTO?",
+        "domain": "Vehicle & Transport",
+        "expected_sources": [
+            "Parivahan",
+            "Government of India"
+        ],
+        "is_procedural": true
+    },
+    {
+        "query": "What is the procedure and what are the fees to transfer my PF account when changing jobs?",
+        "domain": "Taxation",
+        "expected_sources": [
+            "Income Tax Department"
+        ],
+        "is_procedural": true
+    },
+    {
+        "query": "Explain the history of wealth tax in India.",
+        "domain": "Taxation",
+        "expected_sources": [],
+        "is_procedural": false
+    },
+    {
+        "query": "How do I claim health insurance if the company rejects my pre-existing disease declaration?",
+        "domain": "Insurance",
+        "expected_sources": [
+            "IRDAI",
+            "Government of India"
+        ],
+        "is_procedural": true
+    },
+    {
+        "query": "What is the step by step process to register property in Delhi and how is stamp duty calculated?",
+        "domain": "Property",
+        "expected_sources": [
+            "Dept of Land Resources"
+        ],
+        "is_procedural": true
+    }
+]
