@@ -3,10 +3,10 @@
 import { Search, Clock, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { fetchSearchHistory } from "@/lib/searchHistoryApi";
+import { fetchSearchHistory, type SearchHistoryEntry } from "@/lib/searchHistoryApi";
 
 export default function SearchHistory() {
-    const [searchHistory, setSearchHistory] = useState<any[]>([]);
+    const [searchHistory, setSearchHistory] = useState<SearchHistoryEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
