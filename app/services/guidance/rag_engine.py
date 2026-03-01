@@ -124,29 +124,38 @@ class GuidanceEngine:
             logger.info(f"DEBUG: Step 3 - Found {len(search_results)} results")
             
             logger.info(f"Retrieved {len(search_results)} relevant chunks")
+            authoritative_results = self._filter_authoritative_results(search_results)
+            logger.info(
+                f"Authoritative chunks after filtering: {len(authoritative_results)} "
+                f"(from {len(search_results)} raw results)"
+            )
             
             # 4. Build context from search results
-            knowledge_context = self._build_knowledge_context(search_results)
+            knowledge_context = self._build_knowledge_context(authoritative_results)
             
             # 5. Generate suggestions using LLM
-            import time
-            s_start = time.time()
-            logger.info("DEBUG: Step 5 - Calling LLM for suggestions...")
-            raw_guidance = await self._generate_suggestions(
-                query=refined_query,
-                domain=domain,
-                knowledge_context=knowledge_context,
-                user_context=context
-            )
-            logger.info(f"DEBUG: Step 5 - LLM returned in {time.time() - s_start:.2f}s")
+            if authoritative_results:
+                import time
+                s_start = time.time()
+                logger.info("DEBUG: Step 5 - Calling LLM for suggestions...")
+                raw_guidance = await self._generate_suggestions(
+                    query=refined_query,
+                    domain=domain,
+                    knowledge_context=knowledge_context,
+                    user_context=context
+                )
+                logger.info(f"DEBUG: Step 5 - LLM returned in {time.time() - s_start:.2f}s")
+            else:
+                logger.warning("No authoritative retrieval results; using low-authority guidance mode")
+                raw_guidance = self._get_low_authority_guidance(domain, refined_query)
             
             # 6. Extract sources
-            sources = self._extract_sources(search_results)
+            sources = self._extract_sources(authoritative_results)
             
             # Check maximum authority in search results
-            max_auth = max([r.metadata.get("authority_weight", 0.0) for r in search_results]) if search_results else 0.0
+            max_auth = max([r.metadata.get("authority_weight", 0.0) for r in authoritative_results]) if authoritative_results else 0.0
             low_confidence_caveat = None
-            if max_auth < 0.8 and search_results:
+            if max_auth < 1.0 and authoritative_results:
                 low_confidence_caveat = "⚠️  I lack highly authoritative procedural information on this specific nuance. The following guidance is based on general contextual information rather than direct official procedures."
             
             # 7. Apply safety filter
@@ -160,10 +169,10 @@ class GuidanceEngine:
             # 8. Calculate confidence
             confidence = await self.confidence_calc.calculate(
                 llm_confidence=0.8,  # TODO: Extract from LLM response
-                retrieval_strength=self._calculate_retrieval_strength(search_results),
+                retrieval_strength=self._calculate_retrieval_strength(authoritative_results),
                 domain=domain,
                 context={
-                    "retrieved_docs": len(search_results),
+                    "retrieved_docs": len(authoritative_results),
                     "query_length": len(refined_query),
                     **context
                 }
@@ -186,13 +195,13 @@ class GuidanceEngine:
                 query=query,
                 suggestions_count=len(final_guidance.get("suggestions", [])),
                 confidence_score=confidence.overall,
-                sources_used=[r.document_id for r in search_results]
+                sources_used=[r.document_id for r in authoritative_results]
             )
             self.db.add(session)
             self.db.commit()
             
             # 11. Update user query
-            user_query.chunks_retrieved = len(search_results)
+            user_query.chunks_retrieved = len(authoritative_results)
             user_query.response_generated = True
             user_query.confidence = confidence.overall
             self.db.commit()
@@ -212,7 +221,8 @@ class GuidanceEngine:
                 cross_domain_insights=final_guidance.get("cross_domain_insights", []),
                 metadata={
                     "session_id": session.id,
-                    "chunks_retrieved": len(search_results),
+                    "chunks_retrieved": len(authoritative_results),
+                    "raw_chunks_retrieved": len(search_results),
                     "domain": domain
                 }
             )
@@ -369,6 +379,41 @@ Generate 1-3 highly precise procedural suggestions ordered by priority.
             ],
             "caveats": ["⚠️  We couldn't find specific guidance for your exact query, so we provided general best practices."]
         }
+
+    def _get_low_authority_guidance(self, domain: str, query: str) -> Dict[str, Any]:
+        """
+        Guidance mode when we lack authoritative retrieval hits.
+        Avoids pretending precision and asks for narrowing details.
+        """
+        return {
+            "suggestions": [
+                {
+                    "title": "Refine case details before taking action",
+                    "description": (
+                        f"We could not retrieve enough authoritative {domain} procedure content for this exact query. "
+                        "Clarify the exact authority/service name, jurisdiction, and current stage "
+                        "(new request, correction, rejection, or escalation)."
+                    ),
+                    "why_it_matters": "Acting without precise procedure context can lead to wrong forms, fees, or timelines.",
+                    "urgency": "high",
+                    "can_skip": False
+                },
+                {
+                    "title": "Re-run guidance with exact service label",
+                    "description": (
+                        "Use this format for higher precision: '<Authority> + <Service Name> + <Current Status>'. "
+                        "Then refresh guidance."
+                    ),
+                    "why_it_matters": "Precise service labels improve retrieval quality and reduce generic output.",
+                    "urgency": "medium",
+                    "can_skip": False
+                }
+            ],
+            "caveats": [
+                "âš ï¸ Authoritative sources were insufficient for a safe procedural recommendation.",
+                "Please refine details and retry."
+            ]
+        }
     
     async def _apply_safety_filter(
         self,
@@ -421,6 +466,10 @@ Generate 1-3 highly precise procedural suggestions ordered by priority.
                 
                 # If URL is a local file, try to map it to a real URL if possible, or just keep it
                 # (Ideally, the DB should contain the real URL)
+                authority_text = (result.source_authority or "").lower()
+                url_text = (url or "").lower()
+                if "wikipedia" in authority_text or "wikipedia.org" in url_text:
+                    continue
                 
                 sources.append({
                     "title": result.metadata.get("title", "Unknown"),
@@ -431,6 +480,26 @@ Generate 1-3 highly precise procedural suggestions ordered by priority.
                 seen_docs.add(result.document_id)
         
         return sources
+
+    def _filter_authoritative_results(self, search_results: List[SearchResult]) -> List[SearchResult]:
+        """
+        Keep only authoritative retrieval chunks for guidance generation.
+        Excludes wiki-like sources and low-authority chunks.
+        """
+        authoritative: List[SearchResult] = []
+        for result in search_results:
+            authority = (result.source_authority or "").lower()
+            title = (result.metadata.get("title", "") or "").lower()
+            url = (result.metadata.get("url", "") or "").lower()
+            authority_weight = float(result.metadata.get("authority_weight", 0.0) or 0.0)
+
+            if "wikipedia" in authority or "wikipedia" in title or "wikipedia.org" in url:
+                continue
+            if authority_weight < 1.0:
+                continue
+            authoritative.append(result)
+
+        return authoritative
     
     def _calculate_retrieval_strength(self, search_results: List[SearchResult]) -> float:
         """Calculate retrieval strength from search results"""

@@ -8,6 +8,7 @@ NO hard-coded examples or mappings
 from typing import List, Optional, Dict
 from pydantic import BaseModel
 from loguru import logger
+import re
 
 from app.services.llm.client import get_llm_client, LLMClient
 
@@ -33,7 +34,11 @@ DOMAIN_TAXONOMY = {
     "Identity Documents": {
         "sub_domains": ["Aadhaar", "PAN Card", "Passport", "Voter ID", "Driving License"],
         "description": "Government identity documents and verification",
-        "keywords": ["aadhaar", "pan", "passport", "voter id", "identity", "verification"]
+        "keywords": [
+            "aadhaar", "aadhar", "adhar", "uidai", "uid",
+            "pan", "pan card", "passport", "voter id", "identity", "verification",
+            "id card", "kyc update", "dob correction"
+        ]
     },
     "Property": {
         "sub_domains": ["Registration", "Disputes", "Rental", "Sale/Purchase", "Mutation"],
@@ -226,27 +231,63 @@ IMPORTANT:
         
         return "General"
     
+    def _normalize_query_for_matching(self, query: str) -> str:
+        """
+        Normalize common spelling variants so fallback scoring remains stable.
+        """
+        normalized = query.lower()
+        replacements = {
+            "aadhar": "aadhaar",
+            "adhar": "aadhaar",
+            "adhaar": "aadhaar",
+            "voterid": "voter id",
+            "pancard": "pan card",
+            "idcard": "id card",
+        }
+        for src, dst in replacements.items():
+            normalized = re.sub(rf"\b{re.escape(src)}\b", dst, normalized)
+        normalized = re.sub(r"\s+", " ", normalized).strip()
+        return normalized
+
+    def _keyword_in_query(self, keyword: str, normalized_query: str) -> bool:
+        """
+        Match keywords with boundary safety so short tokens do not create false positives
+        (e.g. 'car' should not match 'card').
+        """
+        kw = keyword.lower().strip()
+        if not kw:
+            return False
+        if " " in kw:
+            return kw in normalized_query
+        return re.search(rf"\b{re.escape(kw)}\b", normalized_query) is not None
+
     async def _fallback_classify(self, user_query: str) -> DomainClassification:
         """
         Fallback keyword-based classification when LLM fails
         """
         logger.warning("Using fallback classification")
         
-        query_lower = user_query.lower()
+        query_lower = self._normalize_query_for_matching(user_query)
         scores = {}
         
         # Score each domain based on keyword matches
         for domain, info in self.taxonomy.items():
             score = 0
             for keyword in info["keywords"]:
-                if keyword in query_lower:
+                if self._keyword_in_query(keyword, query_lower):
                     score += 1
             scores[domain] = score
         
         # Get best match
         if scores:
             best_domain = max(scores, key=scores.get)
-            confidence = min(scores[best_domain] / 3.0, 0.7)  # Cap at 0.7 for fallback
+            best_score = scores[best_domain]
+            if best_score <= 0:
+                # Important: do not silently default to first taxonomy domain.
+                best_domain = "General"
+                confidence = 0.2
+            else:
+                confidence = min(best_score / 2.0, 0.75)  # Cap at 0.75 for fallback
         else:
             best_domain = "General"
             confidence = 0.3

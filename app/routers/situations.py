@@ -71,6 +71,64 @@ def _has_useful_mcq_questions(questions: Optional[List[Dict[str, Any]]]) -> bool
     return valid_count >= 2
 
 
+async def _maybe_reclassify_domain(situation: UserSituation, db: Session) -> bool:
+    """
+    Repair wrongly classified historical situations.
+    We only auto-correct when existing classification confidence is low/unknown
+    and the new classification has a meaningful confidence.
+    """
+    existing_context = situation.context or {}
+    existing_classification = existing_context.get("classification", {}) if isinstance(existing_context, dict) else {}
+    existing_conf = existing_classification.get("confidence")
+    try:
+        existing_conf_value = float(existing_conf) if existing_conf is not None else None
+    except (TypeError, ValueError):
+        existing_conf_value = None
+
+    classifier = get_domain_classifier()
+    refreshed = await classifier.classify(situation.title)
+    candidate_domain = refreshed.primary_domain
+    current_domain = situation.primary_domain
+
+    # Always keep latest classification evidence in context.
+    updated_context = {
+        **(existing_context if isinstance(existing_context, dict) else {}),
+        "classification": {
+            "primary_domain": refreshed.primary_domain,
+            "secondary_domain": refreshed.secondary_domain,
+            "confidence": refreshed.confidence,
+            "reasoning": refreshed.reasoning,
+            "suggested_keywords": refreshed.suggested_keywords,
+            "reclassified_at": datetime.utcnow().isoformat(),
+        }
+    }
+    situation.context = updated_context
+
+    if (
+        candidate_domain
+        and candidate_domain != "General"
+        and candidate_domain != current_domain
+        and refreshed.confidence >= 0.35
+        and (existing_conf_value is None or existing_conf_value < 0.35)
+    ):
+        logger.warning(
+            f"Auto-correcting situation {situation.id} domain: "
+            f"{current_domain} -> {candidate_domain} "
+            f"(new confidence={refreshed.confidence:.2f}, existing={existing_conf_value})"
+        )
+        situation.primary_domain = candidate_domain
+        situation.related_domains = refreshed.related_domains
+        # Questions/answers from wrong domain are invalid after reclassification.
+        situation.clarification_questions = []
+        situation.clarification_answers = []
+        db.commit()
+        db.refresh(situation)
+        return True
+
+    db.commit()
+    return False
+
+
 @router.post("/create", response_model=SituationResponse)
 async def create_situation(
     payload: CreateSituationRequest,
@@ -222,6 +280,12 @@ async def get_situation(
         
         if not situation:
             raise HTTPException(status_code=404, detail="Situation not found")
+
+        # Repair historical misclassification before generating questions.
+        try:
+            await _maybe_reclassify_domain(situation, db)
+        except Exception as e:
+            logger.error(f"Domain reclassification check failed for situation {situation.id}: {e}")
         
         # Lazy load/repair clarification questions if missing or low quality.
         if not _has_useful_mcq_questions(situation.clarification_questions):

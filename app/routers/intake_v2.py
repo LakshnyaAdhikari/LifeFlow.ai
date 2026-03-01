@@ -69,6 +69,17 @@ async def resolve_domain(
             user_id=current_user.id,
             title=payload.user_message[:100],  # Use first 100 chars as title
             primary_domain=classification.primary_domain,
+            related_domains=classification.related_domains,
+            context={
+                "initial_query": payload.user_message,
+                "classification": {
+                    "primary_domain": classification.primary_domain,
+                    "secondary_domain": classification.secondary_domain,
+                    "confidence": classification.confidence,
+                    "reasoning": classification.reasoning,
+                    "suggested_keywords": classification.suggested_keywords,
+                }
+            },
             status="active"
         )
         db.add(situation)
