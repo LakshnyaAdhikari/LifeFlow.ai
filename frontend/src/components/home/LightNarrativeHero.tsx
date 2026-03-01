@@ -7,9 +7,12 @@ import { CheckCircle2, Shield, Search, FileText, Globe, User, HelpCircle, ArrowR
 
 interface NarrativeHeroProps {
     onSearch: (query: string) => void;
+    presetQuery?: string;
+    placeholderOverride?: string;
+    presetSeed?: number;
 }
 
-export default function LightNarrativeHero({ onSearch }: NarrativeHeroProps) {
+export default function LightNarrativeHero({ onSearch, presetQuery, placeholderOverride, presetSeed }: NarrativeHeroProps) {
     const { t } = useLanguage();
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
@@ -66,6 +69,13 @@ export default function LightNarrativeHero({ onSearch }: NarrativeHeroProps) {
             if (recognitionRef.current) recognitionRef.current.stop();
         };
     }, []);
+
+    useEffect(() => {
+        if (!presetSeed) return;
+        if (presetQuery) {
+            setQuery(presetQuery);
+        }
+    }, [presetQuery, presetSeed]);
 
     const toggleListening = () => {
         if (!recognitionRef.current) {
@@ -148,7 +158,7 @@ export default function LightNarrativeHero({ onSearch }: NarrativeHeroProps) {
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search legal queries..."
+                                placeholder={placeholderOverride || "Search legal queries..."}
                                 className="flex-grow pl-3 pr-3 py-4 bg-transparent border-none text-slate-900 text-lg font-medium focus:outline-none focus:ring-0 placeholder:text-slate-400"
                             />
                             <div className="mr-2 flex items-center gap-2">

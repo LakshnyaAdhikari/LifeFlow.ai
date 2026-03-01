@@ -7,7 +7,19 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import DarkNarrativeHero from "./DarkNarrativeHero";
 import LightNarrativeHero from "./LightNarrativeHero";
 
-export default function HomeHero({ onSearch }: { onSearch: (query: string) => void }) {
+export interface HomeDomainPreset {
+    query: string;
+    placeholder: string;
+    seed: number;
+}
+
+export default function HomeHero({
+    onSearch,
+    domainPreset,
+}: {
+    onSearch: (query: string) => void;
+    domainPreset?: HomeDomainPreset | null;
+}) {
     const { user } = useAuth();
     const { theme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
@@ -20,7 +32,7 @@ export default function HomeHero({ onSearch }: { onSearch: (query: string) => vo
     if (!mounted) return null;
 
     return (
-        <section className={`relative w-full overflow-hidden transition-colors duration-700 ${isDark ? "bg-[#0c1c1a]" : "bg-white"}`}>
+        <section id="home-intake" className={`relative w-full overflow-hidden transition-colors duration-700 ${isDark ? "bg-[#0c1c1a]" : "bg-white"}`}>
             <div className={`absolute inset-0 -z-10 ${isDark ? "bg-[#0c1c1a]" : "bg-gradient-to-b from-slate-50 to-white"}`} />
 
             <div className="relative pt-8 pb-6 flex flex-col items-center">
@@ -40,9 +52,19 @@ export default function HomeHero({ onSearch }: { onSearch: (query: string) => vo
                 {/* 2. Narrative Engine Stage - Unified with Search */}
                 <div className="w-full relative">
                     {isDark ? (
-                        <DarkNarrativeHero onSearch={onSearch} />
+                        <DarkNarrativeHero
+                            onSearch={onSearch}
+                            presetQuery={domainPreset?.query}
+                            placeholderOverride={domainPreset?.placeholder}
+                            presetSeed={domainPreset?.seed}
+                        />
                     ) : (
-                        <LightNarrativeHero onSearch={onSearch} />
+                        <LightNarrativeHero
+                            onSearch={onSearch}
+                            presetQuery={domainPreset?.query}
+                            placeholderOverride={domainPreset?.placeholder}
+                            presetSeed={domainPreset?.seed}
+                        />
                     )}
                 </div>
             </div>
