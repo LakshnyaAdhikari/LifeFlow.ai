@@ -143,9 +143,18 @@ class GuidanceEngine:
             # 6. Extract sources
             sources = self._extract_sources(search_results)
             
+            # Check maximum authority in search results
+            max_auth = max([r.metadata.get("authority_weight", 0.0) for r in search_results]) if search_results else 0.0
+            low_confidence_caveat = None
+            if max_auth < 0.8 and search_results:
+                low_confidence_caveat = "⚠️  I lack highly authoritative procedural information on this specific nuance. The following guidance is based on general contextual information rather than direct official procedures."
+            
             # 7. Apply safety filter
             logger.info("DEBUG: Step 7 - Applying safety filter...")
             filtered_guidance = await self._apply_safety_filter(raw_guidance, sources, domain)
+            if low_confidence_caveat:
+                filtered_guidance["caveats"] = filtered_guidance.get("caveats", [])
+                filtered_guidance["caveats"].insert(0, low_confidence_caveat)
             logger.info("DEBUG: Step 7 - Safety filter applied")
             
             # 8. Calculate confidence
@@ -294,9 +303,9 @@ Generate practical, actionable suggestions in JSON format:
 {{
     "suggestions": [
         {{
-            "title": "Brief action title",
-            "description": "What to do and how",
-            "why_it_matters": "Why this is important or helpful",
+            "title": "Actionable Procedural Step",
+            "description": "**Task:** [Brief task summary]\n**Forms Needed:** [List of forms or 'None']\n**Fees:** [Exact fee amount or 'None identified']\n**Steps:**\n1. [Step 1] [Cite: Source X]\n2. [Step 2] [Cite: Source Y]\n**Escalation:** [What to do if it fails or 'N/A']",
+            "why_it_matters": "Why this is a critical procedural requirement",
             "urgency": "high/medium/low",
             "can_skip": true/false,
             "estimated_time": "Optional time estimate"
@@ -305,15 +314,13 @@ Generate practical, actionable suggestions in JSON format:
 }}
 
 CRITICAL RULES:
-1. Base suggestions ONLY on the authoritative knowledge provided
-2. Use phrases like "people typically", "common practice", "regulations usually require"
-3. NEVER use "you should", "you must", "I recommend"
-4. Cite sources when making claims
-5. Acknowledge uncertainty if information is incomplete
-6. Focus on procedural guidance, not legal advice
-7. Keep suggestions practical and actionable
+1. Base your steps ONLY on the retrieved authoritative knowledge.
+2. YOU MUST strictly format your `description` field exactly matching the Markdown template above (Task, Forms, Fees, Steps, Escalation).
+3. YOU MUST cite your exact source inline for every procedural step (e.g., [Cite: Source 1]).
+4. If the authoritative knowledge does not contain exact forms, fees, or steps, DO NOT GUESS. State "Not explicitly specified in the retrieved authoritative sources."
+5. Acknowledge uncertainty if information is incomplete. Never hallucinate theoretical law.
 
-Generate 3-5 suggestions ordered by priority.
+Generate 1-3 highly precise procedural suggestions ordered by priority.
 """
         
         try:
