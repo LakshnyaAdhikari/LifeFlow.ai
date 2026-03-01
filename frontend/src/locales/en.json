@@ -310,5 +310,170 @@
                 }
             }
         }
+    },
+    "profile": {
+        "title": "My Profile",
+        "sections": {
+            "search_history": "Search History",
+            "change_password": "Change Password",
+            "documents": "Documents",
+            "settings": "Settings"
+        },
+        "search_history": {
+            "title": "Search History",
+            "subtitle": "All your past searches and guidances",
+            "loading": "Loading...",
+            "empty": "No search history yet",
+            "empty_desc": "Your searches will appear here",
+            "clear_all": "Clear All",
+            "clear_confirm": "Are you sure you want to clear all search history?",
+            "delete": "Delete",
+            "back_to_home": "Back to Home"
+        },
+        "change_password": {
+            "title": "Change Password",
+            "subtitle": "Secure your account with a new password",
+            "phone_number": "Phone Number",
+            "phone_placeholder": "Enter your phone number",
+            "send_otp": "Send OTP",
+            "sending": "Sending OTP...",
+            "enter_otp": "Enter OTP",
+            "otp_placeholder": "6-digit OTP",
+            "verify_otp": "Verify OTP",
+            "verifying": "Verifying...",
+            "new_password": "New Password",
+            "new_password_placeholder": "Enter new password",
+            "confirm_password": "Confirm Password",
+            "confirm_password_placeholder": "Confirm password",
+            "change_password": "Change Password",
+            "changing": "Changing...",
+            "step_1": 1,
+            "step_2": 2,
+            "step_3": 3
+        },
+        "documents": {
+            "title": "Documents",
+            "subtitle": "Upload and organize your important documents by category",
+            "upload_file": "Upload File",
+            "browse_files": "Browse files",
+            "take_photo": "Take Photo",
+            "use_camera": "Use camera",
+            "camera_tip": "💡 Tip: Camera works best on mobile devices. On desktop, you can select image files from your Downloads folder.",
+            "no_documents": "No documents uploaded yet",
+            "documents_stored": "documents stored in your account",
+            "secure_note": "Your documents are securely saved and will persist even after closing the browser",
+            "download": "Download",
+            "delete": "Delete",
+            "download_coming": "Download feature coming soon!",
+            "categories": {
+                "aadhar": "Aadhar Card",
+                "pan": "PAN Card",
+                "passport": "Passport",
+                "ration": "Ration Card",
+                "birth_cert": "Birth Certificate",
+                "marksheets": "Marksheets",
+                "drivers_license": "Driving License",
+                "property_deed": "Property Deed",
+                "insurance": "Insurance Documents",
+                "other": "Other Documents"
+            },
+            "camera_modal": {
+                "title": "Take Photo",
+                "cancel": "Cancel",
+                "capture": "Capture Photo",
+                "instruction": "📸 Position your document clearly and click capture when ready"
+            }
+        },
+        "settings": {
+            "title": "Settings",
+            "subtitle": "Manage your account preferences",
+            "account": "Account",
+            "notifications": "Notifications",
+            "privacy": "Privacy & Security",
+            "preferences": "Preferences",
+            "logout": "Log Out",
+            "delete_account": "Delete Account",
+            "logout_confirm": "Are you sure you want to log out?",
+            "delete_confirm": "This action cannot be undone. All your data will be permanently deleted."
+        }
+    },
+    "intake": {
+        "clarify": {
+            "title": "Help us understand better",
+            "subtitle": "Generic advice is useless. Answering these 2-3 questions allows our AI to check specific rules for your case.",
+            "step_1": 1,
+            "step_2": 2,
+            "step_3": 3,
+            "skip": "Skip",
+            "next": "Next",
+            "submit": "Get Guidance",
+            "submitting": "Analyzing your case...",
+            "why_matters": "Why this matters",
+            "government_rules": "Government rules vary purely by",
+            "jurisdiction": "Jurisdiction",
+            "category": "Category",
+            "generic_fails": "Generic advice (\"File an appeal\") fails 90% of the time if you cite the wrong section code",
+            "verify_sources": "Our AI will search",
+            "verified_pdfs": "verified government PDFs",
+            "based_on_answers": "based on your answers"
+        },
+        "success": {
+            "title": "Your guidance is ready!",
+            "subtitle": "We've analyzed your situation and prepared a personalized action plan.",
+            "view_guidance": "View Guidance"
+        }
+    },
+    "situation": {
+        "action_required": "ACTION REQUIRED",
+        "title": "We need a few details to get this right.",
+        "back_to_home": "Back to Home",
+        "back_to_history": "Back to Search History",
+        "urgency": {
+            "high": "Do now",
+            "medium": "Do next",
+            "low": "Can wait",
+            "high_hint": "Time-sensitive or high-impact",
+            "medium_hint": "Important, but not immediate",
+            "low_hint": "Optional or lower impact"
+        },
+        "confidence": {
+            "high": "High",
+            "medium": "Moderate",
+            "low": "Limited"
+        },
+        "primary_domain": "Primary Domain",
+        "related_domains": "Related Domains",
+        "success_likelihood": "Success Likelihood",
+        "status": "Status",
+        "created": "Created",
+        "suggestions": "Action Items",
+        "next_action": "Next Action",
+        "follow_up": "Follow Up",
+        "chat_with_ai": "Chat with AI",
+        "ask_question": "Ask a follow-up question",
+        "type_message": "Type your message..."
+    },
+    "domains": {
+        "title": "How can we help you today?",
+        "subtitle": "Select a domain below to narrow down your investigation and get more precise AI guidance.",
+        "back": "Back"
+    },
+    "account_details": {
+        "title": "Account Details",
+        "subtitle": "Manage your personal information",
+        "edit": "Edit",
+        "personal_information": "Personal Information",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "email": "Email",
+        "phone": "Phone",
+        "gender": "Gender",
+        "age_range": "Age Range",
+        "state": "State",
+        "city": "City",
+        "family_status": "Family Status",
+        "not_set": "Not Set",
+        "save": "Save Changes",
+        "saving": "Saving..."
     }
 }
