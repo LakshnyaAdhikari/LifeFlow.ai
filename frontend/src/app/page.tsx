@@ -25,9 +25,9 @@ export default function LandingPage() {
 
             if (res.ok) {
                 const data = await res.json();
-                // If a situation was created, redirect to its detail page
+                // If a situation was created, route through clarification page first
                 if (data.situation_id) {
-                    router.push(`/situation/${data.situation_id}`);
+                    router.push(`/intake/clarify/${data.situation_id}`);
                 } else {
                     // Fallback to home if no ID (though resolve should return one)
                     router.push("/home");

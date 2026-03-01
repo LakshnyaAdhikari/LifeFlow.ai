@@ -88,8 +88,8 @@ export default function Home() {
         }
         
         if (data.situation_id) {
-          // Redirect directly to situation guidance page (skip clarification flow)
-          router.push(`/situation/${data.situation_id}`);
+          // Route through clarification flow first (MCQ + finalizing UI)
+          router.push(`/intake/clarify/${data.situation_id}`);
         } else {
           console.warn("⚠️ No situation_id in response");
           alert("Response received but no situation ID. Check console for details.");
