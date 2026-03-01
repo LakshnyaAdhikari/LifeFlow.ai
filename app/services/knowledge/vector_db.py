@@ -150,7 +150,9 @@ class VectorDatabase:
         self,
         query_embedding: List[float],
         top_k: int = 5,
-        filter_metadata: Optional[Dict[str, Any]] = None
+        filter_metadata: Optional[Dict[str, Any]] = None,
+        alpha: float = 0.5,
+        min_authority: float = 0.0
     ) -> List[SearchResult]:
         """
         Search for similar vectors
@@ -172,8 +174,8 @@ class VectorDatabase:
         faiss.normalize_L2(query_vector)
         
         # Search
-        # Get more results if filtering
-        search_k = top_k * 3 if filter_metadata else top_k
+        # Get more results to allow for reranking
+        search_k = top_k * 5 if filter_metadata is None else top_k * 10
         scores, faiss_ids = self.index.search(query_vector, search_k)
         
         # Convert to results
@@ -192,18 +194,26 @@ class VectorDatabase:
             if filter_metadata:
                 if not self._matches_filter(metadata, filter_metadata):
                     continue
+
+            authority_weight = metadata.get("authority_weight", 0.4)
+            if authority_weight < min_authority:
+                continue
+
+            # V3 Authority Reranking Formula
+            final_score = float(score) * (1.0 + (authority_weight * alpha))
             
             results.append(SearchResult(
                 chunk_id=chunk_id,
-                score=float(score),
+                score=final_score,
                 content=metadata.get("content", ""),
                 metadata=metadata,
                 document_id=metadata.get("document_id", 0),
                 source_authority=metadata.get("source_authority", "Unknown")
             ))
             
-            if len(results) >= top_k:
-                break
+        # Re-sort natively by final_score descending and truncate to top_k
+        results.sort(key=lambda x: x.score, reverse=True)
+        results = results[:top_k]
         
         logger.info(f"Search returned {len(results)} results")
         return results

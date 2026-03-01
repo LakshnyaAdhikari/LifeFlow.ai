@@ -81,6 +81,7 @@ async def ingest_from_yaml(pipeline: IngestionPipeline, config_path: str = "know
                         metadata={
                             "original_url": url,
                             "doc_type": doc_config.get("doc_type", "information"),
+                            "authority_weight": source.get("authority_weight", 1.0)
                         }
                     )
                     success += 1
@@ -137,6 +138,7 @@ async def ingest_from_manifest(pipeline: IngestionPipeline, manifest_path: str =
                     "checksum": entry.get("checksum"),
                     "downloaded_at": entry.get("downloaded_at"),
                     "circular_number": entry.get("circular_number"),
+                    "authority_weight": 1.0,
                 }
             )
             success += 1
@@ -214,6 +216,7 @@ async def ingest_from_curated(pipeline: IngestionPipeline, curated_dir: str = "d
                     "doc_type": "curated_guide",
                     "local_path": str(txt_file),
                     "source": "curated",
+                    "authority_weight": 0.8,
                 }
             )
             success += 1

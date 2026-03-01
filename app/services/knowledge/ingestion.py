@@ -91,7 +91,8 @@ class IngestionPipeline:
                 title=title,
                 domain_id=domain.id,
                 content_hash=content_hash,
-                status="processing"
+                status="processing",
+                authority_weight=metadata.get("authority_weight", 0.4) if metadata else 0.4
             )
             self.db.add(doc)
             self.db.commit()
@@ -162,11 +163,16 @@ class IngestionPipeline:
         vector_metadata = []
         
         for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+            chunk_meta = chunk.get("metadata", {})
             chunk_record = KnowledgeChunk(
                 document_id=doc.id,
                 text=chunk["content"],
                 chunk_index=i,
-                chunk_metadata=chunk.get("metadata", {}),
+                chunk_metadata=chunk_meta,
+                authority_weight=chunk_meta.get("authority_weight", 0.4),
+                procedural_density=chunk_meta.get("procedural_density", 0.0),
+                chunk_type=chunk_meta.get("chunk_type", "explainer"),
+                extraction_quality_score=chunk_meta.get("extraction_quality_score", 1.0),
                 embedding=embedding,  # Store as JSON for SQLite
                 embedding_model="all-MiniLM-L6-v2",
                 quality_score=self._calculate_quality_score(chunk["content"])

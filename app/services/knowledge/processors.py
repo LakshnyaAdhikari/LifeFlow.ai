@@ -325,6 +325,43 @@ class TextChunker:
             chunk_overlap=settings["overlap"]
         )
 
+    def _extract_advanced_metadata(self, text: str) -> Dict[str, Any]:
+        """V3 Heuristic Extractor: Determines chunk_type, procedural_density, extraction_quality."""
+        text_lower = text.lower()
+        
+        # 1. Procedural Density (ratio of actionable keywords)
+        action_kw = ["step", "click", "form", "submit", "apply", "login", "register", 
+                     "fee", "payment", "rupees", "rs.", "deadline", "date", "days",
+                     "upload", "document", "portal", "website", "http", "www"]
+        kw_count = sum(1 for kw in action_kw if kw in text_lower)
+        procedural_density = min(1.0, kw_count / 10.0)
+        
+        # 2. Chunk Type prioritization
+        chunk_type = "explainer"
+        if any(kw in text_lower for kw in ["rs.", "rupees", "fee", "cost", "charge"]):
+            chunk_type = "fee"
+        elif any(kw in text_lower for kw in ["form", "application", "format", "annexure"]):
+            chunk_type = "form"
+        elif any(kw in text_lower for kw in ["deadline", "due date", "days from", "within"]):
+            chunk_type = "deadline"
+        elif any(kw in text_lower for kw in ["step", "first", "then", "finally", "process", "procedure", "how to"]):
+            chunk_type = "process"
+        elif any(kw in text_lower for kw in ["complaint", "grievance", "ombudsman", "appeal", "escalate"]):
+            chunk_type = "escalation"
+        elif "means" in text_lower or "defined as" in text_lower or "is a" in text_lower:
+            chunk_type = "definition"
+
+        # 3. Extraction Quality Score
+        quality = 1.0
+        if "  " * 10 in text: quality -= 0.2
+        if len(text.split()) > 50 and text.count('.') == 0: quality -= 0.3
+            
+        return {
+            "procedural_density": round(procedural_density, 2),
+            "chunk_type": chunk_type,
+            "extraction_quality_score": round(max(0.1, quality), 2)
+        }
+
     def chunk_text(self, text: str, metadata: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
         Chunk text into segments. Authority weight is propagated to every chunk.
@@ -351,7 +388,8 @@ class TextChunker:
                 for word in words:
                     if len(sub_para) + len(word) + 1 > self.chunk_size:
                         if len(current_chunk) + len(sub_para) > self.chunk_size and len(current_chunk) >= self.min_chunk_size:
-                            chunk_meta = {**metadata, "chunk_index": len(chunks), "authority_weight": authority_weight}
+                            adv_meta = self._extract_advanced_metadata(current_chunk.strip())
+                            chunk_meta = {**metadata, "chunk_index": len(chunks), "authority_weight": authority_weight, **adv_meta}
                             chunks.append({"content": current_chunk.strip(), "metadata": chunk_meta})
                             overlap_text = current_chunk[-self.chunk_overlap:] if self.chunk_overlap > 0 else ""
                             current_chunk = (overlap_text + " " + sub_para).strip()
@@ -364,7 +402,8 @@ class TextChunker:
                 para = sub_para # Leftover to flow into normal logic
 
             if len(current_chunk) + len(para) > self.chunk_size and len(current_chunk) >= self.min_chunk_size:
-                chunk_meta = {**metadata, "chunk_index": len(chunks), "authority_weight": authority_weight}
+                adv_meta = self._extract_advanced_metadata(current_chunk.strip())
+                chunk_meta = {**metadata, "chunk_index": len(chunks), "authority_weight": authority_weight, **adv_meta}
                 chunks.append({
                     "content": current_chunk.strip(),
                     "metadata": chunk_meta
@@ -376,7 +415,8 @@ class TextChunker:
                 current_chunk = (current_chunk + "\n\n" + para).strip() if current_chunk else para
 
         if current_chunk.strip() and len(current_chunk) >= self.min_chunk_size:
-            chunk_meta = {**metadata, "chunk_index": len(chunks), "authority_weight": authority_weight}
+            adv_meta = self._extract_advanced_metadata(current_chunk.strip())
+            chunk_meta = {**metadata, "chunk_index": len(chunks), "authority_weight": authority_weight, **adv_meta}
             chunks.append({
                 "content": current_chunk.strip(),
                 "metadata": chunk_meta
