@@ -51,6 +51,26 @@ class SituationResponse(BaseModel):
     days_active: int
 
 
+def _has_useful_mcq_questions(questions: Optional[List[Dict[str, Any]]]) -> bool:
+    """
+    Returns True only when we have at least 2 meaningful choice-based questions.
+    """
+    if not questions:
+        return False
+
+    valid_count = 0
+    for question in questions:
+        if not isinstance(question, dict):
+            continue
+        if question.get("type") != "choice":
+            continue
+        options = question.get("options") or []
+        if isinstance(options, list) and len(options) >= 2:
+            valid_count += 1
+
+    return valid_count >= 2
+
+
 @router.post("/create", response_model=SituationResponse)
 async def create_situation(
     payload: CreateSituationRequest,
@@ -203,9 +223,11 @@ async def get_situation(
         if not situation:
             raise HTTPException(status_code=404, detail="Situation not found")
         
-        # Lazy Load Questions if missing
-        if not situation.clarification_questions:
-            logger.info(f"Situation {situation.id} has no questions. Genererating lazily...")
+        # Lazy load/repair clarification questions if missing or low quality.
+        if not _has_useful_mcq_questions(situation.clarification_questions):
+            logger.info(
+                f"Situation {situation.id} clarification questions missing/weak. Generating MCQ set lazily..."
+            )
             try:
                 generator = get_clarification_generator()
                 questions = await generator.generate_questions(
@@ -217,7 +239,7 @@ async def get_situation(
                 situation.clarification_questions = [q.dict() for q in questions]
                 db.commit()
                 db.refresh(situation)
-                logger.info(f"Lazily generated {len(questions)} questions")
+                logger.info(f"Lazily generated {len(questions)} clarification questions")
             except Exception as e:
                 logger.error(f"Lazy generation failed: {e}")
                 # Don't fail the request, just return empty/default
