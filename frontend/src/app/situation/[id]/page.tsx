@@ -90,6 +90,7 @@ export default function SituationPage() {
     const [loadingGuidance, setLoadingGuidance] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({ 0: true });
+    const [sessionExpired, setSessionExpired] = useState(false);
 
     const sortedSuggestions = useMemo(() => {
         if (!guidance) return [];
@@ -102,6 +103,16 @@ export default function SituationPage() {
             setExpandedRows({ 0: true });
         }
     }, [guidance?.suggestions?.length]);
+
+    const handleSessionExpired = useCallback((detail?: string) => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user_id");
+        document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        setSessionExpired(true);
+        setError(detail || "Session expired. Please log in again.");
+        router.push(`/auth/login?next=/situation/${situationId}`);
+    }, [router, situationId]);
 
     const loadGuidance = useCallback(async (
         params?: {
@@ -116,7 +127,10 @@ export default function SituationPage() {
         if (!currentSituation && !queryText) return;
 
         const token = localStorage.getItem("access_token");
-        if (!token) return;
+        if (!token) {
+            handleSessionExpired("Session expired. Please log in again.");
+            return;
+        }
 
         setLoadingGuidance(true);
         setError(null);
@@ -139,6 +153,10 @@ export default function SituationPage() {
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 const detail = err?.detail || "Unknown error.";
+                if (res.status === 401) {
+                    handleSessionExpired(typeof detail === "string" ? detail : "Session expired. Please log in again.");
+                    return;
+                }
                 setError(`Failed to generate guidance: ${detail}`);
                 return;
             }
@@ -151,12 +169,12 @@ export default function SituationPage() {
         } finally {
             setLoadingGuidance(false);
         }
-    }, [situationId]);
+    }, [handleSessionExpired, situationId]);
 
     const loadSituation = useCallback(async () => {
         const token = localStorage.getItem("access_token");
         if (!token) {
-            router.push("/auth/login");
+            handleSessionExpired("Session expired. Please log in again.");
             return;
         }
 
@@ -168,6 +186,13 @@ export default function SituationPage() {
             });
 
             if (!res.ok) {
+                if (res.status === 401) {
+                    const err = await res.json().catch(() => ({}));
+                    const detail = err?.detail;
+                    handleSessionExpired(typeof detail === "string" ? detail : "Session expired. Please log in again.");
+                    setLoading(false);
+                    return;
+                }
                 setError("Failed to load situation.");
                 setLoading(false);
                 return;
@@ -205,7 +230,7 @@ export default function SituationPage() {
         } finally {
             setLoading(false);
         }
-    }, [loadGuidance, router, situationId]);
+    }, [handleSessionExpired, loadGuidance, situationId]);
 
     useEffect(() => {
         loadSituation();
@@ -561,9 +586,9 @@ export default function SituationPage() {
                             </div>
                         )}
 
-                        {guidance?.sources?.length ? (
-                            <div className="rounded-2xl border-2 border-border bg-card p-6">
-                                <h3 className="mb-3 font-semibold">Authoritative sources</h3>
+                        <div className="rounded-2xl border-2 border-border bg-card p-6">
+                            <h3 className="mb-3 font-semibold">Authoritative sources</h3>
+                            {guidance?.sources?.length ? (
                                 <div className="space-y-3">
                                     {guidance.sources.map((source, index) => (
                                         <div key={`${source.document_id}-${index}`} className="rounded-lg border border-border p-3">
@@ -583,8 +608,14 @@ export default function SituationPage() {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        ) : null}
+                            ) : (
+                                <div className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+                                    {sessionExpired
+                                        ? "Session expired. Log in again to load source links."
+                                        : "No source links available yet. Try Refresh plan after guidance loads."}
+                                </div>
+                            )}
+                        </div>
 
                         <div className="rounded-2xl border-2 border-border bg-card p-6">
                             <h3 className="mb-2 flex items-center gap-2 font-semibold">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bot, Loader2, MessageCircle, Send, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ClarificationAnswer, GuidanceResponse } from "@/types/guidance";
@@ -25,6 +26,7 @@ export default function FollowUpChatbot({
     clarificationAnswers = [],
     onApplyGuidance,
 }: FollowUpChatbotProps) {
+    const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
@@ -46,12 +48,33 @@ export default function FollowUpChatbot({
 
     const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading]);
 
+    const handleSessionExpired = (detail?: string) => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user_id");
+        document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        setMessages((prev) => [
+            ...prev,
+            {
+                id: `a-exp-${Date.now()}`,
+                role: "assistant",
+                text: detail || "Session expired. Please log in again to continue follow-up guidance.",
+            },
+        ]);
+        setTimeout(() => {
+            router.push(`/auth/login?next=/situation/${situationId}`);
+        }, 500);
+    };
+
     const sendMessage = async () => {
         const text = input.trim();
         if (!text || loading) return;
 
         const token = localStorage.getItem("access_token");
-        if (!token) return;
+        if (!token) {
+            handleSessionExpired();
+            return;
+        }
 
         const userMessage: ChatMessage = {
             id: `u-${Date.now()}`,
@@ -80,6 +103,10 @@ export default function FollowUpChatbot({
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
                 const detail = errorData?.detail || "Failed to get follow-up guidance.";
+                if (res.status === 401) {
+                    handleSessionExpired(typeof detail === "string" ? detail : undefined);
+                    return;
+                }
                 setMessages((prev) => [
                     ...prev,
                     {

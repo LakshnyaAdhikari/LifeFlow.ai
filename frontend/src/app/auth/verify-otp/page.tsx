@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { useLanguage } from "@/contexts/LanguageContext";
 
+const ACCESS_COOKIE_MAX_AGE_SECONDS = 60 * 240; // 4h, aligned with backend access token default.
+
 export default function VerifyOTPPage() {
     const { login: authLogin } = useAuth();
     const router = useRouter();
@@ -57,7 +59,7 @@ export default function VerifyOTPPage() {
 
             if (res.ok) {
                 authLogin(data.access_token, data.refresh_token, data.user_id.toString());
-                document.cookie = `access_token=${data.access_token}; path=/; max-age=3600; SameSite=Lax`;
+                document.cookie = `access_token=${data.access_token}; path=/; max-age=${ACCESS_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
                 localStorage.removeItem("pending_phone");
 
                 router.push("/home");

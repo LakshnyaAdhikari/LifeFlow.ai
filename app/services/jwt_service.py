@@ -2,11 +2,25 @@ from datetime import datetime, timedelta
 from typing import Optional
 import jwt
 import hashlib
+import os
 
 # JWT Configuration
 SECRET_KEY = "your-secret-key-change-this-in-production"  # TODO: Move to env var
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60  # 1 hour
+
+def _read_access_token_expiry_minutes() -> int:
+    """
+    Access token TTL in minutes.
+    Defaults to 240 (4h) for smoother user sessions.
+    """
+    raw = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "240").strip()
+    try:
+        value = int(raw)
+        return value if value > 0 else 240
+    except ValueError:
+        return 240
+
+ACCESS_TOKEN_EXPIRE_MINUTES = _read_access_token_expiry_minutes()
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 def hash_password(password: str) -> str:
