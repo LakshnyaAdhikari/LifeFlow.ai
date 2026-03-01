@@ -1,14 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
     AlertCircle,
     ArrowLeft,
     CheckCircle2,
     ChevronDown,
+    ClipboardList,
     Clock,
+    Flag,
+    History,
+    Lock,
     Loader2,
+    MessageCircleQuestion,
     RefreshCw,
     ShieldCheck,
     Sparkles,
@@ -28,6 +33,51 @@ interface Situation {
     updated_at?: string | null;
     last_interaction?: string | null;
     clarification_answers?: ClarificationAnswer[];
+}
+
+type WorkflowStatus = "locked" | "active" | "completed";
+
+interface WorkflowStep {
+    id: string;
+    title: string;
+    description: string;
+    status: WorkflowStatus;
+    requires_confirmation: boolean;
+    help_content?: string;
+    why_it_matters: string;
+    urgency: string;
+    can_skip: boolean;
+    estimated_time?: string;
+}
+
+interface PreviousInteraction {
+    type: string;
+    content?: Record<string, unknown>;
+    created_at?: string;
+}
+
+interface SituationContextPayload {
+    completed_steps?: string[];
+    previous_interactions?: PreviousInteraction[];
+}
+
+interface SituationPayload {
+    situation: Situation;
+    context?: SituationContextPayload;
+}
+
+interface ReadinessItem {
+    id: string;
+    label: string;
+    type: "document" | "permission" | "legal";
+    checked: boolean;
+}
+
+interface CaseActivityItem {
+    id: string;
+    event: string;
+    at: string;
+    type: string;
 }
 
 const urgencyMeta: Record<string, { label: string; tone: string; hint: string }> = {
@@ -79,6 +129,108 @@ const getSuccessLikelihood = (score: number) => {
     return "Limited";
 };
 
+const formatDateTime = (value?: string | null) => {
+    if (!value) return "Unknown";
+    try {
+        return new Date(value).toLocaleString();
+    } catch {
+        return "Unknown";
+    }
+};
+
+const slugify = (value: string) =>
+    value
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-")
+        .slice(0, 80);
+
+const buildWorkflowSteps = (
+    suggestions: Suggestion[],
+    completedIds: string[],
+    completedTitles: string[]
+): WorkflowStep[] => {
+    const completedIdSet = new Set(completedIds);
+    const completedTitleSet = new Set(completedTitles.map((title) => title.toLowerCase()));
+    const idCounts: Record<string, number> = {};
+
+    const baseSteps = suggestions.map((suggestion, index) => {
+        const baseSlug = slugify(suggestion.title) || `step-${index + 1}`;
+        idCounts[baseSlug] = (idCounts[baseSlug] || 0) + 1;
+        const id = idCounts[baseSlug] === 1 ? baseSlug : `${baseSlug}-${idCounts[baseSlug]}`;
+        const titleKey = suggestion.title.toLowerCase();
+        const shouldMarkCompleted = completedIdSet.has(id) || completedTitleSet.has(titleKey);
+
+        return {
+            id,
+            title: suggestion.title,
+            description: suggestion.description,
+            status: shouldMarkCompleted ? "completed" : "locked",
+            requires_confirmation: !suggestion.can_skip,
+            help_content: suggestion.can_skip
+                ? "This is optional. If it is slowing you down, continue with the next core step."
+                : "Collect required proof and acknowledgement details before continuing. If blocked, use the follow-up chat for case-specific guidance.",
+            why_it_matters: suggestion.why_it_matters,
+            urgency: suggestion.urgency || "medium",
+            can_skip: suggestion.can_skip,
+            estimated_time: suggestion.estimated_time,
+        } satisfies WorkflowStep;
+    });
+
+    return baseSteps.map((step) => {
+        if (step.status === "completed") return step;
+        return { ...step, status: "active" };
+    });
+};
+
+const buildReadinessItems = (domain: string, suggestions: Suggestion[]): ReadinessItem[] => {
+    const defaults: ReadinessItem[] = [
+        { id: "photo-id", label: "Government photo ID proof", type: "document", checked: false },
+        { id: "application-ref", label: "Application/reference number", type: "document", checked: false },
+        { id: "supporting-proof", label: "Supporting evidence (receipts/screenshots/notices)", type: "document", checked: false },
+        { id: "consent-auth", label: "Authorization/consent where required", type: "permission", checked: false },
+        { id: "deadline-note", label: "Any legal or portal deadline noted", type: "legal", checked: false },
+    ];
+
+    const domainLower = domain.toLowerCase();
+    if (domainLower.includes("identity")) {
+        defaults.push(
+            { id: "address-proof", label: "Address proof (recent and valid)", type: "document", checked: false },
+            { id: "mobile-linked", label: "Mobile number linked for OTP flows", type: "permission", checked: false }
+        );
+    }
+
+    const derivedFromGuidance = suggestions.slice(0, 3).map((suggestion, index) => ({
+        id: `guidance-${index + 1}`,
+        label: `For step "${suggestion.title}", keep required form/details ready`,
+        type: "legal" as const,
+        checked: false,
+    }));
+
+    return [...defaults, ...derivedFromGuidance];
+};
+
+const buildCaseActivityItems = (interactions: PreviousInteraction[]): CaseActivityItem[] => {
+    return interactions.map((item, index) => {
+        const summaryRaw = item.content?.summary;
+        const stepTitleRaw = item.content?.step_title;
+        const summary =
+            typeof summaryRaw === "string"
+                ? summaryRaw
+                : typeof stepTitleRaw === "string"
+                  ? `Completed step: ${stepTitleRaw}`
+                  : `${item.type} recorded`;
+
+        return {
+            id: `activity-${index}-${item.created_at || "na"}`,
+            event: summary,
+            at: item.created_at || new Date().toISOString(),
+            type: item.type,
+        };
+    });
+};
+
 export default function SituationPage() {
     const params = useParams();
     const router = useRouter();
@@ -91,20 +243,25 @@ export default function SituationPage() {
     const [loading, setLoading] = useState(true);
     const [loadingGuidance, setLoadingGuidance] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({ 0: true });
+    const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([]);
+    const [completedStepIdsFromDb, setCompletedStepIdsFromDb] = useState<string[]>([]);
+    const [completedStepTitlesFromDb, setCompletedStepTitlesFromDb] = useState<string[]>([]);
+    const [completedMessages, setCompletedMessages] = useState<Record<string, string>>({});
+    const [confirmationAnswers, setConfirmationAnswers] = useState<Record<string, "yes" | "not_yet" | undefined>>({});
+    const [correctionGuidance, setCorrectionGuidance] = useState<Record<string, string>>({});
+    const [helpOpen, setHelpOpen] = useState<Record<string, boolean>>({});
+    const [savingStepId, setSavingStepId] = useState<string | null>(null);
+    const [readinessOpen, setReadinessOpen] = useState(true);
+    const [activityOpen, setActivityOpen] = useState(true);
+    const [readinessItems, setReadinessItems] = useState<ReadinessItem[]>([]);
+    const [caseActivities, setCaseActivities] = useState<CaseActivityItem[]>([]);
     const [sessionExpired, setSessionExpired] = useState(false);
+    const stepRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
     const sortedSuggestions = useMemo(() => {
         if (!guidance) return [];
         return sortSuggestions(guidance.suggestions || []);
     }, [guidance]);
-
-    useEffect(() => {
-        const hasSuggestions = (guidance?.suggestions?.length || 0) > 0;
-        if (hasSuggestions) {
-            setExpandedRows({ 0: true });
-        }
-    }, [guidance?.suggestions?.length]);
 
     const handleSessionExpired = useCallback((detail?: string) => {
         localStorage.removeItem("access_token");
@@ -200,9 +357,39 @@ export default function SituationPage() {
                 return;
             }
 
-            const data = await res.json();
+            const data: SituationPayload = await res.json();
             const loadedSituation: Situation = data.situation;
             setSituation(loadedSituation);
+
+            const interactions = data.context?.previous_interactions || [];
+            const completedStepIds = new Set<string>();
+            const completedStepTitles = new Set<string>(data.context?.completed_steps || []);
+            const dbMessages: Record<string, string> = {};
+
+            interactions
+                .filter((item) => item.type === "step_completed")
+                .forEach((item) => {
+                    const content = item.content || {};
+                    const stepId = typeof content.step_id === "string" ? content.step_id : "";
+                    const stepTitle = typeof content.step_title === "string" ? content.step_title : "";
+                    const confirmationMessage =
+                        typeof content.confirmation_message === "string"
+                            ? content.confirmation_message
+                            : "Step completed and logged.";
+
+                    if (stepId) {
+                        completedStepIds.add(stepId);
+                        dbMessages[stepId] = confirmationMessage;
+                    }
+                    if (stepTitle) {
+                        completedStepTitles.add(stepTitle);
+                    }
+                });
+
+            setCompletedStepIdsFromDb([...completedStepIds]);
+            setCompletedStepTitlesFromDb([...completedStepTitles]);
+            setCompletedMessages(dbMessages);
+            setCaseActivities(buildCaseActivityItems(interactions));
 
             const cacheKey = `guidance:${situationId}`;
             const cachedGuidance = sessionStorage.getItem(cacheKey);
@@ -238,9 +425,151 @@ export default function SituationPage() {
         loadSituation();
     }, [loadSituation]);
 
-    const toggleRow = (index: number) => {
-        setExpandedRows((prev) => ({ ...prev, [index]: !prev[index] }));
-    };
+    useEffect(() => {
+        if (!sortedSuggestions.length) {
+            setWorkflowSteps([]);
+            return;
+        }
+
+        const initialSteps = buildWorkflowSteps(
+            sortedSuggestions,
+            completedStepIdsFromDb,
+            completedStepTitlesFromDb
+        );
+        setWorkflowSteps(initialSteps);
+    }, [sortedSuggestions, completedStepIdsFromDb, completedStepTitlesFromDb]);
+
+    useEffect(() => {
+        if (!situation || !guidance) return;
+        setReadinessItems(buildReadinessItems(situation.primary_domain, sortedSuggestions));
+    }, [guidance, situation, sortedSuggestions]);
+
+    const persistWorkflowStep = useCallback(
+        async (completedStep: WorkflowStep, updatedSteps: WorkflowStep[]) => {
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                handleSessionExpired("Session expired. Please log in again.");
+                return;
+            }
+
+            const completedTitles = updatedSteps
+                .filter((step) => step.status === "completed")
+                .map((step) => step.title);
+            const pendingTitles = updatedSteps
+                .filter((step) => step.status !== "completed")
+                .map((step) => step.title);
+            const confirmationMessage = `Completed and verified at ${new Date().toLocaleString()}`;
+
+            setSavingStepId(completedStep.id);
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/situations/${situationId}/update`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        interaction_type: "step_completed",
+                        content: {
+                            summary: `Completed step: ${completedStep.title}`,
+                            step_id: completedStep.id,
+                            step_title: completedStep.title,
+                            confirmation_message: confirmationMessage,
+                        },
+                        updates: {
+                            completed_steps: completedTitles,
+                            pending_steps: pendingTitles,
+                        },
+                    }),
+                });
+
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        handleSessionExpired("Session expired. Please log in again.");
+                        return;
+                    }
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(typeof err.detail === "string" ? err.detail : "Failed to persist step update.");
+                }
+
+                setCompletedMessages((prev) => ({
+                    ...prev,
+                    [completedStep.id]: confirmationMessage,
+                }));
+                setCompletedStepIdsFromDb((prev) => (prev.includes(completedStep.id) ? prev : [...prev, completedStep.id]));
+                setCompletedStepTitlesFromDb((prev) =>
+                    prev.includes(completedStep.title) ? prev : [...prev, completedStep.title]
+                );
+                setCaseActivities((prev) => [
+                    {
+                        id: `activity-local-${completedStep.id}-${Date.now()}`,
+                        event: `Completed step: ${completedStep.title}`,
+                        at: new Date().toISOString(),
+                        type: "step_completed",
+                    },
+                    ...prev,
+                ]);
+            } catch (persistError) {
+                const message = persistError instanceof Error ? persistError.message : "Failed to save step progress.";
+                setError(message);
+            } finally {
+                setSavingStepId(null);
+            }
+        },
+        [handleSessionExpired, situationId]
+    );
+
+    const handleCompleteStep = useCallback(
+        async (stepId: string) => {
+            const activeStep = workflowSteps.find((step) => step.id === stepId && step.status === "active");
+            if (!activeStep) return;
+
+            if (activeStep.requires_confirmation) {
+                const answer = confirmationAnswers[stepId];
+                if (!answer) {
+                    setCorrectionGuidance((prev) => ({
+                        ...prev,
+                        [stepId]: "Please confirm whether you received the acknowledgement number before completing this step.",
+                    }));
+                    return;
+                }
+
+                if (answer === "not_yet") {
+                    setCorrectionGuidance((prev) => ({
+                        ...prev,
+                        [stepId]:
+                            "Do this before continuing: revisit the authority portal or service desk, request an acknowledgement/receipt number, and keep a screenshot or copy for records.",
+                    }));
+                    return;
+                }
+            }
+
+            setCorrectionGuidance((prev) => ({ ...prev, [stepId]: "" }));
+
+            const currentIndex = workflowSteps.findIndex((step) => step.id === stepId);
+            const updatedSteps = workflowSteps.map((step) => {
+                if (step.id === stepId) return { ...step, status: "completed" as const };
+                return step;
+            });
+
+            setWorkflowSteps(updatedSteps);
+
+            const completed = updatedSteps.find((step) => step.id === stepId);
+            if (completed) {
+                await persistWorkflowStep(completed, updatedSteps);
+            }
+
+            const nextActive =
+                updatedSteps.slice(currentIndex + 1).find((step) => step.status === "active") ||
+                updatedSteps.find((step) => step.status === "active");
+            if (nextActive) {
+                setTimeout(() => {
+                    stepRefs.current[nextActive.id]?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 120);
+            }
+        },
+        [confirmationAnswers, persistWorkflowStep, workflowSteps]
+    );
 
     if (loading) {
         return (
@@ -419,54 +748,197 @@ export default function SituationPage() {
                                 )}
 
                                 <div className="rounded-2xl border-2 border-border bg-card p-6">
-                                    <h3 className="mb-4 text-lg font-semibold">Step-by-step action plan</h3>
-                                    <div className="space-y-3">
-                                        {sortedSuggestions.map((suggestion, index) => {
-                                            const urgencyKey = (suggestion.urgency || "medium").toLowerCase();
+                                    <button
+                                        onClick={() => setReadinessOpen((prev) => !prev)}
+                                        className="flex w-full items-center justify-between text-left"
+                                    >
+                                        <div>
+                                            <h3 className="flex items-center gap-2 text-lg font-semibold">
+                                                <ClipboardList className="h-4 w-4 text-primary" />
+                                                What to Keep Ready
+                                            </h3>
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                Documents, permissions, and legal checklist for this guidance.
+                                            </p>
+                                        </div>
+                                        <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform", readinessOpen && "rotate-180")} />
+                                    </button>
+
+                                    {readinessOpen && (
+                                        <div className="mt-4 space-y-3 border-t border-border pt-4">
+                                            <div className="space-y-2">
+                                                {readinessItems.map((item) => (
+                                                    <label
+                                                        key={item.id}
+                                                        className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 hover:bg-muted/30"
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={item.checked}
+                                                            onChange={() =>
+                                                                setReadinessItems((prev) =>
+                                                                    prev.map((existing) =>
+                                                                        existing.id === item.id
+                                                                            ? { ...existing, checked: !existing.checked }
+                                                                            : existing
+                                                                    )
+                                                                )
+                                                            }
+                                                            className="mt-0.5 h-4 w-4 accent-primary"
+                                                        />
+                                                        <div className="flex-1">
+                                                            <p className="text-sm">{item.label}</p>
+                                                            <p className="mt-0.5 text-xs capitalize text-muted-foreground">{item.type}</p>
+                                                        </div>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            <a
+                                                href={`/report?from=home&situation_id=${situation.id}`}
+                                                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
+                                            >
+                                                <Flag className="h-4 w-4" />
+                                                Raise issue under guidance
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="rounded-2xl border-2 border-border bg-card p-6">
+                                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                        <h3 className="text-lg font-semibold">Step-by-step action plan</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Progress: {workflowSteps.filter((step) => step.status === "completed").length} of {workflowSteps.length} steps completed
+                                        </p>
+                                    </div>
+                                    <div className="ml-3 space-y-3 border-l-2 border-border pl-4">
+                                        {workflowSteps.map((step, index) => {
+                                            const urgencyKey = (step.urgency || "medium").toLowerCase();
                                             const urgency = urgencyMeta[urgencyKey] || urgencyMeta.medium;
-                                            const isExpanded = !!expandedRows[index];
+                                            const isCompleted = step.status === "completed";
+                                            const isActive = step.status === "active";
+                                            const isLocked = step.status === "locked";
+                                            const confirmation = confirmationAnswers[step.id];
+                                            const confirmationMessage = completedMessages[step.id] || "Step completed and added to your timeline.";
 
                                             return (
-                                                <div key={`${suggestion.title}-${index}`} className="rounded-xl border border-border bg-background">
-                                                    <button
-                                                        onClick={() => toggleRow(index)}
-                                                        className="flex w-full items-start gap-3 p-4 text-left"
-                                                    >
-                                                        <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                                                            {index + 1}
+                                                <div
+                                                    key={step.id}
+                                                    ref={(el) => {
+                                                        stepRefs.current[step.id] = el;
+                                                    }}
+                                                    className={cn(
+                                                        "rounded-xl border bg-background transition-all",
+                                                        isActive && "border-primary/50 shadow-sm",
+                                                        isCompleted && "border-emerald-300 dark:border-emerald-800",
+                                                        isLocked && "border-border opacity-70"
+                                                    )}
+                                                >
+                                                    <div className="flex items-start gap-3 p-4">
+                                                        <div
+                                                            className={cn(
+                                                                "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
+                                                                isCompleted && "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+                                                                isActive && "bg-primary/10 text-primary",
+                                                                isLocked && "bg-muted text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : isLocked ? <Lock className="h-3.5 w-3.5" /> : index + 1}
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex flex-wrap items-center gap-2">
-                                                                <h4 className="font-semibold">{suggestion.title}</h4>
+                                                                <h4 className="font-semibold">{step.title}</h4>
                                                                 <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", urgency.tone)}>
                                                                     {urgency.label}
                                                                 </span>
-                                                                {suggestion.estimated_time && (
+                                                                {step.estimated_time && (
                                                                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                                                                         <Clock className="h-3 w-3" />
-                                                                        {suggestion.estimated_time}
+                                                                        {step.estimated_time}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                             <p className="mt-1 text-xs text-muted-foreground">{urgency.hint}</p>
+                                                            {isCompleted && (
+                                                                <p className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">{confirmationMessage}</p>
+                                                            )}
+                                                            {isLocked && (
+                                                                <p className="mt-2 text-xs text-muted-foreground">Complete the current active step to unlock this.</p>
+                                                            )}
                                                         </div>
-                                                        <ChevronDown
-                                                            className={cn("h-5 w-5 text-muted-foreground transition-transform", isExpanded && "rotate-180")}
-                                                        />
-                                                    </button>
+                                                    </div>
 
-                                                    {isExpanded && (
+                                                    {isActive && (
                                                         <div className="space-y-3 border-t border-border px-4 pb-4 pt-3">
-                                                            <p className="text-sm text-muted-foreground">{suggestion.description}</p>
+                                                            <p className="text-sm text-muted-foreground">{step.description}</p>
                                                             <div className="rounded-lg bg-muted/40 p-3 text-sm">
-                                                                <span className="font-semibold">Why this is suggested:</span> {suggestion.why_it_matters}
+                                                                <span className="font-semibold">Why this is suggested:</span> {step.why_it_matters}
                                                             </div>
-                                                            <div className="rounded-lg bg-muted/40 p-3 text-sm">
-                                                                <span className="font-semibold">What happens if you skip:</span>{" "}
-                                                                {suggestion.can_skip
-                                                                    ? "Usually low impact, but it may reduce completeness for edge cases."
-                                                                    : "It can block or delay downstream steps and increase rework risk."}
+
+                                                            {step.requires_confirmation && (
+                                                                <div className="rounded-lg border border-border p-3">
+                                                                    <p className="text-sm font-medium">Did you receive acknowledgement number?</p>
+                                                                    <div className="mt-2 flex gap-2">
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                setConfirmationAnswers((prev) => ({ ...prev, [step.id]: "yes" }))
+                                                                            }
+                                                                            className={cn(
+                                                                                "rounded-md border px-3 py-1.5 text-sm",
+                                                                                confirmation === "yes"
+                                                                                    ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+                                                                                    : "border-border hover:bg-muted"
+                                                                            )}
+                                                                        >
+                                                                            Yes
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                setConfirmationAnswers((prev) => ({ ...prev, [step.id]: "not_yet" }))
+                                                                            }
+                                                                            className={cn(
+                                                                                "rounded-md border px-3 py-1.5 text-sm",
+                                                                                confirmation === "not_yet"
+                                                                                    ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+                                                                                    : "border-border hover:bg-muted"
+                                                                            )}
+                                                                        >
+                                                                            Not yet
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {!!correctionGuidance[step.id] && (
+                                                                <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+                                                                    {correctionGuidance[step.id]}
+                                                                </div>
+                                                            )}
+
+                                                            <div className="flex flex-wrap gap-2">
+                                                                <button
+                                                                    onClick={() => handleCompleteStep(step.id)}
+                                                                    disabled={savingStepId === step.id}
+                                                                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                                                                >
+                                                                    {savingStepId === step.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                                                                    Mark as Done
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setHelpOpen((prev) => ({ ...prev, [step.id]: !prev[step.id] }))}
+                                                                    className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
+                                                                >
+                                                                    <MessageCircleQuestion className="h-4 w-4" />
+                                                                    Need help with this step?
+                                                                </button>
                                                             </div>
+
+                                                            {helpOpen[step.id] && (
+                                                                <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+                                                                    {step.help_content || "Use follow-up chat to ask what documents, timings, or portal actions are required before marking this step complete."}
+                                                                </div>
+                                                            )}
+
                                                             {!!guidance.sources?.length && (
                                                                 <div className="rounded-lg border border-border p-3">
                                                                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -474,7 +946,7 @@ export default function SituationPage() {
                                                                     </p>
                                                                     <div className="space-y-1">
                                                                         {guidance.sources.slice(0, 2).map((source, srcIndex) => (
-                                                                            <div key={`${suggestion.title}-${index}-src-${srcIndex}`} className="text-xs">
+                                                                            <div key={`${step.id}-src-${srcIndex}`} className="text-xs">
                                                                                 {source.url && !source.url.startsWith("file://") ? (
                                                                                     <a
                                                                                         href={source.url}
@@ -495,7 +967,7 @@ export default function SituationPage() {
                                                             )}
                                                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                                 <CheckCircle2 className="h-3.5 w-3.5" />
-                                                                {suggestion.can_skip ? "Marked optional by the model." : "Marked core for progress."}
+                                                                {step.can_skip ? "Marked optional by the model." : "Marked core for progress."}
                                                             </div>
                                                         </div>
                                                     )}
@@ -503,6 +975,50 @@ export default function SituationPage() {
                                             );
                                         })}
                                     </div>
+                                </div>
+
+                                <div className="rounded-2xl border-2 border-border bg-card p-6">
+                                    <button
+                                        onClick={() => setActivityOpen((prev) => !prev)}
+                                        className="flex w-full items-center justify-between text-left"
+                                    >
+                                        <div>
+                                            <h3 className="flex items-center gap-2 text-lg font-semibold">
+                                                <History className="h-4 w-4 text-primary" />
+                                                Case Activity
+                                            </h3>
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                Maintained timeline of actions taken and when they happened.
+                                            </p>
+                                        </div>
+                                        <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform", activityOpen && "rotate-180")} />
+                                    </button>
+
+                                    {activityOpen && (
+                                        <div className="mt-4 border-t border-border pt-4">
+                                            {caseActivities.length ? (
+                                                <div className="ml-2 space-y-3 border-l-2 border-border pl-4">
+                                                    {caseActivities
+                                                        .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+                                                        .map((activity) => (
+                                                            <div key={activity.id} className="relative rounded-lg border border-border bg-background p-3">
+                                                                <div className="absolute -left-[22px] top-4 h-2.5 w-2.5 rounded-full bg-primary" />
+                                                                <p className="text-sm font-medium">{activity.event}</p>
+                                                                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                                                                    <Clock className="h-3.5 w-3.5" />
+                                                                    <span>{formatDateTime(activity.at)}</span>
+                                                                    <span className="rounded bg-muted px-1.5 py-0.5 uppercase">{activity.type}</span>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                </div>
+                                            ) : (
+                                                <div className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+                                                    No case activity yet. Complete a step to start the timeline.
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {!!guidance.cross_domain_insights?.length && (
@@ -530,7 +1046,7 @@ export default function SituationPage() {
                         )}
                     </div>
 
-                    <aside className="space-y-6 lg:col-span-4">
+                    <aside className="space-y-6 lg:col-span-4 lg:sticky lg:top-6 self-start">
                         {guidance && (
                             <div className="rounded-2xl border-2 border-border bg-card p-6">
                                 <h3 className="mb-3 font-semibold">Confidence</h3>

@@ -1,28 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Instagram, Linkedin, Github, Heart } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Mail, Github, Linkedin } from "lucide-react";
 
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Footer() {
     const { t } = useLanguage();
+    const pathname = usePathname();
+
+    const from = pathname?.startsWith("/home") ? "home" : "landing";
+
+    const withFrom = (href: string) => {
+        const [path, hash] = href.split("#");
+        const separator = path.includes("?") ? "&" : "?";
+        const base = `${path}${separator}from=${from}`;
+        return hash ? `${base}#${hash}` : base;
+    };
 
     const sections = [
         {
             title: t("footer.product"),
             links: [
-                { name: t("footer.links.features"), href: "/#features" },
-                { name: t("footer.links.how_it_works"), href: "/#how-it-works" },
-                { name: t("footer.links.roadmap"), href: "/roadmap" },
+                { name: t("footer.links.features"), href: "/features" },
+                { name: t("footer.links.how_it_works"), href: "/how-it-works" },
+                { name: t("footer.links.knowledge_hub"), href: "/knowledge-hub" },
             ],
         },
         {
             title: t("footer.resources"),
             links: [
-                { name: t("footer.links.knowledge_hub"), href: "/knowledge-hub" },
                 { name: t("footer.links.legal_guides"), href: "/guides" },
                 { name: t("footer.links.faq"), href: "/faq" },
+                { name: t("footer.links.roadmap"), href: "/roadmap" },
             ],
         },
         {
@@ -58,13 +69,27 @@ export default function Footer() {
                             {t("footer.description")}
                         </p>
                         <div className="flex items-center gap-4">
-                            <a href="#" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-colors">
-                                <Twitter className="w-4 h-4" />
+                            <a
+                                href="mailto:hello@lifeflow.ai"
+                                aria-label="Email LifeFlow"
+                                className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-colors"
+                            >
+                                <Mail className="w-4 h-4" />
                             </a>
-                            <a href="#" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-colors">
+                            <a
+                                href="https://github.com/LakshnyaAdhikari/LifeFlow.ai"
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label="LifeFlow GitHub"
+                                className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-colors"
+                            >
                                 <Github className="w-4 h-4" />
                             </a>
-                            <a href="#" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-colors">
+                            <a
+                                href="/about"
+                                aria-label="About LifeFlow"
+                                className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-colors"
+                            >
                                 <Linkedin className="w-4 h-4" />
                             </a>
                         </div>
@@ -80,7 +105,7 @@ export default function Footer() {
                                 {section.links.map((link) => (
                                     <li key={link.name}>
                                         <Link
-                                            href={link.href}
+                                            href={withFrom(link.href)}
                                             className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                         >
                                             {link.name}
