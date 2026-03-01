@@ -2,15 +2,22 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bot, Loader2, MessageCircle, Send, X, Sparkles } from "lucide-react";
+import { Bot, ExternalLink, Loader2, MessageCircle, Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ClarificationAnswer, GuidanceResponse } from "@/types/guidance";
+import {
+    ClarificationAnswer,
+    FollowUpChatResponse,
+    FollowUpChatTurn,
+    GuidanceResponse,
+} from "@/types/guidance";
 
 interface ChatMessage {
     id: string;
     role: "user" | "assistant";
-    text?: string;
-    guidance?: GuidanceResponse;
+    text: string;
+    citations?: FollowUpChatResponse["citations"];
+    confidence?: number;
+    followUpQuestions?: string[];
 }
 
 interface FollowUpChatbotProps {
@@ -24,7 +31,6 @@ export default function FollowUpChatbot({
     domain,
     situationId,
     clarificationAnswers = [],
-    onApplyGuidance,
 }: FollowUpChatbotProps) {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
@@ -34,16 +40,15 @@ export default function FollowUpChatbot({
         {
             id: "welcome",
             role: "assistant",
-            text: "Ask follow-up questions about this case. I will respond using official sources already retrieved for your situation.",
+            text:
+                "Ask anything about this case. I will answer in plain language using your situation context and official sources.",
         },
     ]);
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        if (isOpen) {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
+        if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isOpen]);
 
     const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading]);
@@ -58,7 +63,7 @@ export default function FollowUpChatbot({
             {
                 id: `a-exp-${Date.now()}`,
                 role: "assistant",
-                text: detail || "Session expired. Please log in again to continue follow-up guidance.",
+                text: detail || "Session expired. Please log in again to continue.",
             },
         ]);
         setTimeout(() => {
@@ -66,8 +71,18 @@ export default function FollowUpChatbot({
         }, 500);
     };
 
-    const sendMessage = async () => {
-        const text = input.trim();
+    const buildHistoryPayload = (): FollowUpChatTurn[] => {
+        return messages
+            .filter((m) => m.id !== "welcome")
+            .slice(-8)
+            .map((m) => ({
+                role: m.role,
+                content: m.text,
+            }));
+    };
+
+    const sendMessage = async (explicitText?: string) => {
+        const text = (explicitText ?? input).trim();
         if (!text || loading) return;
 
         const token = localStorage.getItem("access_token");
@@ -86,23 +101,23 @@ export default function FollowUpChatbot({
         setLoading(true);
 
         try {
-            const res = await fetch("http://127.0.0.1:8000/guidance/suggestions", {
+            const res = await fetch("http://127.0.0.1:8000/guidance/followup-chat", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    query: text,
-                    domain,
                     situation_id: situationId,
+                    message: text,
                     clarification_answers: clarificationAnswers,
+                    history: buildHistoryPayload(),
                 }),
             });
 
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
-                const detail = errorData?.detail || "Failed to get follow-up guidance.";
+                const detail = errorData?.detail || "Failed to get follow-up answer.";
                 if (res.status === 401) {
                     handleSessionExpired(typeof detail === "string" ? detail : undefined);
                     return;
@@ -118,13 +133,16 @@ export default function FollowUpChatbot({
                 return;
             }
 
-            const guidance: GuidanceResponse = await res.json();
+            const reply: FollowUpChatResponse = await res.json();
             setMessages((prev) => [
                 ...prev,
                 {
                     id: `a-${Date.now()}`,
                     role: "assistant",
-                    guidance,
+                    text: reply.answer,
+                    citations: reply.citations || [],
+                    confidence: reply.confidence,
+                    followUpQuestions: reply.follow_up_questions || [],
                 },
             ]);
         } catch {
@@ -133,7 +151,7 @@ export default function FollowUpChatbot({
                 {
                     id: `a-net-${Date.now()}`,
                     role: "assistant",
-                    text: "Network issue while generating follow-up guidance. Please try again.",
+                    text: "Network issue while generating follow-up answer. Please try again.",
                 },
             ]);
         } finally {
@@ -166,7 +184,7 @@ export default function FollowUpChatbot({
                 <div
                     className={cn(
                         "fixed z-50 rounded-2xl border-2 border-border bg-card shadow-2xl",
-                        "bottom-20 right-5 w-[360px] max-w-[calc(100vw-2rem)] h-[560px]",
+                        "bottom-20 right-5 w-[380px] max-w-[calc(100vw-2rem)] h-[600px]",
                         "max-md:left-4 max-md:right-4 max-md:w-auto"
                     )}
                 >
@@ -177,59 +195,71 @@ export default function FollowUpChatbot({
                             </div>
                             <div>
                                 <p className="text-sm font-semibold">LifeFlow Assistant</p>
-                                <p className="text-xs text-muted-foreground">Grounded follow-up guidance</p>
+                                <p className="text-xs text-muted-foreground">Context-aware follow-up chat</p>
                             </div>
                         </div>
+                        <p className="text-[11px] text-muted-foreground">{domain}</p>
                     </div>
 
-                    <div className="h-[430px] overflow-y-auto px-4 py-3 space-y-3">
+                    <div className="h-[470px] overflow-y-auto px-4 py-3 space-y-3">
                         {messages.map((message) => {
                             if (message.role === "user") {
                                 return (
                                     <div key={message.id} className="flex justify-end">
-                                        <div className="max-w-[85%] rounded-xl bg-primary px-3 py-2 text-sm text-primary-foreground">
+                                        <div className="max-w-[88%] rounded-xl bg-primary px-3 py-2 text-sm text-primary-foreground whitespace-pre-wrap">
                                             {message.text}
                                         </div>
                                     </div>
                                 );
                             }
 
-                            if (message.guidance) {
-                                const topSuggestions = message.guidance.suggestions.slice(0, 3);
-                                return (
-                                    <div key={message.id} className="max-w-[92%] rounded-xl border border-border bg-background p-3">
-                                        <div className="mb-2 flex items-center gap-1 text-xs font-semibold text-primary">
-                                            <Sparkles className="h-3.5 w-3.5" />
-                                            Follow-up guidance
-                                        </div>
-                                        <div className="space-y-2">
-                                            {topSuggestions.map((suggestion, index) => (
-                                                <div key={`${message.id}-${index}`} className="rounded-lg border border-border p-2">
-                                                    <p className="text-sm font-semibold">{suggestion.title}</p>
-                                                    <p className="text-xs text-muted-foreground line-clamp-3">{suggestion.description}</p>
+                            return (
+                                <div key={message.id} className="max-w-[94%] rounded-xl border border-border bg-background p-3">
+                                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.text}</p>
+
+                                    {typeof message.confidence === "number" && (
+                                        <p className="mt-2 text-[11px] text-muted-foreground">
+                                            Confidence {(message.confidence * 100).toFixed(0)}%
+                                        </p>
+                                    )}
+
+                                    {!!message.citations?.length && (
+                                        <div className="mt-2 border-t border-border pt-2 space-y-1">
+                                            <p className="text-[11px] font-medium text-muted-foreground">Sources</p>
+                                            {message.citations.slice(0, 3).map((citation, idx) => (
+                                                <div key={`${message.id}-src-${idx}`} className="text-xs">
+                                                    {citation.url && !citation.url.startsWith("file://") ? (
+                                                        <a
+                                                            href={citation.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1 text-primary hover:underline"
+                                                        >
+                                                            {citation.title}
+                                                            <ExternalLink className="h-3 w-3" />
+                                                        </a>
+                                                    ) : (
+                                                        <span className="font-medium">{citation.title}</span>
+                                                    )}
+                                                    <p className="text-muted-foreground">{citation.authority}</p>
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="mt-2 flex items-center justify-between">
-                                            <p className="text-[11px] text-muted-foreground">
-                                                Confidence {(message.guidance.confidence.score * 100).toFixed(0)}%
-                                            </p>
-                                            {onApplyGuidance && (
-                                                <button
-                                                    onClick={() => onApplyGuidance(message.guidance!)}
-                                                    className="text-xs font-medium text-primary hover:underline"
-                                                >
-                                                    Apply to page
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            }
+                                    )}
 
-                            return (
-                                <div key={message.id} className="max-w-[90%] rounded-xl border border-border bg-background px-3 py-2 text-sm">
-                                    {message.text}
+                                    {!!message.followUpQuestions?.length && (
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            {message.followUpQuestions.slice(0, 2).map((q, idx) => (
+                                                <button
+                                                    key={`${message.id}-q-${idx}`}
+                                                    onClick={() => sendMessage(q)}
+                                                    className="rounded-full border border-border px-2.5 py-1 text-xs hover:bg-muted"
+                                                >
+                                                    {q}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
@@ -255,7 +285,7 @@ export default function FollowUpChatbot({
                                 className="h-10 flex-1 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                             <button
-                                onClick={sendMessage}
+                                onClick={() => sendMessage()}
                                 disabled={!canSend}
                                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
                                 aria-label="Send"

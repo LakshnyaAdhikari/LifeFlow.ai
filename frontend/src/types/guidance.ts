@@ -41,3 +41,23 @@ export interface GuidanceResponse {
         domain: string;
     };
 }
+
+export interface FollowUpCitation {
+    title: string;
+    authority: string;
+    url?: string | null;
+    document_id?: number | null;
+}
+
+export interface FollowUpChatTurn {
+    role: "user" | "assistant";
+    content: string;
+}
+
+export interface FollowUpChatResponse {
+    answer: string;
+    citations: FollowUpCitation[];
+    confidence: number;
+    follow_up_questions: string[];
+    style: string;
+}

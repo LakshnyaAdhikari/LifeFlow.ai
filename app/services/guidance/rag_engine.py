@@ -231,6 +231,135 @@ class GuidanceEngine:
             logger.error(f"Failed to generate guidance: {e}")
             raise
 
+    async def generate_followup_chat(
+        self,
+        message: str,
+        domain: str,
+        situation_title: str,
+        clarification_answers: Optional[List[Dict[str, str]]] = None,
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Conversational, context-grounded follow-up chat.
+        Returns plain-language answer plus citations.
+        """
+        clean_message = (message or "").strip()
+        if not clean_message:
+            return {
+                "answer": "Please ask a follow-up question so I can help.",
+                "citations": [],
+                "confidence": 0.0,
+                "follow_up_questions": [],
+                "style": "default",
+            }
+
+        style = self._detect_response_style(clean_message)
+        answers_text = self._format_clarification_answers(clarification_answers or [])
+        history_text = self._format_conversation_history(conversation_history or [])
+
+        retrieval_query = (
+            f"Case: {situation_title}\n"
+            f"Domain: {domain}\n"
+            f"Follow-up question: {clean_message}\n"
+            f"{answers_text}"
+        )
+
+        query_embedding = await self.llm_client.generate_embedding(retrieval_query)
+        search_results = self.vector_db.search(
+            query_embedding=query_embedding,
+            top_k=6,
+            filter_metadata={"domain": domain} if domain != "General" else None,
+        )
+        authoritative_results = self._filter_authoritative_results(search_results)
+        sources = self._extract_sources(authoritative_results)[:4]
+
+        if not authoritative_results:
+            return {
+                "answer": self._fallback_followup_answer(
+                    message=clean_message,
+                    domain=domain,
+                    style=style,
+                    snippets=[],
+                ),
+                "citations": [],
+                "confidence": 0.25,
+                "follow_up_questions": self._build_followup_questions(domain, low_authority=True),
+                "style": style,
+            }
+
+        knowledge_context = self._build_knowledge_context(authoritative_results[:4])
+        prompt = f"""
+You are LifeFlow Assistant, a conversational legal-procedure helper.
+You must answer naturally like a chat assistant, while staying grounded in retrieved sources.
+
+Response style requested: {style}
+Domain: {domain}
+Situation title: {situation_title}
+
+Clarification answers:
+{answers_text if answers_text else "None provided."}
+
+Conversation history:
+{history_text if history_text else "No prior turns."}
+
+Authoritative source context:
+{knowledge_context}
+
+User follow-up:
+"{clean_message}"
+
+Rules:
+1) Give a direct answer first, in plain language.
+2) If style is "eli10", use simple words and short sentences.
+3) If style is "summary", keep it concise and structured.
+4) If style is "checklist", provide clear numbered steps.
+5) Do not invent facts outside source context.
+6) If uncertain, state what is missing.
+7) End with 1-2 practical next actions.
+"""
+
+        try:
+            llm_response = await self.llm_client.generate(
+                prompt=prompt,
+                system_prompt=(
+                    "You are a grounded follow-up assistant. "
+                    "Be conversational, accurate, and explicitly non-hallucinatory."
+                ),
+                temperature=0.3,
+                max_tokens=900,
+            )
+            answer = (llm_response.content or "").strip()
+        except Exception as e:
+            logger.error(f"Follow-up chat generation failed: {e}")
+            answer = ""
+
+        if not answer or answer.startswith("[AI DISABLED]"):
+            snippets = [self._compress_text(r.content, 240) for r in authoritative_results[:2]]
+            answer = self._fallback_followup_answer(
+                message=clean_message,
+                domain=domain,
+                style=style,
+                snippets=snippets,
+            )
+
+        confidence = min(max(self._calculate_retrieval_strength(authoritative_results), 0.25), 0.95)
+
+        return {
+            "answer": answer,
+            "citations": [
+                {
+                    "title": src.get("title", "Unknown"),
+                    "authority": src.get("authority", "Unknown"),
+                    "url": src.get("url"),
+                    "document_id": src.get("document_id"),
+                }
+                for src in sources
+            ],
+            "confidence": confidence,
+            "follow_up_questions": self._build_followup_questions(domain, low_authority=False),
+            "style": style,
+        }
+
     def _normalize_urgency(self, urgency: str) -> str:
         """Normalize urgency values from LLM output into high/medium/low."""
         if not urgency:
@@ -271,6 +400,84 @@ class GuidanceEngine:
             )
         )
         return normalized
+
+    def _format_clarification_answers(self, clarification_answers: List[Dict[str, str]]) -> str:
+        lines: List[str] = []
+        for item in clarification_answers:
+            question = (item.get("question_text") or item.get("question_id") or "").strip()
+            answer = (item.get("answer") or "").strip()
+            if question and answer:
+                lines.append(f"- {question}: {answer}")
+        return "\n".join(lines)
+
+    def _format_conversation_history(self, conversation_history: List[Dict[str, str]]) -> str:
+        lines: List[str] = []
+        for turn in conversation_history[-8:]:
+            role = (turn.get("role") or "user").strip().lower()
+            text = (turn.get("content") or turn.get("message") or "").strip()
+            if not text:
+                continue
+            label = "User" if role == "user" else "Assistant"
+            lines.append(f"{label}: {text}")
+        return "\n".join(lines)
+
+    def _detect_response_style(self, message: str) -> str:
+        text = message.lower()
+        if any(phrase in text for phrase in ["eli5", "like i am 10", "like i'm 10", "explain like 10"]):
+            return "eli10"
+        if any(phrase in text for phrase in ["summarize", "summary", "in short", "tldr"]):
+            return "summary"
+        if any(phrase in text for phrase in ["step by step", "checklist", "bullets", "bullet points"]):
+            return "checklist"
+        return "default"
+
+    def _compress_text(self, text: str, max_chars: int) -> str:
+        clean = " ".join((text or "").split())
+        if len(clean) <= max_chars:
+            return clean
+        return clean[: max_chars - 3].rstrip() + "..."
+
+    def _fallback_followup_answer(
+        self,
+        message: str,
+        domain: str,
+        style: str,
+        snippets: List[str],
+    ) -> str:
+        if snippets:
+            snippet_block = "\n".join([f"- {s}" for s in snippets])
+            if style == "eli10":
+                return (
+                    "Simple version:\n"
+                    "Here is what the official content is saying in easy words:\n"
+                    f"{snippet_block}\n\n"
+                    "Next: tell me your exact stage (new request, correction, rejected, or escalation) "
+                    "and I will make this more precise."
+                )
+            return (
+                "I could not generate a full conversational response right now, "
+                "but I found these relevant official points:\n"
+                f"{snippet_block}\n\n"
+                "If you share your exact stage, I will give a more precise next-step answer."
+            )
+
+        return (
+            f"I do not yet have enough authoritative {domain} context to answer that safely. "
+            "Please share the exact authority/service name and your current stage "
+            "(new request, correction, rejected, or escalation)."
+        )
+
+    def _build_followup_questions(self, domain: str, low_authority: bool) -> List[str]:
+        if low_authority:
+            return [
+                f"What exact {domain} service are you trying to complete?",
+                "What stage are you currently at: new request, correction, rejected, or escalation?",
+                "Do you already have any acknowledgement/reference number?",
+            ]
+        return [
+            "Do you want this explained in a simpler version or as a checklist?",
+            "Should I give you the exact documents and sequence for your current stage?",
+        ]
     
     def _build_knowledge_context(self, search_results: List[SearchResult]) -> str:
         """Build context string from search results"""
@@ -410,7 +617,7 @@ Generate 1-3 highly precise procedural suggestions ordered by priority.
                 }
             ],
             "caveats": [
-                "âš ï¸ Authoritative sources were insufficient for a safe procedural recommendation.",
+                "Warning: authoritative sources were insufficient for a safe procedural recommendation.",
                 "Please refine details and retry."
             ]
         }

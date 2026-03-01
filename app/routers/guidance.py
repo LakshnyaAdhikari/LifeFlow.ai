@@ -14,6 +14,7 @@ from app.database import get_db
 from app.routers.auth import get_current_user
 from app.models import User
 from app.services.guidance.rag_engine import GuidanceEngine, GuidanceResponse
+from app.models.situation import UserSituation, SituationInteraction
 
 
 router = APIRouter(prefix="/guidance", tags=["guidance"])
@@ -41,6 +42,29 @@ class FeedbackRequest(BaseModel):
     helpful: bool
     rating: Optional[int] = None  # 1-5 stars
     comment: Optional[str] = None
+
+class ChatHistoryTurn(BaseModel):
+    role: str  # "user" | "assistant"
+    content: str
+
+class FollowUpChatRequest(BaseModel):
+    situation_id: int
+    message: str
+    clarification_answers: List[ClarificationAnswer] = []
+    history: List[ChatHistoryTurn] = []
+
+class FollowUpCitation(BaseModel):
+    title: str
+    authority: str
+    url: Optional[str] = None
+    document_id: Optional[int] = None
+
+class FollowUpChatResponse(BaseModel):
+    answer: str
+    citations: List[FollowUpCitation] = []
+    confidence: float = 0.0
+    follow_up_questions: List[str] = []
+    style: str = "default"
 
 
 @router.post("/suggestions", response_model=GuidanceResponse)
@@ -89,6 +113,92 @@ async def get_suggestions(
             status_code=500,
             detail=f"Failed to generate guidance: {str(e)}"
         )
+
+
+@router.post("/followup-chat", response_model=FollowUpChatResponse)
+async def followup_chat(
+    payload: FollowUpChatRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Conversational follow-up endpoint:
+    - grounded by authoritative retrieval
+    - aware of situation context + previous turns
+    - returns plain-text answer with citations
+    """
+    try:
+        situation = db.query(UserSituation).filter(
+            UserSituation.id == payload.situation_id,
+            UserSituation.user_id == current_user.id
+        ).first()
+        if not situation:
+            raise HTTPException(status_code=404, detail="Situation not found")
+
+        recent_turns = db.query(SituationInteraction).filter(
+            SituationInteraction.situation_id == payload.situation_id,
+            SituationInteraction.interaction_type.in_(["followup_user", "followup_assistant"])
+        ).order_by(SituationInteraction.created_at.desc()).limit(12).all()
+
+        persisted_history: List[Dict[str, str]] = []
+        for turn in reversed(recent_turns):
+            role = "assistant" if turn.interaction_type == "followup_assistant" else "user"
+            content = ""
+            if isinstance(turn.content, dict):
+                content = (
+                    turn.content.get("message")
+                    or turn.content.get("answer")
+                    or turn.content.get("text")
+                    or ""
+                )
+            if content:
+                persisted_history.append({"role": role, "content": content})
+
+        request_history = [
+            {"role": h.role, "content": h.content}
+            for h in payload.history[-8:]
+            if h.content.strip()
+        ]
+
+        merged_history = persisted_history + request_history
+        clarification_payload = [a.model_dump() for a in payload.clarification_answers]
+        effective_clarification = clarification_payload or (situation.clarification_answers or [])
+
+        engine = GuidanceEngine(db)
+        chat_result = await engine.generate_followup_chat(
+            message=payload.message,
+            domain=situation.primary_domain,
+            situation_title=situation.title,
+            clarification_answers=effective_clarification,
+            conversation_history=merged_history,
+        )
+
+        db.add(SituationInteraction(
+            situation_id=payload.situation_id,
+            interaction_type="followup_user",
+            content={"message": payload.message},
+            context_snapshot=situation.context or {}
+        ))
+        db.add(SituationInteraction(
+            situation_id=payload.situation_id,
+            interaction_type="followup_assistant",
+            content={
+                "message": chat_result.get("answer", ""),
+                "citations": chat_result.get("citations", []),
+                "confidence": chat_result.get("confidence", 0.0),
+                "style": chat_result.get("style", "default"),
+            },
+            context_snapshot=situation.context or {}
+        ))
+        db.commit()
+
+        return FollowUpChatResponse(**chat_result)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to generate follow-up chat: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate follow-up chat: {str(e)}")
 
 
 @router.post("/feedback")
