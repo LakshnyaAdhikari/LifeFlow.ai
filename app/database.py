@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Use SQLite for local MVP simplicity, or configurable via env var
-DATABASE_URL = "sqlite:///./lifeflow_v2.db"
+DATABASE_URL = "sqlite:///./lifeflow_v3.db"
 
 engine = create_engine(
     DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}

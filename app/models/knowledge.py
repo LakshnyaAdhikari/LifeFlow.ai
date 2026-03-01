@@ -39,6 +39,7 @@ class KnowledgeDocument(Base):
     source_url = Column(String(1000), nullable=False)
     source_type = Column(String(50), nullable=False)  # "pdf", "html", "api"
     source_authority = Column(String(200), nullable=False)  # "UIDAI", "IRDAI", etc.
+    authority_weight = Column(Float, default=0.4, nullable=False)  # V3 Architecture weight (1.0, 0.8, 0.4)
     
     # Document metadata
     title = Column(String(500), nullable=False)
@@ -87,6 +88,12 @@ class KnowledgeChunk(Base):
     
     # Metadata
     chunk_metadata = Column(JSON, default=dict)  # Renamed from 'metadata' to avoid SQLAlchemy conflict # Section, headers, etc.
+    
+    # V3 Architecture Advanced Metadata
+    authority_weight = Column(Float, default=0.4, nullable=False)
+    procedural_density = Column(Float, default=0.0, nullable=False)
+    chunk_type = Column(String(50), default="explainer", nullable=False) # definition, fee, form, deadline, escalation, process, explainer
+    extraction_quality_score = Column(Float, default=1.0, nullable=False)
     
     # Embedding (stored as JSON array for SQLite compatibility)
     # In production with PostgreSQL, use ARRAY type
