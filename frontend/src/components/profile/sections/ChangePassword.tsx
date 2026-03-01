@@ -2,6 +2,7 @@
 
 import { Lock, Phone, AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ChangePassword() {
     const [step, setStep] = useState<"phone" | "otp" | "password">("phone");
@@ -12,6 +13,7 @@ export default function ChangePassword() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const { t } = useLanguage();
 
     const handleSendOTP = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -89,8 +91,8 @@ export default function ChangePassword() {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Change Password</h1>
-                <p className="text-muted-foreground">Secure your account with a new password</p>
+                <h1 className="text-3xl font-bold tracking-tight mb-2">{t("profile.change_password.title")}</h1>
+                <p className="text-muted-foreground">{t("profile.change_password.subtitle")}</p>
             </div>
 
             <div className="w-full max-w-2xl mx-auto bg-card border border-border rounded-2xl p-8 shadow-sm">

@@ -54,10 +54,10 @@ export default function DomainsPage() {
                         >
                             <div className="text-center mb-16 space-y-4">
                                 <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground">
-                                    How can we <span className="text-primary">help</span> you today?
+                                    {t("domains.title").split(" ").slice(0, -2).join(" ")} <span className="text-primary">{t("domains.title").split(" ").slice(-2, -1)[0]}</span> {t("domains.title").split(" ").slice(-1)[0]}?
                                 </h1>
                                 <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-medium">
-                                    Select a domain below to narrow down your investigation and get more precise AI guidance.
+                                    {t("domains.subtitle")}
                                 </p>
                             </div>
 

@@ -58,12 +58,13 @@ export default function Home() {
     }
   };
 
-  const handleSearch = async (query: string, shouldSaveToHistory: boolean = true) => {
+  const handleSearch = async (query: string, shouldSaveToHistory: boolean = true, source: string = "home") => {
     if (!query.trim()) return;
     const token = localStorage.getItem("access_token");
 
     console.log("🔍 handleSearch called with query:", query);
     console.log("🔑 Token:", token ? "Present" : "Missing");
+    console.log("📍 Source:", source);
 
     try {
       console.log("📡 Sending request to /intake/resolve...");
@@ -88,8 +89,13 @@ export default function Home() {
         }
         
         if (data.situation_id) {
-          // Route through clarification flow first (MCQ + finalizing UI)
-          router.push(`/intake/clarify/${data.situation_id}`);
+          // If coming from search history, go directly to guidance (skip clarification)
+          // Otherwise, go through clarification MCQ page
+          if (source === "search_history") {
+            router.push(`/situation/${data.situation_id}?source=${source}`);
+          } else {
+            router.push(`/intake/clarify/${data.situation_id}?source=${source}`);
+          }
         } else {
           console.warn("⚠️ No situation_id in response");
           alert("Response received but no situation ID. Check console for details.");
@@ -108,10 +114,11 @@ export default function Home() {
   // Handle search query parameter from search history navigation
   useEffect(() => {
     const searchQuery = searchParams.get("search");
+    const source = searchParams.get("source") || "home";
     if (searchQuery) {
-      console.log("📌 Auto-searching from search history:", searchQuery);
+      console.log("📌 Auto-searching from:", source, "with query:", searchQuery);
       // Pass false to prevent saving the same search again to history
-      handleSearch(decodeURIComponent(searchQuery), false);
+      handleSearch(decodeURIComponent(searchQuery), false, source);
     }
   }, [searchParams]);
 

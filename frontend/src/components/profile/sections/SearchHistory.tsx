@@ -3,12 +3,14 @@
 import { Search, Clock, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchSearchHistory, type SearchHistoryEntry } from "@/lib/searchHistoryApi";
 
 export default function SearchHistory() {
     const [searchHistory, setSearchHistory] = useState<SearchHistoryEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { t } = useLanguage();
 
     useEffect(() => {
         const loadSearchHistory = async () => {
@@ -26,15 +28,15 @@ export default function SearchHistory() {
     }, []);
 
     const handleSearchClick = (query: string) => {
-        // Navigate to home page with search query
-        router.push(`/home?search=${encodeURIComponent(query)}`);
+        // Navigate to home page with search query and source=search_history
+        router.push(`/home?search=${encodeURIComponent(query)}&source=search_history`);
     };
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Search History</h1>
-                <p className="text-muted-foreground">All your past searches and guidances</p>
+                <h1 className="text-3xl font-bold tracking-tight mb-2">{t("profile.search_history.title")}</h1>
+                <p className="text-muted-foreground">{t("profile.search_history.subtitle")}</p>
             </div>
 
             {loading ? (
@@ -42,7 +44,7 @@ export default function SearchHistory() {
                     <div className="inline-block animate-spin">
                         <Search className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <p className="text-muted-foreground mt-4">Loading...</p>
+                    <p className="text-muted-foreground mt-4">{t("profile.search_history.loading")}</p>
                 </div>
             ) : searchHistory.length > 0 ? (
                 <div className="space-y-3">
@@ -72,8 +74,8 @@ export default function SearchHistory() {
             ) : (
                 <div className="py-12 text-center border-2 border-dashed border-border rounded-2xl">
                     <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-muted-foreground mb-2">No search history</h3>
-                    <p className="text-sm text-muted-foreground">Your searches will appear here</p>
+                    <h3 className="text-lg font-semibold text-muted-foreground mb-2">{t("profile.search_history.empty")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("profile.search_history.empty_desc")}</p>
                 </div>
             )}
         </div>

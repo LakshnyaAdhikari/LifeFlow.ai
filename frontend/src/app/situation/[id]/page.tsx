@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
     AlertCircle,
     ArrowLeft,
@@ -82,7 +82,9 @@ const getSuccessLikelihood = (score: number) => {
 export default function SituationPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const situationId = params.id as string;
+    const source = searchParams.get("source") || "home";
 
     const [situation, setSituation] = useState<Situation | null>(null);
     const [guidance, setGuidance] = useState<GuidanceResponse | null>(null);
@@ -272,11 +274,17 @@ export default function SituationPage() {
         <main className="min-h-screen bg-background px-4 py-6 text-foreground md:px-6">
             <div className="mx-auto w-full max-w-7xl">
                 <button
-                    onClick={() => router.push("/profile?section=search-history")}
+                    onClick={() => {
+                        if (source === "search_history") {
+                            router.push("/profile?section=search-history");
+                        } else {
+                            router.push("/home");
+                        }
+                    }}
                     className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeft className="h-4 w-4" />
-                    Back to Search History
+                    {source === "search_history" ? "Back to Search History" : "Back to Home"}
                 </button>
 
                 <section className="rounded-2xl border-2 border-border bg-card p-6">

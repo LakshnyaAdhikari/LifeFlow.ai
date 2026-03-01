@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, Calendar, Users, Edit2, Save, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AccountDetails() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         first_name: user?.full_name?.split(" ")[0] || "",
@@ -54,8 +56,8 @@ export default function AccountDetails() {
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight mb-2">Account Details</h1>
-                    <p className="text-muted-foreground">Manage your personal information</p>
+                    <h1 className="text-3xl font-bold tracking-tight mb-2">{t("account_details.title")}</h1>
+                    <p className="text-muted-foreground">{t("account_details.subtitle")}</p>
                 </div>
                 <button
                     onClick={() => setIsEditing(!isEditing)}
@@ -68,12 +70,12 @@ export default function AccountDetails() {
                     {isEditing ? (
                         <>
                             <X className="w-4 h-4" />
-                            Cancel
+                            {t("account_details.cancel")}
                         </>
                     ) : (
                         <>
                             <Edit2 className="w-4 h-4" />
-                            Edit
+                            {t("account_details.edit")}
                         </>
                     )}
                 </button>
@@ -81,11 +83,11 @@ export default function AccountDetails() {
 
             {/* Personal Information Card */}
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold mb-6">Personal Information</h3>
+                <h3 className="text-lg font-bold mb-6">{t("account_details.personal_information")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* First Name */}
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-foreground">First Name</label>
+                        <label className="text-sm font-semibold text-foreground">{t("account_details.first_name")}</label>
                         {isEditing ? (
                             <input
                                 type="text"
@@ -101,7 +103,7 @@ export default function AccountDetails() {
 
                     {/* Last Name */}
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-foreground">Last Name</label>
+                        <label className="text-sm font-semibold text-foreground">{t("account_details.last_name")}</label>
                         {isEditing ? (
                             <input
                                 type="text"
@@ -119,7 +121,7 @@ export default function AccountDetails() {
                     <div className="space-y-2">
                         <label className="text-sm font-semibold flex items-center gap-2">
                             <Mail className="w-4 h-4 text-primary" />
-                            Email
+                            {t("account_details.email")}
                         </label>
                         {isEditing ? (
                             <input
@@ -138,7 +140,7 @@ export default function AccountDetails() {
                     <div className="space-y-2">
                         <label className="text-sm font-semibold flex items-center gap-2">
                             <Phone className="w-4 h-4 text-primary" />
-                            Phone
+                            {t("account_details.phone")}
                         </label>
                         <p className="px-4 py-3 bg-muted/50 rounded-lg text-foreground text-sm text-muted-foreground">
                             {formData.phone || "Not set"}
@@ -147,7 +149,7 @@ export default function AccountDetails() {
 
                     {/* Gender */}
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-foreground">Gender</label>
+                        <label className="text-sm font-semibold text-foreground">{t("account_details.gender")}</label>
                         {isEditing ? (
                             <select
                                 name="gender"
@@ -155,10 +157,10 @@ export default function AccountDetails() {
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 rounded-lg border border-border bg-input text-foreground focus:border-primary focus:outline-none transition-colors"
                             >
-                                <option value="">Select gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
+                                <option value="">{t("account_details.select_gender")}</option>
+                                <option value="male">{t("account_details.male")}</option>
+                                <option value="female">{t("account_details.female")}</option>
+                                <option value="other">{t("account_details.other")}</option>
                             </select>
                         ) : (
                             <p className="px-4 py-3 bg-muted/50 rounded-lg text-foreground capitalize">{formData.gender || "Not set"}</p>
@@ -169,7 +171,7 @@ export default function AccountDetails() {
                     <div className="space-y-2">
                         <label className="text-sm font-semibold flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-primary" />
-                            Age Range
+                            {t("account_details.age_range")}
                         </label>
                         {isEditing ? (
                             <select
