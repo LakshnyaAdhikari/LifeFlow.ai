@@ -5,6 +5,7 @@ Retrieves knowledge and generates contextual guidance
 """
 
 from typing import List, Dict, Any, Optional
+import re
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from loguru import logger
@@ -254,14 +255,23 @@ class GuidanceEngine:
             }
 
         style = self._detect_response_style(clean_message)
+        intent = self._detect_followup_intent(clean_message)
+        service = self._infer_service_from_context(
+            domain=domain,
+            message=clean_message,
+            situation_title=situation_title,
+            clarification_answers=clarification_answers or [],
+        )
         answers_text = self._format_clarification_answers(clarification_answers or [])
         history_text = self._format_conversation_history(conversation_history or [])
 
-        retrieval_query = (
-            f"Case: {situation_title}\n"
-            f"Domain: {domain}\n"
-            f"Follow-up question: {clean_message}\n"
-            f"{answers_text}"
+        retrieval_query = self._build_followup_retrieval_query(
+            domain=domain,
+            situation_title=situation_title,
+            message=clean_message,
+            intent=intent,
+            service=service,
+            answers_text=answers_text,
         )
 
         query_embedding = await self.llm_client.generate_embedding(retrieval_query)
@@ -272,14 +282,32 @@ class GuidanceEngine:
         )
         authoritative_results = self._filter_authoritative_results(search_results)
         sources = self._extract_sources(authoritative_results)[:4]
+        snippets = [self._compress_text(r.content, 220) for r in authoritative_results[:2]]
+
+        intent_first_answer = self._build_intent_first_answer(
+            intent=intent,
+            domain=domain,
+            service=service,
+            style=style,
+            snippets=snippets,
+            has_authority=bool(authoritative_results),
+        )
 
         if not authoritative_results:
+            if intent_first_answer:
+                return {
+                    "answer": intent_first_answer,
+                    "citations": [],
+                    "confidence": 0.45 if intent != "general" else 0.25,
+                    "follow_up_questions": self._build_followup_questions(domain, low_authority=True),
+                    "style": style,
+                }
             return {
                 "answer": self._fallback_followup_answer(
                     message=clean_message,
                     domain=domain,
                     style=style,
-                    snippets=[],
+                    snippets=snippets,
                 ),
                 "citations": [],
                 "confidence": 0.25,
@@ -295,6 +323,8 @@ You must answer naturally like a chat assistant, while staying grounded in retri
 Response style requested: {style}
 Domain: {domain}
 Situation title: {situation_title}
+Detected intent: {intent}
+Detected service: {service or "unspecified"}
 
 Clarification answers:
 {answers_text if answers_text else "None provided."}
@@ -333,13 +363,30 @@ Rules:
             logger.error(f"Follow-up chat generation failed: {e}")
             answer = ""
 
-        if not answer or answer.startswith("[AI DISABLED]"):
-            snippets = [self._compress_text(r.content, 240) for r in authoritative_results[:2]]
+        abstain_markers = [
+            "i do not yet have enough authoritative",
+            "could not retrieve enough authoritative",
+        ]
+        answer_lower = answer.lower() if answer else ""
+
+        if not answer or answer.startswith("[AI DISABLED]") or any(marker in answer_lower for marker in abstain_markers):
+            if intent_first_answer:
+                answer = intent_first_answer
+            else:
+                snippets = [self._compress_text(r.content, 240) for r in authoritative_results[:2]]
+                answer = self._fallback_followup_answer(
+                    message=clean_message,
+                    domain=domain,
+                    style=style,
+                    snippets=snippets,
+                )
+
+        if not answer:
             answer = self._fallback_followup_answer(
                 message=clean_message,
                 domain=domain,
                 style=style,
-                snippets=snippets,
+                snippets=[],
             )
 
         confidence = min(max(self._calculate_retrieval_strength(authoritative_results), 0.25), 0.95)
@@ -425,11 +472,179 @@ Rules:
         text = message.lower()
         if any(phrase in text for phrase in ["eli5", "like i am 10", "like i'm 10", "explain like 10"]):
             return "eli10"
-        if any(phrase in text for phrase in ["summarize", "summary", "in short", "tldr"]):
+        if any(phrase in text for phrase in ["summarize", "summarise", "summary", "in short", "tldr"]):
             return "summary"
         if any(phrase in text for phrase in ["step by step", "checklist", "bullets", "bullet points"]):
             return "checklist"
         return "default"
+
+    def _detect_followup_intent(self, message: str) -> str:
+        text = message.lower()
+        if any(token in text for token in ["document", "documents", "docs", "proof", "papers"]):
+            return "doc_requirements"
+        if any(token in text for token in ["fee", "fees", "charge", "cost", "payment"]):
+            return "fees"
+        if any(token in text for token in ["time", "timeline", "how long", "when", "eta"]):
+            return "timeline"
+        if any(token in text for token in ["status", "track", "tracking", "progress"]):
+            return "status"
+        if any(token in text for token in ["reject", "rejected", "appeal", "escalate", "complaint"]):
+            return "escalation"
+        if any(token in text for token in ["summary", "summarize", "summarise", "in short", "tldr"]):
+            return "summary"
+        if any(token in text for token in ["how to", "steps", "process", "procedure"]):
+            return "steps"
+        return "general"
+
+    def _infer_service_from_context(
+        self,
+        domain: str,
+        message: str,
+        situation_title: str,
+        clarification_answers: List[Dict[str, str]],
+    ) -> Optional[str]:
+        text_blob = " ".join(
+            [
+                message or "",
+                situation_title or "",
+                " ".join([a.get("answer", "") for a in clarification_answers]),
+                " ".join([a.get("question_text", "") for a in clarification_answers]),
+            ]
+        ).lower()
+
+        if domain == "Identity Documents":
+            if any(token in text_blob for token in ["aadhaar", "aadhar", "uidai", "uid"]):
+                return "Aadhaar"
+            if "pan" in text_blob:
+                return "PAN"
+            if "passport" in text_blob:
+                return "Passport"
+            if "voter" in text_blob:
+                return "Voter ID"
+            if "driving license" in text_blob or "licence" in text_blob or "license" in text_blob:
+                return "Driving License"
+        return None
+
+    def _build_followup_retrieval_query(
+        self,
+        domain: str,
+        situation_title: str,
+        message: str,
+        intent: str,
+        service: Optional[str],
+        answers_text: str,
+    ) -> str:
+        service_synonyms = {
+            "Aadhaar": "aadhaar uidai demographic update biometric update urn status",
+            "PAN": "pan card correction pan update income tax pan services",
+            "Passport": "passport seva reissue renewal tatkal",
+            "Voter ID": "voter id election commission voter registration",
+            "Driving License": "driving license parivahan dl update",
+        }
+
+        intent_hints = {
+            "doc_requirements": "required documents proof identity proof address proof date of birth",
+            "fees": "fees charges payment amount",
+            "timeline": "processing time expected timeline service delivery time",
+            "status": "status tracking acknowledgement reference number",
+            "escalation": "rejection appeal grievance escalation support",
+            "steps": "step by step process procedure",
+            "summary": "summary key points",
+            "general": "",
+        }
+
+        return (
+            f"Case: {situation_title}\n"
+            f"Domain: {domain}\n"
+            f"Service: {service or 'unspecified'}\n"
+            f"Intent: {intent}\n"
+            f"User message: {message}\n"
+            f"Intent hints: {intent_hints.get(intent, '')}\n"
+            f"Service hints: {service_synonyms.get(service or '', '')}\n"
+            f"Clarifications:\n{answers_text if answers_text else 'None'}"
+        )
+
+    def _build_intent_first_answer(
+        self,
+        intent: str,
+        domain: str,
+        service: Optional[str],
+        style: str,
+        snippets: List[str],
+        has_authority: bool,
+    ) -> Optional[str]:
+        if intent == "doc_requirements" and domain == "Identity Documents":
+            if service == "Aadhaar":
+                body = (
+                    "For Aadhaar update, keep these ready:\n"
+                    "1. Aadhaar number and current Aadhaar copy.\n"
+                    "2. One supporting document for the field you are changing:\n"
+                    "   - Name: Proof of Identity.\n"
+                    "   - Address: Proof of Address.\n"
+                    "   - Date of Birth: Proof of Date of Birth.\n"
+                    "3. Registered mobile number for OTP (if online steps are involved).\n"
+                    "4. Original documents if visiting an update center.\n"
+                    "5. Acknowledgement/URN slip after submission for tracking."
+                )
+            elif service:
+                body = (
+                    f"For {service} updates, keep identity proof, address proof, and any service-specific supporting document ready. "
+                    "Also keep your registered mobile number and acknowledgement references."
+                )
+            else:
+                body = (
+                    "For identity-document updates, you usually need identity proof, address proof, and the specific supporting document "
+                    "for the field being changed, plus your registered mobile for OTP/alerts."
+                )
+
+            if style == "eli10":
+                body = (
+                    "Simple version:\n"
+                    "Keep your current ID copy, one proof paper for what you want to change, and your mobile number.\n"
+                    "After submitting, keep the acknowledgement number to track status."
+                )
+
+            if has_authority and snippets:
+                body += "\n\nFrom official sources I found:\n" + "\n".join([f"- {s}" for s in snippets[:2]])
+
+            return body
+
+        if intent == "fees":
+            return (
+                "Fees depend on the exact service and update type. Share the exact service name and I will give the fee-focused answer. "
+                "If you already have a portal page or acknowledgement, paste that wording."
+            )
+
+        if intent in {"timeline", "status"}:
+            return (
+                "Timeline and status tracking depend on service type and submission channel. "
+                "If you share your acknowledgement/reference number type and submission date, I can give a tighter estimate and status path."
+            )
+
+        if intent == "steps":
+            return (
+                "I can give exact steps, but first confirm your exact service and stage "
+                "(new request, correction, rejected, or escalation). Then I will list a strict step-by-step checklist."
+            )
+
+        if intent == "summary" and domain == "Identity Documents":
+            if service == "Aadhaar":
+                return (
+                    "Short summary for Aadhaar update:\n"
+                    "- Keep current Aadhaar details handy.\n"
+                    "- Keep one supporting proof for the field you want to change.\n"
+                    "- Keep registered mobile for OTP and tracking.\n"
+                    "- Keep acknowledgement/URN after submission."
+                )
+            if service:
+                return (
+                    f"Short summary for {service}:\n"
+                    "- Keep core ID/address proofs ready.\n"
+                    "- Keep service-specific supporting documents.\n"
+                    "- Keep reference/acknowledgement details for tracking."
+                )
+
+        return None
 
     def _compress_text(self, text: str, max_chars: int) -> str:
         clean = " ".join((text or "").split())
