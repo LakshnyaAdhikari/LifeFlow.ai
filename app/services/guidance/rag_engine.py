@@ -14,6 +14,7 @@ from app.services.knowledge.vector_db import get_vector_db, SearchResult
 from app.services.llm.client import get_llm_client
 from app.services.safety.legal_filter import SafetyFilter, GUIDANCE_SYSTEM_PROMPT
 from app.services.confidence.triangulated import TriangulatedConfidence, ConfidenceBasedResponseStrategy
+from app.services.routing.lightweight_router import get_lightweight_router
 from app.models.knowledge import UserQuery, GuidanceSession
 from app.models.situation import UserSituation
 
@@ -50,6 +51,7 @@ class GuidanceEngine:
         self.safety_filter = SafetyFilter()
         self.confidence_calc = TriangulatedConfidence(db)
         self.response_strategy = ConfidenceBasedResponseStrategy()
+        self.router = get_lightweight_router()
     
     async def generate_guidance(
         self,
@@ -479,6 +481,14 @@ Rules:
         return "default"
 
     def _detect_followup_intent(self, message: str) -> str:
+        router_prediction = self.router.predict(message)
+        if (
+            router_prediction
+            and router_prediction.intent_label in {"doc_requirements", "fees", "timeline", "status", "escalation", "steps", "summary", "general"}
+            and router_prediction.intent_confidence >= 0.45
+        ):
+            return router_prediction.intent_label
+
         text = message.lower()
         if any(token in text for token in ["document", "documents", "docs", "proof", "papers"]):
             return "doc_requirements"

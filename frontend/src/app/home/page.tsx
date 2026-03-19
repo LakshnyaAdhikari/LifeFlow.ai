@@ -58,40 +58,68 @@ export default function Home() {
     loadSituations();
   }, [user]); // Reload if user changes
 
+  const fetchWithTimeout = async (
+    url: string,
+    options: RequestInit,
+    timeoutMs: number
+  ) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+
   const loadSituations = async () => {
+    setLoadingSituations(true);
     const token = localStorage.getItem("access_token");
-    if (!token) return;
+    if (!token) {
+      setSituations([]);
+      setLoadingSituations(false);
+      return;
+    }
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/situations", {
+      const res = await fetchWithTimeout("http://127.0.0.1:8000/situations", {
         headers: {
           "Authorization": `Bearer ${token}`
         }
-      });
+      }, 8000);
 
       if (res.ok) {
         const data = await res.json();
         const rawSituations = Array.isArray(data) ? data : (data.situations || []);
-        const normalized: Situation[] = (rawSituations as RawSituation[])
-          .map((item) => ({
-            id: item.id ?? item.situation_id,
-            title: item.title || "Untitled situation",
-            primary_domain: item.primary_domain || "General",
-            status: item.status || "active",
-            priority: item.priority || "normal",
-            created_at: item.created_at || new Date().toISOString(),
-            updated_at: item.updated_at,
-          }))
-          .filter((item: Situation) => typeof item.id === "number");
+        const normalized = (rawSituations as RawSituation[]).reduce<Situation[]>(
+          (acc, item) => {
+            const id = item.id ?? item.situation_id;
+            if (typeof id !== "number") {
+              return acc;
+            }
+
+            acc.push({
+              id,
+              title: item.title || "Untitled situation",
+              primary_domain: item.primary_domain || "General",
+              status: item.status || "active",
+              priority: item.priority || "normal",
+              created_at: item.created_at || new Date().toISOString(),
+              updated_at: item.updated_at,
+            });
+            return acc;
+          },
+          []
+        );
 
         const withProgress = await Promise.all(
           normalized.map(async (situation) => {
             try {
-              const detailRes = await fetch(`http://127.0.0.1:8000/situations/${situation.id}`, {
+              const detailRes = await fetchWithTimeout(`http://127.0.0.1:8000/situations/${situation.id}`, {
                 headers: {
                   "Authorization": `Bearer ${token}`
                 }
-              });
+              }, 3000);
 
               if (!detailRes.ok) return situation;
               const detailData = await detailRes.json();
@@ -110,9 +138,12 @@ export default function Home() {
         );
 
         setSituations(withProgress);
+      } else {
+        setSituations([]);
       }
     } catch (e) {
       console.error("Failed to load situations:", e);
+      setSituations([]);
     } finally {
       setLoadingSituations(false);
     }

@@ -64,6 +64,7 @@ python-dotenv>=1.0.0
 tenacity>=8.2.3  # Retry logic
 numpy>=1.26.2
 pandas>=2.1.4  # Data processing
+scikit-learn>=1.4.0  # Lightweight router training/inference
 
 # Monitoring & Logging
 loguru>=0.7.2

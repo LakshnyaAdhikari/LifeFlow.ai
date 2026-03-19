@@ -11,6 +11,7 @@ from loguru import logger
 import re
 
 from app.services.llm.client import get_llm_client, LLMClient
+from app.services.routing.lightweight_router import get_lightweight_router
 
 
 class DomainClassification(BaseModel):
@@ -91,6 +92,8 @@ class DomainClassifier:
     def __init__(self, llm_client: Optional[LLMClient] = None):
         self.llm = llm_client or get_llm_client()
         self.taxonomy = DOMAIN_TAXONOMY
+        self.router = get_lightweight_router()
+        self.router_confidence_threshold = 0.33
     
     async def classify(self, user_query: str) -> DomainClassification:
         """
@@ -99,7 +102,28 @@ class DomainClassifier:
         NO hard-coded examples - purely ML-driven
         """
         logger.info(f"Classifying query: {user_query[:100]}...")
-        
+
+        # Fast local router first, then LLM fallback.
+        router_prediction = self.router.predict(user_query)
+        if router_prediction:
+            candidate_domain = router_prediction.domain_label
+            candidate_confidence = router_prediction.domain_confidence
+            if candidate_domain == "General" or (
+                candidate_domain in self.taxonomy and candidate_confidence >= self.router_confidence_threshold
+            ):
+                logger.info(
+                    "Lightweight router classification: {} (confidence: {:.2f})",
+                    candidate_domain,
+                    candidate_confidence,
+                )
+                return DomainClassification(
+                    primary_domain=candidate_domain,
+                    confidence=candidate_confidence,
+                    user_friendly_summary=f"This appears to be related to {candidate_domain}",
+                    suggested_keywords=[],
+                    reasoning=f"Lightweight router prediction (intent: {router_prediction.intent_label})",
+                )
+
         # Build classification prompt
         prompt = self._build_classification_prompt(user_query)
         system_prompt = self._build_system_prompt()
