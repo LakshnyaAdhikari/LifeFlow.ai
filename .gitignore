@@ -93,6 +93,8 @@ data/vector_index/
 *.index
 *.pt
 *.onnx
+!data/router/domain_router.pkl
+!data/router/intent_router.pkl
 
 # Testing & Logs
 test_*.py
