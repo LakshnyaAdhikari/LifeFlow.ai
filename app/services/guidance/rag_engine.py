@@ -186,8 +186,10 @@ class GuidanceEngine:
                 filtered_guidance,
                 confidence
             )
+            router_intent = context.get("router_intent") if isinstance(context, dict) else None
             final_guidance["suggestions"] = self._normalize_and_rank_suggestions(
-                final_guidance.get("suggestions", [])
+                final_guidance.get("suggestions", []),
+                router_intent=router_intent,
             )
             
             # 10. Create guidance session
@@ -226,7 +228,8 @@ class GuidanceEngine:
                     "session_id": session.id,
                     "chunks_retrieved": len(authoritative_results),
                     "raw_chunks_retrieved": len(search_results),
-                    "domain": domain
+                    "domain": domain,
+                    "router_intent": router_intent,
                 }
             )
         
@@ -422,11 +425,50 @@ Rules:
             return "low"
         return "medium"
 
-    def _normalize_and_rank_suggestions(self, suggestions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _intent_alignment_rank(
+        self,
+        suggestion: Dict[str, Any],
+        router_intent: Optional[str]
+    ) -> int:
+        """
+        Rank 0 = aligned with router intent, 1 = not aligned.
+        Used only as a tertiary sort key after urgency + can_skip.
+        """
+        if not router_intent or router_intent in {"general", "summary"}:
+            return 0
+
+        text = " ".join(
+            [
+                str(suggestion.get("title", "")),
+                str(suggestion.get("description", "")),
+                str(suggestion.get("why_it_matters", "")),
+            ]
+        ).lower()
+
+        intent_tokens = {
+            "doc_requirements": ["document", "documents", "form", "proof", "certificate"],
+            "fees": ["fee", "fees", "charge", "charges", "cost", "payment"],
+            "timeline": ["timeline", "time", "days", "deadline", "expected"],
+            "status": ["status", "track", "tracking", "reference", "acknowledgement"],
+            "escalation": ["escalate", "escalation", "appeal", "complaint", "grievance", "rejected"],
+            "steps": ["step", "process", "procedure", "apply", "submit"],
+        }
+
+        tokens = intent_tokens.get(router_intent, [])
+        if not tokens:
+            return 0
+        return 0 if any(token in text for token in tokens) else 1
+
+    def _normalize_and_rank_suggestions(
+        self,
+        suggestions: List[Dict[str, Any]],
+        router_intent: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """
         Apply deterministic ordering so UI doesn't feel random:
         1) high > medium > low urgency
         2) non-skippable before skippable
+        3) (tertiary) align with router intent when available
         """
         urgency_rank = {"high": 0, "medium": 1, "low": 2}
         normalized: List[Dict[str, Any]] = []
@@ -445,7 +487,8 @@ Rules:
         normalized.sort(
             key=lambda s: (
                 urgency_rank.get(s.get("urgency", "medium"), 1),
-                1 if s.get("can_skip", False) else 0
+                1 if s.get("can_skip", False) else 0,
+                self._intent_alignment_rank(s, router_intent),
             )
         )
         return normalized

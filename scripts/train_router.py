@@ -144,6 +144,7 @@ def main() -> None:
     X = [row["query_text"] for row in rows]
     y_domain = [row["domain_label"] for row in rows]
     y_intent = [row["intent_label"] for row in rows]
+    y_clarification = [bool(row["needs_clarification"]) for row in rows]
 
     domain_model, domain_metrics = train_and_evaluate(
         X, y_domain, label_name="domain_label", deps=deps
@@ -151,12 +152,17 @@ def main() -> None:
     intent_model, intent_metrics = train_and_evaluate(
         X, y_intent, label_name="intent_label", deps=deps
     )
+    clarification_model, clarification_metrics = train_and_evaluate(
+        X, y_clarification, label_name="needs_clarification", deps=deps
+    )
 
     args.output.mkdir(parents=True, exist_ok=True)
     with (args.output / "domain_router.pkl").open("wb") as f:
         pickle.dump(domain_model, f)
     with (args.output / "intent_router.pkl").open("wb") as f:
         pickle.dump(intent_model, f)
+    with (args.output / "clarification_router.pkl").open("wb") as f:
+        pickle.dump(clarification_model, f)
 
     metadata = {
         "dataset_path": str(args.input),
@@ -168,6 +174,7 @@ def main() -> None:
         "metrics": {
             "domain": domain_metrics,
             "intent": intent_metrics,
+            "clarification": clarification_metrics,
         },
     }
     (args.output / "metrics.json").write_text(
@@ -178,9 +185,14 @@ def main() -> None:
     print("Router training complete.")
     print(f"Saved: {args.output / 'domain_router.pkl'}")
     print(f"Saved: {args.output / 'intent_router.pkl'}")
+    print(f"Saved: {args.output / 'clarification_router.pkl'}")
     print(f"Saved: {args.output / 'metrics.json'}")
     print(f"Domain accuracy: {domain_metrics['accuracy']:.4f} | macro_f1: {domain_metrics['macro_f1']:.4f}")
     print(f"Intent accuracy: {intent_metrics['accuracy']:.4f} | macro_f1: {intent_metrics['macro_f1']:.4f}")
+    print(
+        "Clarification accuracy: "
+        f"{clarification_metrics['accuracy']:.4f} | macro_f1: {clarification_metrics['macro_f1']:.4f}"
+    )
 
 
 if __name__ == "__main__":

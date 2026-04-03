@@ -176,16 +176,20 @@ export default function Home() {
         
         // Save search to history only if it's a new search (not replayed from history)
         if (shouldSaveToHistory) {
-          await saveSearchToHistory(query, data.domain || "General");
+          await saveSearchToHistory(query, data.primary_domain || "General");
         }
         
         if (data.situation_id) {
-          // If coming from search history, go directly to guidance (skip clarification)
-          // Otherwise, go through clarification MCQ page
+          // Search-history replay should keep existing direct-open behavior.
           if (source === "search_history") {
             router.push(`/situation/${data.situation_id}?source=${source}`);
           } else {
-            router.push(`/intake/clarify/${data.situation_id}?source=${source}`);
+            const needsClarification = data.needs_clarification ?? true;
+            if (needsClarification) {
+              router.push(`/intake/clarify/${data.situation_id}?source=${source}`);
+            } else {
+              router.push(`/situation/${data.situation_id}?source=${source}`);
+            }
           }
         } else {
           console.warn("⚠️ No situation_id in response");

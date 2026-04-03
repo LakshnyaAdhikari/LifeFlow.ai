@@ -1,0 +1,527 @@
+{
+  "dataset_path": "router_dataset.jsonl",
+  "model_dir": "data\\router",
+  "rows": 400,
+  "domain_eval": {
+    "label_name": "domain_label",
+    "accuracy": 0.9775,
+    "macro_f1": 0.973006020293284,
+    "report": {
+      "Banking & Finance": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 37.0
+      },
+      "Business Compliance": {
+        "precision": 0.868421052631579,
+        "recall": 0.9428571428571428,
+        "f1-score": 0.9041095890410958,
+        "support": 35.0
+      },
+      "Consumer Protection": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 29.0
+      },
+      "Employment": {
+        "precision": 1.0,
+        "recall": 0.9722222222222222,
+        "f1-score": 0.9859154929577465,
+        "support": 36.0
+      },
+      "Family & Legal": {
+        "precision": 0.8571428571428571,
+        "recall": 1.0,
+        "f1-score": 0.9230769230769231,
+        "support": 12.0
+      },
+      "Identity Documents": {
+        "precision": 0.96875,
+        "recall": 1.0,
+        "f1-score": 0.9841269841269841,
+        "support": 62.0
+      },
+      "Insurance": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 61.0
+      },
+      "Property": {
+        "precision": 1.0,
+        "recall": 0.9782608695652174,
+        "f1-score": 0.989010989010989,
+        "support": 46.0
+      },
+      "Taxation": {
+        "precision": 1.0,
+        "recall": 0.8936170212765957,
+        "f1-score": 0.9438202247191011,
+        "support": 47.0
+      },
+      "Vehicle & Transport": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 35.0
+      },
+      "accuracy": 0.9775,
+      "macro avg": {
+        "precision": 0.9694313909774437,
+        "recall": 0.9786957255921178,
+        "f1-score": 0.973006020293284,
+        "support": 400.0
+      },
+      "weighted avg": {
+        "precision": 0.9793573778195488,
+        "recall": 0.9775,
+        "f1-score": 0.9777091137800413,
+        "support": 400.0
+      }
+    },
+    "confusion": {
+      "labels": [
+        "Banking & Finance",
+        "Business Compliance",
+        "Consumer Protection",
+        "Employment",
+        "Family & Legal",
+        "Identity Documents",
+        "Insurance",
+        "Property",
+        "Taxation",
+        "Vehicle & Transport"
+      ],
+      "matrix": [
+        [
+          37,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          33,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          29,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          35,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          62,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          61,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          45,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          42,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          35
+        ]
+      ]
+    }
+  },
+  "intent_eval": {
+    "label_name": "intent_label",
+    "accuracy": 0.92,
+    "macro_f1": 0.9224375102608311,
+    "report": {
+      "doc_requirements": {
+        "precision": 1.0,
+        "recall": 0.9642857142857143,
+        "f1-score": 0.9818181818181818,
+        "support": 28.0
+      },
+      "escalation": {
+        "precision": 0.8055555555555556,
+        "recall": 0.90625,
+        "f1-score": 0.8529411764705882,
+        "support": 32.0
+      },
+      "fees": {
+        "precision": 0.925,
+        "recall": 0.925,
+        "f1-score": 0.925,
+        "support": 40.0
+      },
+      "general": {
+        "precision": 0.9444444444444444,
+        "recall": 0.85,
+        "f1-score": 0.8947368421052632,
+        "support": 80.0
+      },
+      "status": {
+        "precision": 0.9512195121951219,
+        "recall": 0.9512195121951219,
+        "f1-score": 0.9512195121951219,
+        "support": 41.0
+      },
+      "steps": {
+        "precision": 0.9428571428571428,
+        "recall": 0.908256880733945,
+        "f1-score": 0.9252336448598131,
+        "support": 109.0
+      },
+      "summary": {
+        "precision": 0.8378378378378378,
+        "recall": 0.96875,
+        "f1-score": 0.8985507246376812,
+        "support": 32.0
+      },
+      "timeline": {
+        "precision": 0.9047619047619048,
+        "recall": 1.0,
+        "f1-score": 0.95,
+        "support": 38.0
+      },
+      "accuracy": 0.92,
+      "macro avg": {
+        "precision": 0.913959549706501,
+        "recall": 0.9342202634018477,
+        "f1-score": 0.9224375102608311,
+        "support": 400.0
+      },
+      "weighted avg": {
+        "precision": 0.9232413127413127,
+        "recall": 0.92,
+        "f1-score": 0.9201701614612862,
+        "support": 400.0
+      }
+    },
+    "confusion": {
+      "labels": [
+        "doc_requirements",
+        "escalation",
+        "fees",
+        "general",
+        "status",
+        "steps",
+        "summary",
+        "timeline"
+      ],
+      "matrix": [
+        [
+          27,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          29,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          37,
+          0,
+          0,
+          1,
+          1,
+          1
+        ],
+        [
+          0,
+          4,
+          2,
+          68,
+          1,
+          2,
+          2,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          39,
+          1,
+          0,
+          1
+        ],
+        [
+          0,
+          3,
+          0,
+          4,
+          0,
+          99,
+          2,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          31,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          38
+        ]
+      ]
+    }
+  },
+  "clarification_eval": {
+    "label_name": "needs_clarification",
+    "accuracy": 0.97,
+    "macro_f1": 0.9411764705882353,
+    "report": {
+      "False": {
+        "precision": 0.9852507374631269,
+        "recall": 0.9794721407624634,
+        "f1-score": 0.9823529411764705,
+        "support": 341.0
+      },
+      "True": {
+        "precision": 0.8852459016393442,
+        "recall": 0.9152542372881356,
+        "f1-score": 0.9,
+        "support": 59.0
+      },
+      "accuracy": 0.97,
+      "macro avg": {
+        "precision": 0.9352483195512356,
+        "recall": 0.9473631890252995,
+        "f1-score": 0.9411764705882353,
+        "support": 400.0
+      },
+      "weighted avg": {
+        "precision": 0.970500024179119,
+        "recall": 0.97,
+        "f1-score": 0.9702058823529411,
+        "support": 400.0
+      }
+    },
+    "confusion": {
+      "labels": [
+        false,
+        true
+      ],
+      "matrix": [
+        [
+          334,
+          7
+        ],
+        [
+          5,
+          54
+        ]
+      ]
+    }
+  },
+  "top_domain_confusions": [
+    [
+      "Taxation",
+      "Business Compliance",
+      4
+    ],
+    [
+      "Business Compliance",
+      "Family & Legal",
+      1
+    ],
+    [
+      "Business Compliance",
+      "Identity Documents",
+      1
+    ],
+    [
+      "Employment",
+      "Family & Legal",
+      1
+    ],
+    [
+      "Property",
+      "Business Compliance",
+      1
+    ],
+    [
+      "Taxation",
+      "Identity Documents",
+      1
+    ]
+  ],
+  "top_intent_confusions": [
+    [
+      "general",
+      "escalation",
+      4
+    ],
+    [
+      "steps",
+      "general",
+      4
+    ],
+    [
+      "steps",
+      "escalation",
+      3
+    ],
+    [
+      "general",
+      "fees",
+      2
+    ],
+    [
+      "general",
+      "steps",
+      2
+    ],
+    [
+      "general",
+      "summary",
+      2
+    ],
+    [
+      "steps",
+      "summary",
+      2
+    ],
+    [
+      "doc_requirements",
+      "summary",
+      1
+    ],
+    [
+      "escalation",
+      "fees",
+      1
+    ],
+    [
+      "escalation",
+      "status",
+      1
+    ]
+  ],
+  "top_clarification_confusions": [
+    [
+      false,
+      true,
+      7
+    ],
+    [
+      true,
+      false,
+      5
+    ]
+  ]
+}

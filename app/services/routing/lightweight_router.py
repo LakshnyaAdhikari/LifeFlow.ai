@@ -19,6 +19,7 @@ from loguru import logger
 DEFAULT_MODEL_DIR = Path("data/router")
 DOMAIN_MODEL_FILE = "domain_router.pkl"
 INTENT_MODEL_FILE = "intent_router.pkl"
+CLARIFICATION_MODEL_FILE = "clarification_router.pkl"
 
 ALLOWED_INTENTS = {
     "doc_requirements",
@@ -40,6 +41,7 @@ class RouterPrediction:
     intent_label: str
     intent_confidence: float
     needs_clarification: bool
+    clarification_confidence: float
     clarification_reason: Optional[str] = None
 
 
@@ -53,12 +55,14 @@ class LightweightRouter:
         self.model_dir = model_dir
         self.domain_model = None
         self.intent_model = None
+        self.clarification_model = None
         self.available = False
         self._load_models()
 
     def _load_models(self) -> None:
         domain_path = self.model_dir / DOMAIN_MODEL_FILE
         intent_path = self.model_dir / INTENT_MODEL_FILE
+        clarification_path = self.model_dir / CLARIFICATION_MODEL_FILE
 
         if not domain_path.exists() or not intent_path.exists():
             logger.warning(
@@ -73,12 +77,16 @@ class LightweightRouter:
                 self.domain_model = pickle.load(f)
             with intent_path.open("rb") as f:
                 self.intent_model = pickle.load(f)
+            if clarification_path.exists():
+                with clarification_path.open("rb") as f:
+                    self.clarification_model = pickle.load(f)
             self.available = True
             logger.info("Lightweight router loaded from {}", self.model_dir)
         except Exception as e:
             logger.error("Failed to load lightweight router artifacts: {}", e)
             self.domain_model = None
             self.intent_model = None
+            self.clarification_model = None
             self.available = False
 
     def predict(self, query_text: str) -> Optional[RouterPrediction]:
@@ -94,10 +102,9 @@ class LightweightRouter:
                 intent_label = "general"
                 intent_conf = min(intent_conf, 0.5)
 
-            needs_clarification, reason = self._needs_clarification(
+            needs_clarification, clarification_confidence, reason = self._predict_needs_clarification(
                 query_text=query_text,
                 domain_confidence=domain_conf,
-                intent_label=intent_label,
                 intent_confidence=intent_conf,
             )
 
@@ -108,6 +115,7 @@ class LightweightRouter:
                 intent_label=intent_label,
                 intent_confidence=intent_conf,
                 needs_clarification=needs_clarification,
+                clarification_confidence=clarification_confidence,
                 clarification_reason=reason,
             )
         except Exception as e:
@@ -131,24 +139,47 @@ class LightweightRouter:
 
         return label, confidence
 
-    def _needs_clarification(
+    def _predict_needs_clarification(
         self,
         query_text: str,
         domain_confidence: float,
-        intent_label: str,
         intent_confidence: float,
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, float, Optional[str]]:
         tokens = re.findall(r"\w+", query_text.lower())
 
+        # Prefer trained clarification classifier when available.
+        if self.clarification_model is not None:
+            try:
+                if hasattr(self.clarification_model, "predict_proba"):
+                    proba = self.clarification_model.predict_proba([query_text])[0]
+                    classes = list(self.clarification_model.classes_)
+                    if True in classes:
+                        idx = classes.index(True)
+                    elif 1 in classes:
+                        idx = classes.index(1)
+                    else:
+                        idx = int(len(proba) - 1)
+                    clarification_prob = float(proba[idx])
+                else:
+                    pred = self.clarification_model.predict([query_text])[0]
+                    clarification_prob = 1.0 if bool(pred) else 0.0
+
+                # Extremely short queries still force clarification.
+                if len(tokens) <= 2:
+                    return True, max(clarification_prob, 0.9), "query_too_short"
+
+                return clarification_prob >= 0.5, clarification_prob, "router_classifier"
+            except Exception as e:
+                logger.warning("Clarification classifier failed, using heuristic fallback: {}", e)
+
+        # Heuristic fallback if clarification classifier is unavailable.
         if len(tokens) <= 2:
-            return True, "query_too_short"
+            return True, 0.9, "query_too_short"
         if domain_confidence < 0.55:
-            return True, "low_domain_confidence"
+            return True, 0.7, "low_domain_confidence"
         if intent_confidence < 0.5:
-            return True, "low_intent_confidence"
-        if intent_label == "general" and len(tokens) <= 5:
-            return True, "general_intent_needs_specificity"
-        return False, None
+            return True, 0.65, "low_intent_confidence"
+        return False, 0.3, "heuristic_confident"
 
 
 _router_instance: Optional[LightweightRouter] = None

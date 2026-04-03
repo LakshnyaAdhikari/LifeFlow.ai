@@ -18,6 +18,7 @@ from app.models.situation import UserSituation, SituationInteraction
 from app.services.situation.context_builder import SituationContextBuilder, SituationContext
 from app.services.intake.domain_classifier import get_domain_classifier
 from app.services.intake.question_generator import get_clarification_generator
+from app.services.routing.lightweight_router import get_lightweight_router
 
 
 router = APIRouter(prefix="/situations", tags=["situations"])
@@ -69,6 +70,21 @@ def _has_useful_mcq_questions(questions: Optional[List[Dict[str, Any]]]) -> bool
             valid_count += 1
 
     return valid_count >= 2
+
+
+def _router_needs_clarification(context: Optional[Dict[str, Any]]) -> Optional[bool]:
+    """
+    Return router clarification decision if present in situation context.
+    """
+    if not isinstance(context, dict):
+        return None
+    router_decision = context.get("router_decision")
+    if not isinstance(router_decision, dict):
+        return None
+    value = router_decision.get("needs_clarification")
+    if isinstance(value, bool):
+        return value
+    return None
 
 
 async def _maybe_reclassify_domain(situation: UserSituation, db: Session) -> bool:
@@ -146,6 +162,28 @@ async def create_situation(
         # 1. Classify domain
         classifier = get_domain_classifier()
         classification = await classifier.classify(payload.description)
+
+        # 1.1 Build router decision (if artifacts are available)
+        lightweight_router = get_lightweight_router()
+        router_prediction = lightweight_router.predict(payload.description)
+        if router_prediction:
+            router_decision = {
+                "intent_label": router_prediction.intent_label,
+                "domain_label": router_prediction.domain_label,
+                "domain_confidence": router_prediction.domain_confidence,
+                "intent_confidence": router_prediction.intent_confidence,
+                "needs_clarification": router_prediction.needs_clarification,
+                "clarification_reason": router_prediction.clarification_reason,
+            }
+        else:
+            router_decision = {
+                "intent_label": None,
+                "domain_label": classification.primary_domain,
+                "domain_confidence": classification.confidence,
+                "intent_confidence": None,
+                "needs_clarification": classification.confidence < 0.45,
+                "clarification_reason": "fallback_from_classification_confidence",
+            }
         
         # 2. Create situation
         situation = UserSituation(
@@ -159,7 +197,8 @@ async def create_situation(
                 "classification": {
                     "confidence": classification.confidence,
                     "reasoning": classification.reasoning
-                }
+                },
+                "router_decision": router_decision,
             },
             status="active",
             priority=payload.priority,
@@ -288,7 +327,12 @@ async def get_situation(
             logger.error(f"Domain reclassification check failed for situation {situation.id}: {e}")
         
         # Lazy load/repair clarification questions if missing or low quality.
-        if not _has_useful_mcq_questions(situation.clarification_questions):
+        # Only generate when router indicates clarification is needed
+        # (or when no router decision is available in historical records).
+        needs_clarification = _router_needs_clarification(situation.context)
+        should_generate_questions = needs_clarification is not False
+
+        if should_generate_questions and not _has_useful_mcq_questions(situation.clarification_questions):
             logger.info(
                 f"Situation {situation.id} clarification questions missing/weak. Generating MCQ set lazily..."
             )

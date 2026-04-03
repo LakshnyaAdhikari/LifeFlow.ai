@@ -16,6 +16,7 @@ from app.models import User
 from app.models.situation import UserSituation
 from app.services.intake.question_generator import get_clarification_generator, ClarificationQuestion
 from app.services.intake.domain_classifier import get_domain_classifier, DomainClassification
+from app.services.routing.lightweight_router import get_lightweight_router
 from app.services.safety.legal_filter import LegalBoundaryDetector, RiskAssessment
 
 class IntakeRequest(BaseModel):
@@ -35,6 +36,11 @@ class IntakeResponse(BaseModel):
     reasoning: str
     risk_assessment: Optional[RiskAssessment] = None
     clarifying_questions: List[ClarificationQuestion] = []  # [NEW] Structured questions
+    needs_clarification: bool = True
+    router_intent: Optional[str] = None
+    router_domain_confidence: Optional[float] = None
+    router_intent_confidence: Optional[float] = None
+    clarification_reason: Optional[str] = None
 
 
 @router.post("/resolve", response_model=IntakeResponse)
@@ -56,6 +62,23 @@ async def resolve_domain(
         # 1. Classify domain using ML
         classifier = get_domain_classifier()
         classification: DomainClassification = await classifier.classify(payload.user_message)
+
+        # 1.1 Local router decision (if artifacts available)
+        lightweight_router = get_lightweight_router()
+        router_prediction = lightweight_router.predict(payload.user_message)
+        if router_prediction:
+            needs_clarification = bool(router_prediction.needs_clarification)
+            clarification_reason = router_prediction.clarification_reason
+            router_intent = router_prediction.intent_label
+            router_domain_confidence = router_prediction.domain_confidence
+            router_intent_confidence = router_prediction.intent_confidence
+        else:
+            # Conservative fallback when no local router artifacts are available.
+            needs_clarification = classification.confidence < 0.45
+            clarification_reason = "fallback_from_classification_confidence"
+            router_intent = None
+            router_domain_confidence = None
+            router_intent_confidence = None
         
         # 2. Assess legal risk
         boundary_detector = LegalBoundaryDetector()
@@ -78,7 +101,15 @@ async def resolve_domain(
                     "confidence": classification.confidence,
                     "reasoning": classification.reasoning,
                     "suggested_keywords": classification.suggested_keywords,
-                }
+                },
+                "router_decision": {
+                    "intent_label": router_intent,
+                    "domain_label": classification.primary_domain,
+                    "domain_confidence": router_domain_confidence,
+                    "intent_confidence": router_intent_confidence,
+                    "needs_clarification": needs_clarification,
+                    "clarification_reason": clarification_reason,
+                },
             },
             status="active"
         )
@@ -108,7 +139,12 @@ async def resolve_domain(
             suggested_keywords=classification.suggested_keywords,
             reasoning=classification.reasoning,
             risk_assessment=risk_assessment,
-            clarifying_questions=[] # Empty list, will be populated on clarification page load
+            clarifying_questions=[], # Empty list, will be populated on clarification page load
+            needs_clarification=needs_clarification,
+            router_intent=router_intent,
+            router_domain_confidence=router_domain_confidence,
+            router_intent_confidence=router_intent_confidence,
+            clarification_reason=clarification_reason,
         )
     
     except Exception as e:

@@ -89,6 +89,20 @@ async def get_suggestions(
     try:
         # Initialize guidance engine
         engine = GuidanceEngine(db)
+
+        effective_context: Dict[str, Any] = dict(payload.context or {})
+        if payload.situation_id:
+            situation = db.query(UserSituation).filter(
+                UserSituation.id == payload.situation_id,
+                UserSituation.user_id == current_user.id
+            ).first()
+            if situation and isinstance(situation.context, dict):
+                router_decision = situation.context.get("router_decision")
+                if isinstance(router_decision, dict):
+                    effective_context.setdefault("router_intent", router_decision.get("intent_label"))
+                    effective_context.setdefault("router_needs_clarification", router_decision.get("needs_clarification"))
+                    effective_context.setdefault("router_domain_confidence", router_decision.get("domain_confidence"))
+                    effective_context.setdefault("router_intent_confidence", router_decision.get("intent_confidence"))
         
         # Generate guidance
         guidance = await engine.generate_guidance(
@@ -96,7 +110,7 @@ async def get_suggestions(
             domain=payload.domain,
             user_id=current_user.id,
             situation_id=payload.situation_id,
-            context=payload.context,
+            context=effective_context or None,
             clarification_answers=[a.model_dump() for a in payload.clarification_answers]  # [NEW] Convert to dicts
         )
         
