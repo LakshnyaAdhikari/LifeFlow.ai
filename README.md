@@ -99,6 +99,4 @@ Detailed documentation is available in the `/docs` directory and via the API swa
 
 ---
 
-## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
