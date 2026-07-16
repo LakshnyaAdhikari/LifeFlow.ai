@@ -101,28 +101,31 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     """
     Create a new user account with email.
     Sends OTP to email via Resend for verification.
+    If account exists but is unverified, resends OTP instead of rejecting.
     """
     print("🚀 Signup endpoint triggered")
     try:
         email = payload.email.lower().strip()
 
-        # Check if email already exists in UserAuth
+        # Check if a verified account already exists — hard stop
         existing_auth = db.query(UserAuth).filter(UserAuth.email == email).first()
-        if existing_auth:
+        if existing_auth and existing_auth.is_email_verified:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered"
             )
 
-        # Also check the core User table (used elsewhere with emails)
-        existing_user = db.query(User).filter(User.email == email).first()
-        if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
-            )
+        # If unverified account exists, just resend OTP and let them verify
+        if existing_auth and not existing_auth.is_email_verified:
+            otp_service.send_otp(email)
+            return {
+                "message": "Verification code resent. Please check your email.",
+                "user_id": existing_auth.user_id,
+                "email": email,
+                "otp_sent": True
+            }
 
-        # Create user
+        # Fresh signup — create User + UserAuth
         user = User(
             email=email,
             full_name=payload.full_name
@@ -131,7 +134,6 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
-        # Create auth record
         user_auth = UserAuth(
             user_id=user.id,
             email=email,

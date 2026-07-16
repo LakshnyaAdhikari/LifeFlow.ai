@@ -13,7 +13,7 @@ from app.models.core import (
 from app.models.situation import UserSituation, SituationInteraction, UserFeedback
 from app.models.knowledge import KnowledgeDomain, KnowledgeDocument, KnowledgeChunk, UserQuery, GuidanceSession
 from app.models.search import SearchHistory
-from app.auth_models import UserAuth, OTPVerification, UserProfile, UserSession
+from app.auth_models import UserAuth, UserProfile, UserSession
 from app.infrastructure.sqlalchemy_repository import SqlAlchemyWorkflowRepository, SqlAlchemyAuditRepository
 from app.infrastructure.rag_adapter import FAISSRAGAdapter
 from app.workflow_engine import StateManager, GraphTraverser
