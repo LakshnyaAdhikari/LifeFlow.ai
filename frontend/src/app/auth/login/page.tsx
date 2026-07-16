@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Loader2, Phone, Lock, AlertCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Mail, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -14,23 +14,11 @@ export default function LoginPage() {
     const router = useRouter();
     const { t } = useLanguage();
     const [formData, setFormData] = useState({
-        phone: "",
+        email: "",
         password: ""
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
-    const normalizePhone = (phone: string) => {
-        phone = phone.replace(/\s/g, '').replace(/-/g, '');
-        if (!phone.startsWith('+91')) {
-            if (phone.startsWith('91')) {
-                phone = '+' + phone;
-            } else if (phone.length === 10) {
-                phone = '+91' + phone;
-            }
-        }
-        return phone;
-    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,13 +26,13 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const normalizedPhone = normalizePhone(formData.phone);
+            const email = formData.email.trim().toLowerCase();
 
             const res = await fetch("http://127.0.0.1:8000/auth/login-simple", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    phone: normalizedPhone,
+                    email,
                     password: formData.password,
                     skip_otp: true
                 })
@@ -58,7 +46,7 @@ export default function LoginPage() {
                 router.push("/home");
             } else {
                 if (data.detail?.includes("not verified")) {
-                    localStorage.setItem("pending_phone", normalizedPhone);
+                    localStorage.setItem("pending_email", email);
                     router.push("/auth/verify-otp");
                 } else {
                     setError(data.detail || t("auth.errors.generic_error"));
@@ -88,7 +76,7 @@ export default function LoginPage() {
                         LifeFlow.ai
                     </span>
                 </div>
-                <div className="w-[100px]"></div> {/* Spacer */}
+                <div className="w-[100px]"></div>
             </div>
 
             <div className="w-full max-w-md space-y-8 mt-10">
@@ -101,16 +89,16 @@ export default function LoginPage() {
 
                 <div className="bg-card border-2 border-border rounded-xl p-8 shadow-sm">
                     <form onSubmit={handleLogin} className="space-y-6">
-                        {/* Phone Number */}
+                        {/* Email */}
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold">{t("auth.login.phone")}</label>
+                            <label className="text-sm font-semibold">{t("auth.login.email")}</label>
                             <div className="relative">
-                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                                 <input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder={t("auth.signup.phone_placeholder")}
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    placeholder={t("auth.signup.email_placeholder")}
                                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none transition-colors"
                                     required
                                 />

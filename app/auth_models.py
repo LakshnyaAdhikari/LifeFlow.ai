@@ -9,28 +9,13 @@ class UserAuth(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
-    phone = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
     password_hash = Column(String)
-    is_phone_verified = Column(Boolean, default=False)
+    is_email_verified = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     user = relationship("User", back_populates="auth")
-    otp_verifications = relationship("OTPVerification", back_populates="user_auth")
 
-class OTPVerification(Base):
-    """OTP codes for phone verification"""
-    __tablename__ = "otp_verification"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_auth_id = Column(Integer, ForeignKey("user_auth.id"))
-    phone = Column(String)
-    otp_code = Column(String(6))
-    expires_at = Column(DateTime)
-    is_verified = Column(Boolean, default=False)
-    attempts = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    user_auth = relationship("UserAuth", back_populates="otp_verifications")
 
 class UserProfile(Base):
     """User context for personalization"""

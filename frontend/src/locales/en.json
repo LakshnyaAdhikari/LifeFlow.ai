@@ -199,8 +199,8 @@
             "subtitle": "Create an account to start your guided journey",
             "full_name": "Full Name",
             "full_name_placeholder": "Enter your full name",
-            "phone": "Phone Number",
-            "phone_placeholder": "e.g. 9876543210",
+            "email": "Email Address",
+            "email_placeholder": "you@example.com",
             "password": "Password",
             "password_placeholder": "Min 6 characters",
             "confirm_password": "Confirm Password",
@@ -214,7 +214,7 @@
         "login": {
             "title": "Welcome Back",
             "subtitle": "Log in to continue your journey",
-            "phone": "Phone Number",
+            "email": "Email Address",
             "password": "Password",
             "submit": "Log In",
             "submitting": "Logging in...",
@@ -222,16 +222,16 @@
             "signup_link": "Sign up"
         },
         "verify_otp": {
-            "title": "Verify Phone",
+            "title": "Verify Email",
             "subtitle": "We've sent a code to",
             "otp_placeholder": "000000",
             "submit": "Verify & Continue",
             "submitting": "Verifying...",
             "resend": "Resend Code",
-            "change_phone": "Change phone number"
+            "change_email": "Change email address"
         },
         "errors": {
-            "invalid_phone": "Please enter a valid 10-digit Indian phone number",
+            "invalid_email": "Please enter a valid email address",
             "password_length": "Password must be at least 6 characters",
             "password_mismatch": "Passwords do not match",
             "name_required": "Please enter your full name",
@@ -333,8 +333,8 @@
         "change_password": {
             "title": "Change Password",
             "subtitle": "Secure your account with a new password",
-            "phone_number": "Phone Number",
-            "phone_placeholder": "Enter your phone number",
+            "phone_number": "Email Address",
+            "phone_placeholder": "Enter your email address",
             "send_otp": "Send OTP",
             "sending": "Sending OTP...",
             "enter_otp": "Enter OTP",

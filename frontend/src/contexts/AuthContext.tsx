@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 interface User {
     id: number;
     full_name: string;
-    phone: string;
+    email: string;
     profile?: {
         location_state?: string;
         location_city?: string;
@@ -49,13 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (res.ok) {
                 const data = await res.json();
                 setUser({
-                    id: data.user_id,
+                    id: data.id,
                     full_name: data.full_name,
-                    phone: data.phone,
+                    email: data.email,
                     profile: data.profile
                 });
             } else {
-                // Token might be invalid or expired
                 logout();
             }
         } catch (err) {

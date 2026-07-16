@@ -16,16 +16,16 @@ export default function VerifyOTPPage() {
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
     const [resendTimer, setResendTimer] = useState(30);
 
     useEffect(() => {
-        const storedPhone = localStorage.getItem("pending_phone");
-        if (!storedPhone) {
+        const storedEmail = localStorage.getItem("pending_email");
+        if (!storedEmail) {
             router.push("/auth/signup");
             return;
         }
-        setPhone(storedPhone);
+        setEmail(storedEmail);
 
         const timer = setInterval(() => {
             setResendTimer((prev) => (prev > 0 ? prev - 1 : 0));
@@ -39,7 +39,7 @@ export default function VerifyOTPPage() {
         setError("");
 
         if (otp.length !== 6) {
-            setError(t("auth.verify_otp.otp_placeholder")); // Or a specific error key
+            setError("Please enter the 6-digit code.");
             return;
         }
 
@@ -50,7 +50,7 @@ export default function VerifyOTPPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    phone: phone,
+                    email,
                     otp_code: otp
                 })
             });
@@ -60,8 +60,7 @@ export default function VerifyOTPPage() {
             if (res.ok) {
                 authLogin(data.access_token, data.refresh_token, data.user_id.toString());
                 document.cookie = `access_token=${data.access_token}; path=/; max-age=${ACCESS_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
-                localStorage.removeItem("pending_phone");
-
+                localStorage.removeItem("pending_email");
                 router.push("/home");
             } else {
                 setError(data.detail || t("auth.errors.generic_error"));
@@ -82,11 +81,10 @@ export default function VerifyOTPPage() {
             const res = await fetch("http://127.0.0.1:8000/auth/send-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone })
+                body: JSON.stringify({ email })
             });
             if (res.ok) {
                 setResendTimer(30);
-                // We could localize this alert too, but usually UI feedback is better
             } else {
                 const data = await res.json();
                 setError(data.detail || t("auth.errors.generic_error"));
@@ -112,14 +110,14 @@ export default function VerifyOTPPage() {
                         LifeFlow.ai
                     </span>
                 </div>
-                <div className="w-[100px]"></div> {/* Spacer */}
+                <div className="w-[100px]"></div>
             </div>
 
             <div className="w-full max-w-md space-y-8 mt-10">
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold">{t("auth.verify_otp.title")}</h1>
                     <p className="text-muted-foreground">
-                        {t("auth.verify_otp.subtitle")} <span className="text-foreground font-semibold">{phone}</span>
+                        {t("auth.verify_otp.subtitle")} <span className="text-foreground font-semibold">{email}</span>
                     </p>
                 </div>
 
@@ -178,11 +176,11 @@ export default function VerifyOTPPage() {
                             {resendTimer > 0 ? `${t("auth.verify_otp.resend")} in ${resendTimer}s` : t("auth.verify_otp.resend")}
                         </button>
                     </div>
-                    <div className="text-center text-sm text-muted-foreground">
-                        {t("auth.verify_otp.change_phone")}{" "}
+                    <div className="text-center text-sm text-muted-foreground mt-4">
+                        {t("auth.verify_otp.change_email")}{" "}
                         <button
                             onClick={() => {
-                                localStorage.removeItem("pending_phone");
+                                localStorage.removeItem("pending_email");
                                 router.push("/auth/signup");
                             }}
                             className="text-primary hover:underline font-medium"

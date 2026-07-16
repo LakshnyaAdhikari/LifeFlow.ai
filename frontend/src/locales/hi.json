@@ -196,8 +196,8 @@
             "subtitle": "अपनी निर्देशित यात्रा शुरू करने के लिए एक खाता बनाएं",
             "full_name": "पूरा नाम",
             "full_name_placeholder": "अपना पूरा नाम दर्ज करें",
-            "phone": "फ़ोन नंबर",
-            "phone_placeholder": "जैसे: 9876543210",
+            "email": "ईमेल पता",
+            "email_placeholder": "you@example.com",
             "password": "पासवर्ड",
             "password_placeholder": "न्यूनतम 6 अंक",
             "confirm_password": "पासवर्ड की पुष्टि करें",
@@ -211,7 +211,7 @@
         "login": {
             "title": "स्वागत है",
             "subtitle": "अपनी यात्रा जारी रखने के लिए लॉग इन करें",
-            "phone": "फ़ोन नंबर",
+            "email": "ईमेल पता",
             "password": "पासवर्ड",
             "submit": "लॉग इन करें",
             "submitting": "लॉग इन किया जा रहा है...",
@@ -219,16 +219,16 @@
             "signup_link": "साइन अप करें"
         },
         "verify_otp": {
-            "title": "फ़ोन सत्यापित करें",
+            "title": "ईमेल सत्यापित करें",
             "subtitle": "हमने एक कोड भेजा है",
             "otp_placeholder": "000000",
             "submit": "सत्यापित करें और जारी रखें",
             "submitting": "सत्यापित किया जा रहा है...",
             "resend": "कोड फिर से भेजें",
-            "change_phone": "फ़ोन नंबर बदलें"
+            "change_email": "ईमेल पता बदलें"
         },
         "errors": {
-            "invalid_phone": "कृपया एक मान्य 10-अंकीय भारतीय फ़ोन नंबर दर्ज करें",
+            "invalid_email": "कृपया एक मान्य ईमेल पता दर्ज करें",
             "password_length": "पासवर्ड कम से कम 6 अंकों का होना चाहिए",
             "password_mismatch": "पासवर्ड मेल नहीं खाते",
             "name_required": "कृपया अपना पूरा नाम दर्ज करें",

@@ -1,71 +1,101 @@
 import os
+import random
+import string
+from datetime import datetime, timedelta
 from typing import Optional
 
+# In-memory OTP store for dev/mock mode: { email: { code, expires_at } }
+_otp_store: dict = {}
+
+RESEND_AVAILABLE = False
+resend = None
+
 try:
-    from twilio.rest import Client
-    TWILIO_AVAILABLE = True
+    import resend as resend_sdk
+    resend = resend_sdk
+    RESEND_AVAILABLE = True
 except ImportError:
-    TWILIO_AVAILABLE = False
-    Client = None
+    pass
+
+
+def _generate_otp() -> str:
+    return ''.join(random.choices(string.digits, k=6))
+
 
 class OTPService:
     def __init__(self):
-        self.account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-        self.auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-        self.verify_sid = os.getenv("TWILIO_VERIFY_SERVICE_SID")
-        
-        if TWILIO_AVAILABLE and self.account_sid and self.auth_token and self.verify_sid:
-            try:
-                self.client = Client(self.account_sid, self.auth_token)
-                print("🚀 Twilio Verify Service initialized")
-            except Exception as e:
-                print(f"⚠️ Failed to initialize Twilio client: {e}")
-                self.client = None
+        self.api_key = os.getenv("RESEND_API_KEY")
+        self.from_email = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
+
+        if RESEND_AVAILABLE and self.api_key:
+            resend.api_key = self.api_key
+            print("🚀 Resend email OTP service initialized")
         else:
-            self.client = None
-            if not TWILIO_AVAILABLE:
-                print("🛑 [DEPENDENCY MISSING] 'twilio' library not found. Using MOCK OTP service.")
+            if not RESEND_AVAILABLE:
+                print("🛑 [DEPENDENCY MISSING] 'resend' library not found. Using MOCK OTP service.")
             else:
-                print("🛑 [DEVELOPER MODE] Twilio credentials missing. Using MOCK OTP service.")
-            print("💡 Use code '123456' to verify any number in local development.")
+                print("🛑 [DEVELOPER MODE] RESEND_API_KEY missing. Using MOCK OTP service.")
+            print("💡 Use code '123456' to verify any email in local development.")
 
-    def send_otp(self, phone: str) -> str:
-        """Send OTP via Twilio Verify (or mock)"""
-        if not self.client:
-            print(f"📡 [MOCK] OTP 'sent' to {phone}. (Status: pending)")
-            return "pending"
-            
-        try:
-            verification = self.client.verify.v2.services(self.verify_sid).verifications.create(
-                to=phone,
-                channel="sms"
-            )
-            print(f"✅ Twilio Verify sent to {phone}. SID: {verification.sid}")
-            return verification.status
-        except Exception as e:
-            print(f"❌ Twilio Error sending OTP: {e}")
-            print(f"🔄 Falling back to [MOCK] mode for {phone}")
+    def send_otp(self, email: str) -> str:
+        """Generate and send OTP via Resend (or mock in dev mode)."""
+        code = _generate_otp()
+        expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+        # Store for verification
+        _otp_store[email] = {"code": code, "expires_at": expires_at}
+
+        if not (RESEND_AVAILABLE and self.api_key):
+            print(f"📡 [MOCK] OTP for {email}: {code} (valid 10 min)")
             return "pending"
 
-    def verify_otp(self, phone: str, code: str) -> str:
-        """Verify OTP via Twilio Verify (or mock)"""
-        if not self.client:
-            if code == "123456":
-                print(f"✅ [MOCK] Code '123456' accepted for {phone}")
-                return "approved"
-            print(f"❌ [MOCK] Invalid code '{code}' for {phone}. (Try '123456')")
-            return "pending"
-            
         try:
-            verification_check = self.client.verify.v2.services(self.verify_sid).verification_checks.create(
-                to=phone,
-                code=code
-            )
-            print(f"🔍 OTP verification check for {phone}: {verification_check.status}")
-            return verification_check.status
-        except Exception as e:
-            print(f"❌ Twilio Error verifying OTP: {e}")
-            if code == "123456":
-                print(f"✅ [MOCK FALLBACK] Code '123456' accepted due to Twilio error")
-                return "approved"
+            resend.Emails.send({
+                "from": self.from_email,
+                "to": email,
+                "subject": "Your LifeFlow verification code",
+                "html": f"""
+                <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px;">
+                    <h2 style="color: #0d9488;">LifeFlow.ai</h2>
+                    <p>Your verification code is:</p>
+                    <h1 style="letter-spacing: 8px; font-size: 40px; color: #111;">{code}</h1>
+                    <p style="color: #666;">This code expires in 10 minutes. Do not share it with anyone.</p>
+                </div>
+                """
+            })
+            print(f"✅ Resend OTP sent to {email}")
             return "pending"
+        except Exception as e:
+            print(f"❌ Resend error sending OTP to {email}: {e}")
+            print(f"🔄 Falling back to MOCK mode — code: {code}")
+            return "pending"
+
+    def verify_otp(self, email: str, code: str) -> str:
+        """Verify the OTP code for the given email."""
+        # Dev mock fallback: always accept 123456
+        if not (RESEND_AVAILABLE and self.api_key):
+            if code == "123456":
+                print(f"✅ [MOCK] Code '123456' accepted for {email}")
+                _otp_store.pop(email, None)
+                return "approved"
+            print(f"❌ [MOCK] Invalid code '{code}' for {email}. Try '123456'.")
+            return "pending"
+
+        entry = _otp_store.get(email)
+        if not entry:
+            print(f"❌ No OTP found for {email}")
+            return "pending"
+
+        if datetime.utcnow() > entry["expires_at"]:
+            print(f"❌ OTP expired for {email}")
+            _otp_store.pop(email, None)
+            return "pending"
+
+        if entry["code"] != code:
+            print(f"❌ Wrong OTP for {email}")
+            return "pending"
+
+        # Valid — clean up
+        _otp_store.pop(email, None)
+        print(f"✅ OTP verified for {email}")
+        return "approved"
