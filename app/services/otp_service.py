@@ -50,9 +50,9 @@ class OTPService:
             return "pending"
 
         try:
-            resend.Emails.send({
+            params: resend.Emails.SendParams = {
                 "from": self.from_email,
-                "to": email,
+                "to": [email],
                 "subject": "Your LifeFlow verification code",
                 "html": f"""
                 <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px;">
@@ -62,7 +62,8 @@ class OTPService:
                     <p style="color: #666;">This code expires in 10 minutes. Do not share it with anyone.</p>
                 </div>
                 """
-            })
+            }
+            resend.Emails.send(params)
             print(f"✅ Resend OTP sent to {email}")
             return "pending"
         except Exception as e:
