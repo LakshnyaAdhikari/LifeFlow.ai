@@ -18,8 +18,8 @@ python-multipart>=0.0.6
 passlib[bcrypt]>=1.7.4
 bcrypt>=4.0.1
 
-# Email OTP
-resend>=2.0.0
+# Email OTP (Gmail SMTP)
+aiosmtplib==3.0.2
 
 # LLM & AI
 openai>=1.6.0

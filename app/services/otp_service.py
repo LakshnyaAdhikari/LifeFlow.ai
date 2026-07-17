@@ -1,21 +1,13 @@
 import os
 import random
 import string
+import smtplib
 from datetime import datetime, timedelta
-from typing import Optional
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-# In-memory OTP store for dev/mock mode: { email: { code, expires_at } }
+# In-memory OTP store: { email: { code, expires_at } }
 _otp_store: dict = {}
-
-RESEND_AVAILABLE = False
-resend = None
-
-try:
-    import resend as resend_sdk
-    resend = resend_sdk
-    RESEND_AVAILABLE = True
-except ImportError:
-    pass
 
 
 def _generate_otp() -> str:
@@ -24,57 +16,70 @@ def _generate_otp() -> str:
 
 class OTPService:
     def __init__(self):
-        self.api_key = os.getenv("RESEND_API_KEY")
-        self.from_email = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
+        self.gmail_user = os.getenv("GMAIL_USER")
+        self.gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")
 
-        if RESEND_AVAILABLE and self.api_key:
-            resend.api_key = self.api_key
-            print("🚀 Resend email OTP service initialized")
+        if self.gmail_user and self.gmail_app_password:
+            print(f"🚀 Gmail SMTP OTP service initialized ({self.gmail_user})")
         else:
-            if not RESEND_AVAILABLE:
-                print("🛑 [DEPENDENCY MISSING] 'resend' library not found. Using MOCK OTP service.")
-            else:
-                print("🛑 [DEVELOPER MODE] RESEND_API_KEY missing. Using MOCK OTP service.")
+            print("🛑 [DEVELOPER MODE] GMAIL_USER or GMAIL_APP_PASSWORD missing. Using MOCK OTP service.")
             print("💡 Use code '123456' to verify any email in local development.")
 
+    def _is_configured(self) -> bool:
+        return bool(self.gmail_user and self.gmail_app_password)
+
     def send_otp(self, email: str) -> str:
-        """Generate and send OTP via Resend (or mock in dev mode)."""
+        """Generate OTP, store it, and send via Gmail SMTP (or mock)."""
         code = _generate_otp()
         expires_at = datetime.utcnow() + timedelta(minutes=10)
-
-        # Store for verification
         _otp_store[email] = {"code": code, "expires_at": expires_at}
 
-        if not (RESEND_AVAILABLE and self.api_key):
+        if not self._is_configured():
             print(f"📡 [MOCK] OTP for {email}: {code} (valid 10 min)")
             return "pending"
 
         try:
-            params: resend.Emails.SendParams = {
-                "from": self.from_email,
-                "to": [email],
-                "subject": "Your LifeFlow verification code",
-                "html": f"""
-                <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px;">
-                    <h2 style="color: #0d9488;">LifeFlow.ai</h2>
-                    <p>Your verification code is:</p>
-                    <h1 style="letter-spacing: 8px; font-size: 40px; color: #111;">{code}</h1>
-                    <p style="color: #666;">This code expires in 10 minutes. Do not share it with anyone.</p>
-                </div>
-                """
-            }
-            resend.Emails.send(params)
-            print(f"✅ Resend OTP sent to {email}")
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = "Your LifeFlow verification code"
+            msg["From"] = f"LifeFlow.ai <{self.gmail_user}>"
+            msg["To"] = email
+
+            html = f"""
+            <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px;">
+                <h2 style="color: #0d9488;">LifeFlow.ai</h2>
+                <p style="font-size: 16px; color: #333;">Your email verification code is:</p>
+                <h1 style="letter-spacing: 10px; font-size: 44px; color: #111; margin: 24px 0;">{code}</h1>
+                <p style="color: #666; font-size: 14px;">
+                    This code expires in <strong>10 minutes</strong>.<br>
+                    If you didn't request this, you can safely ignore this email.
+                </p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
+                <p style="color: #999; font-size: 12px;">LifeFlow.ai — Simplifying life's legal and administrative challenges.</p>
+            </div>
+            """
+
+            msg.attach(MIMEText(html, "html"))
+
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(self.gmail_user, self.gmail_app_password)
+                server.sendmail(self.gmail_user, email, msg.as_string())
+
+            print(f"✅ Gmail OTP sent to {email}")
+            return "pending"
+
+        except smtplib.SMTPAuthenticationError:
+            print(f"❌ Gmail auth failed — check GMAIL_USER and GMAIL_APP_PASSWORD in .env")
+            print(f"🔄 Falling back to MOCK mode — code for {email}: {code}")
             return "pending"
         except Exception as e:
-            print(f"❌ Resend error sending OTP to {email}: {e}")
-            print(f"🔄 Falling back to MOCK mode — code: {code}")
+            print(f"❌ Gmail SMTP error for {email}: {e}")
+            print(f"🔄 Falling back to MOCK mode — code for {email}: {code}")
             return "pending"
 
     def verify_otp(self, email: str, code: str) -> str:
         """Verify the OTP code for the given email."""
-        # Dev mock fallback: always accept 123456
-        if not (RESEND_AVAILABLE and self.api_key):
+        # Dev mock fallback
+        if not self._is_configured():
             if code == "123456":
                 print(f"✅ [MOCK] Code '123456' accepted for {email}")
                 _otp_store.pop(email, None)
@@ -96,7 +101,6 @@ class OTPService:
             print(f"❌ Wrong OTP for {email}")
             return "pending"
 
-        # Valid — clean up
         _otp_store.pop(email, None)
         print(f"✅ OTP verified for {email}")
         return "approved"
