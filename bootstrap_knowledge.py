@@ -11,12 +11,15 @@ from app.database import Base
 from app.services.knowledge.ingestion import IngestionPipeline
 from app.services.knowledge.vector_db import get_vector_db
 from loguru import logger
+from app.auth_models import UserAuth, UserProfile, UserSession, UserDependent
 
 
 # Database setup
-DATABASE_URL = "sqlite:///./lifeflow.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from app.database import (
+    Base,
+    engine,
+    SessionLocal
+)
 
 
 # Sample documents to ingest
@@ -430,9 +433,9 @@ async def ingest_sample_documents():
                 for j, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
                     chunk_record = KnowledgeChunk(
                         document_id=doc.id,
-                        content=chunk["content"],
+                        text=chunk["content"],
                         chunk_index=j,
-                        metadata=chunk.get("metadata", {}),
+                        chunk_metadata=chunk.get("metadata", {}),
                         embedding=embedding,
                         embedding_model="all-MiniLM-L6-v2",
                         quality_score=0.8
@@ -448,11 +451,11 @@ async def ingest_sample_documents():
                     vector_metadata.append({
                         "chunk_id": chunk_record.id,
                         "document_id": doc.id,
-                        "content": chunk_record.content,
+                        "content": chunk_record.text,
                         "source_authority": doc.source_authority,
                         "domain": doc.domain.name,
                         "title": doc.title,
-                        **chunk_record.metadata
+                        **chunk_record.chunk_metadata
                     })
                 
                 vector_db.add_vectors(embeddings, chunk_ids, vector_metadata)
