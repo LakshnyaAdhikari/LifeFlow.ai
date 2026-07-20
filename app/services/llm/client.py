@@ -3,6 +3,8 @@ LLM Client Service
 
 Handles all interactions with LLM providers (OpenAI, Gemini)
 """
+from dotenv import load_dotenv
+load_dotenv()
 
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
@@ -15,7 +17,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 class LLMConfig(BaseModel):
     """LLM configuration"""
     provider: str = "gemini"  # "openai" or "gemini"
-    model: str = "models/gemini-2.5-flash-lite"  # Verified fast & available
+    model: str = "models/gemini-3.5-flash"  # Verified fast & available
     temperature: float = 0.7
     max_tokens: int = 1500
     api_key: Optional[str] = None
@@ -94,6 +96,7 @@ class LLMClient:
     
     def _init_gemini(self):
         """Initialize Gemini client"""
+        
         try:
             from google import genai
         except ImportError:
@@ -110,7 +113,7 @@ class LLMClient:
         
         self.client = genai.Client(api_key=api_key)
         if self.config.model == "gpt-4-turbo-preview":  # Default was set for OpenAI
-            self.config.model = "models/gemini-2.5-flash-lite"  # Use verified available model
+            self.config.model = "models/gemini-3.5-flash"  # Use verified available model
     
     @retry(
         stop=stop_after_attempt(3),
@@ -220,14 +223,29 @@ class LLMClient:
             logger.info(f"⚡ Generating content with model: {self.config.model}")
             
             # Generate content using new API
-            response = self.client.models.generate_content(
-                model=self.config.model,
-                contents=full_prompt,
-                config={
-                    "temperature": temperature or self.config.temperature,
-                    "max_output_tokens": max_tokens or self.config.max_tokens,
-                }
-            )
+            print("MODEL =", self.config.model)
+            try:
+                response = self.client.models.generate_content(
+                    model=self.config.model,
+                    contents=full_prompt,
+                    config={
+                        "temperature": temperature or self.config.temperature,
+                        "max_output_tokens": max_tokens or self.config.max_tokens,
+                    }
+                )
+                response_model = self.config.model
+            except Exception as e:
+                if "503" not in str(e) or "UNAVAILABLE" not in str(e):
+                    raise
+                response = self.client.models.generate_content(
+                    model="models/gemini-3.1-flash-lite",
+                    contents=full_prompt,
+                    config={
+                        "temperature": temperature or self.config.temperature,
+                        "max_output_tokens": max_tokens or self.config.max_tokens,
+                    }
+                )
+                response_model = "models/gemini-3.1-flash-lite"
             
             duration = time.time() - start
             logger.info(f"✅ Gemini generation complete in {duration:.2f}s")
@@ -239,7 +257,7 @@ class LLMClient:
             
             return LLMResponse(
                 content=content,
-                model=self.config.model,
+                model=response_model,
                 tokens_used=tokens_used,
                 confidence=None
             )
@@ -279,6 +297,35 @@ class LLMClient:
         try:
             return json.loads(content)
         except json.JSONDecodeError as e:
+            sanitized = response.content.strip()
+            if sanitized.startswith("```json"):
+                sanitized = sanitized[7:]
+            if sanitized.startswith("```"):
+                sanitized = sanitized[3:]
+            if sanitized.endswith("```"):
+                sanitized = sanitized[:-3]
+            sanitized = sanitized.strip()
+            sanitized = sanitized.replace("\r\n", "\n").replace("\r", "\n")
+            
+            normalized = []
+            in_string = False
+            escaped = False
+            for char in sanitized:
+                if char == '"' and not escaped:
+                    in_string = not in_string
+                if char in "\r\n" and in_string:
+                    normalized.append("\\n")
+                else:
+                    normalized.append(char)
+                escaped = char == "\\" and not escaped
+                if char != "\\":
+                    escaped = False
+            
+            try:
+                return json.loads("".join(normalized))
+            except json.JSONDecodeError:
+                pass
+            
             logger.error(f"Failed to parse JSON response: {e}")
             logger.error(f"Response content: {response.content}")
             raise

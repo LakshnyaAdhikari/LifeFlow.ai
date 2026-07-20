@@ -218,11 +218,20 @@ class VectorDatabase:
         logger.info(f"Search returned {len(results)} results")
         return results
     
-    def _matches_filter(self, metadata: Dict[str, Any], filters: Dict[str, Any]) -> bool:
-        """Check if metadata matches filters"""
-        for key, value in filters.items():
-            if metadata.get(key) != value:
+    def _matches_filter(self, metadata, filter_metadata):
+        for key, value in filter_metadata.items():
+            metadata_value = metadata.get(key)
+
+            if metadata_value is None:
                 return False
+
+            if isinstance(metadata_value, str) and isinstance(value, str):
+                if metadata_value.strip().lower() != value.strip().lower():
+                    return False
+            else:
+                if metadata_value != value:
+                    return False
+
         return True
     
     def delete_by_document_id(self, document_id: int):
