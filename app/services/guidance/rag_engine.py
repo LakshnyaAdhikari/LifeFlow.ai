@@ -127,11 +127,48 @@ class GuidanceEngine:
             logger.info(f"DEBUG: Step 3 - Found {len(search_results)} results")
             
             logger.info(f"Retrieved {len(search_results)} relevant chunks")
+
             authoritative_results = self._filter_authoritative_results(search_results)
+
             logger.info(
                 f"Authoritative chunks after filtering: {len(authoritative_results)} "
                 f"(from {len(search_results)} raw results)"
             )
+
+            retrieval_strength = self._calculate_retrieval_strength(authoritative_results)
+            logger.info("=" * 60)
+            logger.info(f"Retrieval Strength : {retrieval_strength:.3f}")
+
+            for i, r in enumerate(authoritative_results):
+                logger.info(
+                    f"{i+1}. Score={r.score:.3f} | Authority={r.metadata.get('authority_weight')} | {r.content[:80]}"
+                )
+
+            logger.info("=" * 60)
+            logger.info(f"Retrieval strength: {retrieval_strength:.2f}")
+
+            if retrieval_strength < 0.45:
+                logger.warning(f"Weak retrieval: {retrieval_strength:.2f}")
+
+                clarification = self._build_clarification(domain)
+
+                return GuidanceResponse(
+                    suggestions=[],
+                    sources=[],
+                    confidence={
+                        "score": retrieval_strength,
+                        "overall": retrieval_strength,
+                        "reliability": "low"
+                    },
+                    caveats=[
+                        "I couldn't confidently determine what you're asking."
+                    ],
+                    metadata={
+                        "needs_clarification": True,
+                        "clarification_message": clarification["message"],
+                        "clarification_questions": clarification["questions"]
+                    }
+                )
             
             # 4. Build context from search results
             knowledge_context = self._build_knowledge_context(authoritative_results)
@@ -923,6 +960,81 @@ Generate 1-3 highly precise procedural suggestions ordered by priority.
         
         return guidance
     
+    def _build_clarification(self, domain: str) -> dict:
+        clarifications = {
+            "Insurance": {
+                "message": "I couldn't identify your insurance issue.",
+                "questions": [
+                    {
+                        "id": "insurance_type",
+                        "question": "What type of insurance is this?",
+                        "options": [
+                            "Health",
+                            "Motor",
+                            "Life",
+                            "Travel",
+                            "Other"
+                        ]
+                    },
+                    {
+                        "id": "problem_type",
+                        "question": "What happened?",
+                        "options": [
+                            "Claim rejected",
+                            "Want to file a claim",
+                            "Policy renewal",
+                            "Complaint",
+                            "Other"
+                        ]
+                    }
+                ]
+            },
+
+            "Identity": {
+                "message": "I couldn't identify your identity-related issue.",
+                "questions": [
+                    {
+                        "id": "document",
+                        "question": "Which document is involved?",
+                        "options": [
+                            "Aadhaar",
+                            "PAN",
+                            "Passport",
+                            "Voter ID",
+                            "Other"
+                        ]
+                    }
+                ]
+            },
+
+            "Tax": {
+                "message": "I couldn't identify your tax issue.",
+                "questions": [
+                    {
+                        "id": "tax_problem",
+                        "question": "What is your tax-related issue?",
+                        "options": [
+                            "ITR Filing",
+                            "Refund",
+                            "PAN",
+                            "GST",
+                            "Other"
+                        ]
+                    }
+                ]
+            },
+
+            "General": {
+                "message": "I couldn't understand your request.",
+                "questions": []
+            }
+        }
+
+        return clarifications.get(
+            domain,
+            clarifications["General"]
+        )
+
     def _extract_sources(self, search_results: List[SearchResult]) -> List[Dict[str, Any]]:
         """Extract source information"""
         from app.models.knowledge import KnowledgeDocument
