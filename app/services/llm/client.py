@@ -12,6 +12,7 @@ import os
 import json
 from loguru import logger
 from tenacity import retry, stop_after_attempt, wait_exponential
+from google.genai.types import GenerateContentConfig
 
 
 class LLMConfig(BaseModel):
@@ -225,13 +226,15 @@ class LLMClient:
             # Generate content using new API
             print("MODEL =", self.config.model)
             try:
+                print("MAX TOKENS SENT =", max_tokens)
                 response = self.client.models.generate_content(
                     model=self.config.model,
                     contents=full_prompt,
-                    config={
-                        "temperature": temperature or self.config.temperature,
-                        "max_output_tokens": max_tokens or self.config.max_tokens,
-                    }
+                    config=GenerateContentConfig(
+                        temperature=temperature or self.config.temperature,
+                        max_output_tokens=max_tokens or self.config.max_tokens,
+                        response_mime_type="application/json",
+                    )
                 )
                 response_model = self.config.model
             except Exception as e:
@@ -240,10 +243,11 @@ class LLMClient:
                 response = self.client.models.generate_content(
                     model="models/gemini-3.1-flash-lite",
                     contents=full_prompt,
-                    config={
-                        "temperature": temperature or self.config.temperature,
-                        "max_output_tokens": max_tokens or self.config.max_tokens,
-                    }
+                    config=GenerateContentConfig(
+                        temperature=temperature or self.config.temperature,
+                        max_output_tokens=max_tokens or self.config.max_tokens,
+                        response_mime_type="application/json",
+                    )
                 )
                 response_model = "models/gemini-3.1-flash-lite"
             
@@ -251,6 +255,10 @@ class LLMClient:
             logger.info(f"✅ Gemini generation complete in {duration:.2f}s")
             
             content = response.text
+            logger.info(f"Content length: {len(content)}")
+            logger.info(f"Finish reason: {getattr(response, 'finish_reason', None)}")
+            logger.info(f"Response object: {response}")
+            logger.info(repr(content))
             
             # Estimate tokens (free tier doesn't provide exact count)
             tokens_used = len(full_prompt.split()) + len(content.split())
@@ -270,7 +278,8 @@ class LLMClient:
         self,
         prompt: str,
         system_prompt: Optional[str] = None,
-        temperature: Optional[float] = None
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Generate JSON response from LLM
@@ -279,8 +288,11 @@ class LLMClient:
             prompt=prompt,
             system_prompt=system_prompt,
             temperature=temperature,
+            max_tokens=max_tokens,
             response_format={"type": "json_object"} if self.provider == "openai" else None
         )
+        logger.info("========== RAW GEMINI ==========")
+        logger.info(response.content)
         
         content = response.content.strip()
         
@@ -354,8 +366,16 @@ class LLMClient:
     def _generate_embedding_local(self, text: str) -> List[float]:
         """Generate embedding using local model"""
         try:
+            import numpy as np
+
             embedding = self.embedding_model.encode(text)
+
+            logger.info(f"Embedding dimension: {len(embedding)}")
+            logger.info(f"Embedding norm: {np.linalg.norm(embedding)}")
+            logger.info(f"First 10 values: {embedding[:10]}")
+
             return embedding.tolist()
+
         except Exception as e:
             logger.error(f"Local embedding generation failed: {e}")
             raise

@@ -34,9 +34,11 @@ class TriangulatedConfidence:
         self.db = db
         
         # Weights for each signal
-        self.llm_weight = 0.4
-        self.retrieval_weight = 0.35
-        self.historical_weight = 0.25
+        # Weights for each signal
+        self.router_weight = 0.20
+        self.llm_weight = 0.20
+        self.retrieval_weight = 0.40
+        self.evidence_weight = 0.20
     
     async def calculate(
         self,
@@ -46,55 +48,66 @@ class TriangulatedConfidence:
         context: Optional[Dict[str, Any]] = None
     ) -> ConfidenceScore:
         """
-        Triangulate confidence from multiple sources
-        
-        Args:
-            llm_confidence: Confidence from LLM (0.0 to 1.0)
-            retrieval_strength: Strength of retrieval (0.0 to 1.0)
-            domain: Domain for historical lookup
-            context: Additional context for adjustments
+        Triangulate confidence using Router + Retrieval + Evidence + LLM.
         """
         context = context or {}
-        
-        # 1. Normalize LLM confidence
+
+        # 1. Router confidence
+        router_score = max(
+            context.get("domain_confidence", 0.5),
+            context.get("intent_confidence", 0.5)
+        )
+
+        # 2. LLM confidence
         llm_score = self._normalize_llm_confidence(llm_confidence)
-        
-        # 2. Calculate retrieval strength
-        retrieval_score = self._calculate_retrieval_strength(retrieval_strength, context)
-        
-        # 3. Get historical accuracy
-        historical_score = await self._get_historical_accuracy(domain)
-        
-        # 4. Weighted combination
+
+        # 3. Retrieval confidence
+        retrieval_score = self._calculate_retrieval_strength(
+            retrieval_strength,
+            context
+        )
+
+        # 4. Evidence quality
+        evidence_score = self._calculate_evidence_quality(context)
+
+        # 5. Final weighted confidence
         final_score = (
-            llm_score * self.llm_weight +
+            router_score * self.router_weight +
             retrieval_score * self.retrieval_weight +
-            historical_score * self.historical_weight
+            evidence_score * self.evidence_weight +
+            llm_score * self.llm_weight
         )
-        
-        # 5. Apply adjustments for edge cases
-        final_score = self._apply_adjustments(final_score, context)
-        
-        # 6. Assess reliability
-        reliability = self._assess_reliability(llm_score, retrieval_score, historical_score)
-        
-        # 7. Generate explanation
+
+        final_score = min(max(final_score, 0.0), 1.0)
+
+        reliability = self._assess_reliability(
+            llm_score,
+            retrieval_score,
+            evidence_score
+        )
+
         explanation = self._generate_explanation(
-            llm_score, retrieval_score, historical_score, reliability
+            llm_score,
+            retrieval_score,
+            evidence_score,
+            reliability
         )
-        
+
         logger.info(
-            f"Confidence calculated: {final_score:.2f} "
-            f"(LLM: {llm_score:.2f}, Retrieval: {retrieval_score:.2f}, "
-            f"Historical: {historical_score:.2f}, Reliability: {reliability})"
+            f"Confidence={final_score:.2f} | "
+            f"Router={router_score:.2f}, "
+            f"Retrieval={retrieval_score:.2f}, "
+            f"Evidence={evidence_score:.2f}, "
+            f"LLM={llm_score:.2f}"
         )
-        
+
         return ConfidenceScore(
             overall=final_score,
             breakdown={
-                "llm": llm_score,
+                "router": router_score,
                 "retrieval": retrieval_score,
-                "historical": historical_score
+                "evidence": evidence_score,
+                "llm": llm_score
             },
             reliability=reliability,
             explanation=explanation
@@ -113,33 +126,73 @@ class TriangulatedConfidence:
         context: Dict[str, Any]
     ) -> float:
         """
-        Calculate retrieval strength from multiple factors
+        Calculate retrieval strength using weighted scoring instead of
+        multiplicative boosts.
         """
-        # Base: vector similarity
-        strength = similarity_score
-        
-        # Boost for authoritative sources
-        source_authority = context.get("source_authority", "")
-        if source_authority in ["IRDAI", "UIDAI", "IT Dept", "Passport Seva", "Parivahan"]:
-            strength *= 1.2
-        
-        # Boost for recent documents
-        doc_age_days = context.get("document_age_days", 365)
-        if doc_age_days < 90:
-            strength *= 1.1
-        elif doc_age_days > 730:  # >2 years old
-            strength *= 0.9
-        
-        # Penalize for low document count
+
+        similarity = max(0.0, min(similarity_score, 1.0))
+
+        authority_score = (
+            1.0
+            if context.get("source_authority", "") in [
+                "IRDAI",
+                "UIDAI",
+                "IT Dept",
+                "Passport Seva",
+                "Parivahan"
+            ]
+            else 0.6
+        )
+
         doc_count = context.get("retrieved_docs", 0)
-        if doc_count < 3:
-            strength *= 0.8
-        elif doc_count >= 5:
-            strength *= 1.1
-        
-        # Cap at 1.0
-        return min(strength, 1.0)
-    
+        if doc_count >= 5:
+            coverage_score = 1.0
+        elif doc_count >= 3:
+            coverage_score = 0.8
+        elif doc_count >= 1:
+            coverage_score = 0.6
+        else:
+            coverage_score = 0.3
+
+        doc_age = context.get("document_age_days", 365)
+        if doc_age <= 90:
+            freshness_score = 1.0
+        elif doc_age <= 365:
+            freshness_score = 0.8
+        elif doc_age <= 730:
+            freshness_score = 0.6
+        else:
+            freshness_score = 0.4
+
+        return (
+            similarity * 0.50 +
+            authority_score * 0.20 +
+            coverage_score * 0.15 +
+            freshness_score * 0.15
+        )
+    def _calculate_evidence_quality(
+        self,
+        context: Dict[str, Any]
+    ) -> float:
+        """
+        Estimate the quality of retrieved evidence.
+        """
+
+        score = 0.0
+
+        if context.get("retrieved_docs", 0) >= 3:
+            score += 0.30
+
+        if context.get("source_authority"):
+            score += 0.30
+
+        if context.get("document_age_days", 365) <= 365:
+            score += 0.20
+
+        avg_similarity = context.get("average_similarity", 0.0)
+        score += min(avg_similarity, 1.0) * 0.20
+
+        return min(score, 1.0)
     async def _get_historical_accuracy(self, domain: str) -> float:
         """
         Get historical accuracy for this domain from user feedback

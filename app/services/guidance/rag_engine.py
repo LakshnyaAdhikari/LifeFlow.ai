@@ -398,7 +398,7 @@ Rules:
                     "Be conversational, accurate, and explicitly non-hallucinatory."
                 ),
                 temperature=0.3,
-                max_tokens=900,
+                max_tokens=2048,
             )
             answer = (llm_response.content or "").strip()
         except Exception as e:
@@ -846,10 +846,15 @@ Generate 1-3 highly precise procedural suggestions ordered by priority.
 """
         
         try:
+            logger.info("========== PROMPT ==========")
+            logger.info(prompt)
+            logger.info("========== SYSTEM ==========")
+            logger.info(GUIDANCE_SYSTEM_PROMPT)
             response = await self.llm_client.generate_json(
                 prompt=prompt,
                 system_prompt=GUIDANCE_SYSTEM_PROMPT,
-                temperature=0.7
+                temperature=0.0,
+                max_tokens=2048
             )
             
             # Validate response
@@ -1083,6 +1088,9 @@ Generate 1-3 highly precise procedural suggestions ordered by priority.
             if "wikipedia" in authority or "wikipedia" in title or "wikipedia.org" in url:
                 continue
             if authority_weight < 1.0:
+                logger.info(
+                    f"Filtered: authority={authority} | weight={authority_weight} | title={title}"
+                )
                 continue
             authoritative.append(result)
 

@@ -171,12 +171,17 @@ class VectorDatabase:
         
         # Convert to numpy and normalize
         query_vector = np.array([query_embedding], dtype=np.float32)
+        logger.info(f"Query norm before normalize: {np.linalg.norm(query_vector)}")
         faiss.normalize_L2(query_vector)
+        logger.info(f"Query norm after normalize: {np.linalg.norm(query_vector)}")
         
         # Search
         # Get more results to allow for reranking
         search_k = top_k * 5 if filter_metadata is None else top_k * 10
         scores, faiss_ids = self.index.search(query_vector, search_k)
+
+        logger.info(f"Raw FAISS scores: {scores[0]}")
+        logger.info(f"Raw FAISS ids: {faiss_ids[0]}")
         
         # Convert to results
         results = []
