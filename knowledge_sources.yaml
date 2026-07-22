@@ -1,239 +1,1902 @@
 domains:
-- name: Identity Documents
-  sources:
-  - authority: UIDAI
-    documents:
-    - title: Update Aadhaar Details - Online
-      url: https://uidai.gov.in/en/my-aadhaar/update-aadhaar.html
-      type: html
-    - title: Virtual ID and Aadhaar Authentication
-      url: https://uidai.gov.in/en/my-aadhaar/virtual-id-overview.html
-      type: html
-    - title: Aadhaar FAQ - Grievances and Support
-      url: https://uidai.gov.in/en/contact-support/have-any-question.html
-      type: html
-    - title: Aadhaar Enrolment - How to Enrol
-      url: https://uidai.gov.in/en/my-aadhaar/about-your-aadhaar.html
-      type: html
-    authority_weight: 1.0
-  - authority: Passport Seva
-    documents:
-    - title: Passport Application - Complete FAQ
-      url: https://www.passportindia.gov.in/AppOnlineProject/online/faqMainPage
-      type: html
-    - title: Tatkal Passport Scheme
-      url: https://www.passportindia.gov.in/AppOnlineProject/online/tatkalScheme
-      type: html
-    - title: Passport Reissue and Renewal
-      url: https://www.passportindia.gov.in/AppOnlineProject/online/renewalOfPassport
-      type: html
-    - title: Passport Services for Minors
-      url: https://www.passportindia.gov.in/AppOnlineProject/online/minorServiceTypes
-      type: html
-    authority_weight: 1.0
-  - authority: Income Tax Department
-    documents:
-    - title: PAN Services - How to Apply, Correct, Update
-      url: https://incometaxindia.gov.in/Pages/pan.aspx
-      type: html
-    - title: Link Aadhaar with PAN - Step by Step
-      url: https://www.incometax.gov.in/iec/foportal/help/how-to-link-aadhaar
-      type: html
-    authority_weight: 1.0
-  - authority: Election Commission of India
-    documents:
-    - title: Voter Registration and Voter ID Portal
-      url: https://voters.eci.gov.in/
-      type: html
-    authority_weight: 1.0
-  - authority: Parivahan
-    documents:
-    - title: Driving Licence - All Services Overview
-      url: https://parivahan.gov.in/parivahan/en/content/driving-licence-dl
-      type: html
-    - title: Learner Licence - How to Apply
-      url: https://parivahan.gov.in/parivahan/en/content/learners-licence
-      type: html
-    authority_weight: 1.0
-  - authority: Identity (Wikipedia)
-    documents:
-    - title: Aadhaar System and History
-      url: https://en.wikipedia.org/wiki/Aadhaar
-      type: html
-    - title: Permanent Account Number (PAN)
-      url: https://en.wikipedia.org/wiki/Permanent_account_number
-      type: html
-    - title: Indian Passport
-      url: https://en.wikipedia.org/wiki/Indian_passport
-      type: html
-    authority_weight: 0.4
-- name: Insurance
-  sources:
-  - authority: IRDAI
-    documents:
-    - title: Insurance Ombudsman - How to Complain
-      url: https://irdai.gov.in/web/guest/consumer-education
-      type: html
-    - title: IRDAI Bima Bharosa Consumer Portal
-      url: https://bimabharosa.irdai.gov.in/
-      type: html
-    - title: IRDAI Consumer Grievance - FAQ
-      url: https://www.irdai.gov.in/web/guest/faqs
-      type: html
-    - title: Health Insurance - Claim Settlement
-      url: https://www.irdai.gov.in/web/guest/health-insurance
-      type: html
-    - title: Life Insurance - Policyholder Rights
-      url: https://www.irdai.gov.in/web/guest/life-insurance
-      type: html
-    - title: Motor Insurance - Third Party Claims
-      url: https://www.irdai.gov.in/web/guest/motor-insurance
-      type: html
-    - title: Bima Lokpal - Insurance Ombudsman Offices
-      url: https://www.ecoi.co.in/en/home
-      type: html
-    authority_weight: 1.0
-  - authority: Government of India
-    documents:
-    - title: Policyholder.gov.in - Rights and Entitlements
-      url: https://policyholder.gov.in/
-      type: html
-    authority_weight: 1.0
-  - authority: Insurance (Wikipedia)
-    documents:
-    - title: Insurance Regulatory and Development Authority of India
-      url: https://en.wikipedia.org/wiki/Insurance_Regulatory_and_Development_Authority
-      type: html
-    - title: Life Insurance Corporation (LIC)
-      url: https://en.wikipedia.org/wiki/Life_Insurance_Corporation
-      type: html
-    - title: Health insurance in India
-      url: https://en.wikipedia.org/wiki/Health_insurance_in_India
-      type: html
-    - title: Motor vehicle insurance in India
-      url: https://en.wikipedia.org/wiki/Vehicle_insurance
-      type: html
-    authority_weight: 0.4
-- name: Taxation
-  sources:
-  - authority: Income Tax Department
-    documents:
-    - title: How to File Income Tax Return Online
-      url: https://www.incometax.gov.in/iec/foportal/help/how-to-file-return-of-income
-      type: html
-    - title: Income Tax Refund - Status and Process
-      url: https://www.incometax.gov.in/iec/foportal/help/individual/refund-1
-      type: html
-    - title: Responding to Income Tax Notices
-      url: https://www.incometax.gov.in/iec/foportal/help/individual/notices-1
-      type: html
-    - title: ITR-1 Sahaj - Who Should File
-      url: https://www.incometax.gov.in/iec/foportal/help/individual/itr-1
-      type: html
-    - title: Tax Deducted at Source - How TDS Works
-      url: https://www.incometax.gov.in/iec/foportal/help/individual/tds-1
-      type: html
-    - title: Income Tax FAQ - Common Questions
-      url: https://www.incometax.gov.in/iec/foportal/help/faq
-      type: html
-    - title: Income Tax Challan - Pay Online
-      url: https://www.incometax.gov.in/iec/foportal/help/individual/challan
-      type: html
-    - title: Budget 2024 Tax Changes Summary
-      url: https://incometaxindia.gov.in/Pages/budget.aspx
-      type: html
-    authority_weight: 1.0
-  - authority: CBIC
-    documents:
-    - title: GST Registration - How to Register
-      url: https://www.gst.gov.in/help/helpmodules/registrationfaqnew
-      type: html
-    - title: GST Return Filing - GSTR-1 and GSTR-3B
-      url: https://www.gst.gov.in/help/helpmodules/returnsfaq
-      type: html
-    - title: GST - E-Invoice System
-      url: https://einvoice1.gst.gov.in/Others/FAQ
-      type: html
-    - title: GST Refund Process
-      url: https://www.gst.gov.in/help/helpmodules/refundfaq
-      type: html
-    - title: CBIC Central Excise and GST FAQ
-      url: https://cbic-gst.gov.in/gst-goods-services-rates.html
-      type: html
-    authority_weight: 1.0
-- name: Property
-  sources:
-  - authority: Dept of Land Resources
-    documents:
-    - title: Digital India Land Records Modernisation
-      url: https://dilrmp.gov.in/
-      type: html
-    - title: NGDRS - Property Registration Portal
-      url: https://ngdrs.gov.in/NGDRS/
-      type: html
-    authority_weight: 1.0
-  - authority: NHB
-    documents:
-    - title: National Housing Bank - Home Loan Grievance
-      url: https://www.nhb.org.in/Complaint/Complaint.aspx
-      type: html
-    authority_weight: 1.0
-  - authority: Government of India
-    documents:
-    - title: RERA - Real Estate Regulator
-      url: https://rera.gov.in/
-      type: html
-    - title: PMAY - Pradhan Mantri Awas Yojana
-      url: https://pmaymis.gov.in/
-      type: html
-    authority_weight: 1.0
-  - authority: Property (Wikipedia)
-    documents:
-    - title: Real Estate (Regulation and Development) Act, 2016
-      url: https://en.wikipedia.org/wiki/Real_Estate_(Regulation_and_Development)_Act,_2016
-      type: html
-    - title: Stamp duty in India
-      url: https://en.wikipedia.org/wiki/Stamp_duty_in_India
-      type: html
-    - title: Property tax in India
-      url: https://en.wikipedia.org/wiki/Property_tax_in_India
-      type: html
-    authority_weight: 0.4
-- name: Vehicle & Transport
-  sources:
-  - authority: Parivahan
-    documents:
-    - title: Driving Licence - Complete Information
-      url: https://parivahan.gov.in/parivahan/en/content/driving-licence-dl
-      type: html
-    - title: Vehicle Registration Certificate
-      url: https://parivahan.gov.in/parivahan/en/content/registration-certificate
-      type: html
-    - title: Transfer of Vehicle Ownership
-      url: https://parivahan.gov.in/parivahan/en/content/transfer-ownership
-      type: html
-    - title: E-Challan - Traffic Fine Payment
-      url: https://echallan.parivahan.gov.in/
-      type: html
-    - title: Vehicle Fitness Certificate
-      url: https://parivahan.gov.in/parivahan/en/content/fitness-certificate
-      type: html
-    - title: Permit for Commercial Vehicles
-      url: https://parivahan.gov.in/parivahan/en/content/permit
-      type: html
-    authority_weight: 1.0
-  - authority: Vehicle & Transport (Wikipedia)
-    documents:
-    - title: Motor Vehicles Act, 1988
-      url: https://en.wikipedia.org/wiki/Motor_Vehicles_Act,_1988
-      type: html
-    - title: Driving licence in India
-      url: https://en.wikipedia.org/wiki/Driving_licence_in_India
-      type: html
-    - title: Regional Transport Office (RTO)
-      url: https://en.wikipedia.org/wiki/Regional_Transport_Office
-      type: html
-    - title: Vehicle registration plates of India
-      url: https://en.wikipedia.org/wiki/Vehicle_registration_plates_of_India
-      type: html
-    authority_weight: 0.4
+  - name: Identity
+
+    sources:
+
+      - authority: UIDAI
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Aadhaar Online Services FAQ
+            url: https://uidai.gov.in/en/921-faqs/aadhaar
+            type: html
+
+          - title: Aadhaar Update FAQ
+            url: https://uidai.gov.in/en/297-faqs/enrolment-update/aadhaar
+            type: html
+
+          - title: General Aadhaar FAQs
+            url: https://uidai.gov.in/en/277-faqs.html
+            type: html
+
+          - title: Update Aadhaar
+            url: https://uidai.gov.in/en/my-aadhaar/update-aadhaar.html
+            type: html
+
+          - title: myAadhaar Services
+            url: https://uidai.gov.in/en/my-aadhaar.html
+            type: html
+
+      - authority: DigiLocker
+        authority_weight: 0.95
+
+        documents:
+
+          - title: DigiLocker FAQ
+            url: https://www.digilocker.gov.in/web/about/faq
+            type: html
+
+          - title: About DigiLocker
+            url: https://www.digilocker.gov.in/web/about
+            type: html
+
+      - authority: National Government Services Portal
+        authority_weight: 0.9
+
+        documents:
+
+          - title: UIDAI Aadhaar Update Services
+            url: https://services.india.gov.in/service/detail/uidai-aadhaar-card-update-services
+            type: html
+
+      - authority: Election Commission of India
+        authority_weight: 0.9
+
+        documents:
+
+          - title: Voter Services Portal
+            url: https://voters.eci.gov.in/
+            type: html
+
+      ####################################################################
+      # APPENDED SOURCES
+      ####################################################################
+
+      - authority: Passport Seva
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Getting Started
+            url: https://www.passportindia.gov.in/psp/GettingStarted
+            type: html
+
+          - title: Passport FAQs
+            url: https://www.passportindia.gov.in/psp/Faqs
+            type: html
+
+          - title: Application Form FAQ
+            url: https://www.passportindia.gov.in/psp/FaqApplicationForm
+            type: html
+
+          - title: Where to Apply
+            url: https://www.passportindia.gov.in/psp/FaqWhereToApply
+            type: html
+
+          - title: Fresh Passport
+            url: https://www.passportindia.gov.in/psp/Apply
+            type: html
+
+          - title: Tatkaal Passport
+            url: https://www.passportindia.gov.in/psp/FaqTatkaalPassports
+            type: html
+
+          - title: ePassport FAQ
+            url: https://services1.passportindia.gov.in/psp/FaqEPassport
+            type: html
+
+      - authority: DigiLocker Dashboard
+        authority_weight: 0.9
+
+        documents:
+
+          - title: Issuers
+            url: https://www.digilocker.gov.in/web/dashboard/issuers
+            type: html
+
+          - title: Requesters
+            url: https://www.digilocker.gov.in/web/dashboard/requesters
+            type: html
+
+      - authority: Parivahan
+        authority_weight: 0.9
+
+        documents:
+
+          - title: Parivahan Portal
+            url: https://parivahan.gov.in/
+            type: html
+
+      - authority: Civil Registration System
+        authority_weight: 0.9
+
+        documents:
+
+          - title: CRS Home
+            url: https://crsorgi.gov.in/
+            type: html
+
+      - authority: National Government Services Portal
+        authority_weight: 0.9
+
+        documents:
+
+          - title: Passport Service
+            url: https://services.india.gov.in/service/detail/passport-seva-comprehensive-passport-services-1
+            type: html
+
+          - title: Ordinary Passport
+            url: https://services.india.gov.in/service/detail/passport-seva-apply-for-ordinary-passport-1
+            type: html
+
+          - title: Government Services Portal
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: National Portal of India
+        authority_weight: 0.9
+
+        documents:
+
+          - title: India Portal
+            url: https://www.india.gov.in/
+            type: html
+  
+  - name: Insurance
+
+    sources:
+
+      - authority: IRDAI
+        authority_weight: 1.0
+
+        documents:
+
+          - title: IRDAI Home
+            url: https://irdai.gov.in/
+            type: html
+
+          - title: Policyholder FAQ
+            url: https://irdai.gov.in/policyholder-faqs
+            type: html
+
+          - title: Health Insurance
+            url: https://irdai.gov.in/health-insurance
+            type: html
+
+      - authority: Insurance Ombudsman
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Insurance Ombudsman
+            url: https://www.cioins.co.in/
+            type: html
+
+      - authority: India.gov Insurance Services
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Insurance Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: PMJJBY
+            url: https://www.myscheme.gov.in/schemes/pmjjby
+            type: html
+
+          - title: PMSBY
+            url: https://www.myscheme.gov.in/schemes/pmsby
+            type: html
+
+          - title: Ayushman Bharat
+            url: https://www.myscheme.gov.in/schemes/abpmjay
+            type: html
+
+      - authority: LIC
+        authority_weight: 0.85
+
+        documents:
+
+          - title: LIC Home
+            url: https://licindia.in/
+            type: html
+
+      - authority: General Insurance Council
+        authority_weight: 0.85
+
+        documents:
+
+          - title: General Insurance Council
+            url: https://www.gicouncil.in/
+            type: html
+
+      - authority: Agriculture Insurance Company
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Crop Insurance
+            url: https://www.aicofindia.com/
+            type: html
+
+      - authority: PMFBY
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Pradhan Mantri Fasal Bima Yojana
+            url: https://pmfby.gov.in/
+            type: html
+      
+      - authority: LIC
+        authority_weight: 0.85
+
+        documents:
+
+          - title: LIC Products
+            url: https://licindia.in/web/guest/products
+            type: html
+
+          - title: LIC Customer Services
+            url: https://licindia.in/web/guest/customer-services
+            type: html
+
+      - authority: General Insurance Council
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Insurance Information
+            url: https://www.gicouncil.in/insurance-information/
+            type: html
+
+          - title: Motor Third Party Pool
+            url: https://www.gicouncil.in/motor/
+            type: html
+
+      - authority: PMFBY
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Farmer Corner
+            url: https://pmfby.gov.in/farmerCorner
+            type: html
+
+          - title: Scheme Details
+            url: https://pmfby.gov.in/
+            type: html
+
+      - authority: Agriculture Insurance Company
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Products
+            url: https://www.aicofindia.com/AICEng/Products.aspx
+            type: html
+
+          - title: Weather Based Crop Insurance
+            url: https://www.aicofindia.com/AICEng/WeatherBasedCropInsurance.aspx
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Insurance Category
+            url: https://www.myscheme.gov.in/search/category/Insurance
+            type: html
+
+          - title: Jan Suraksha Search
+            url: https://www.myscheme.gov.in/search?q=insurance
+            type: html
+
+      - authority: Postal Life Insurance
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Postal Life Insurance
+            url: https://pli.indiapost.gov.in/
+            type: html
+
+      - authority: India Post
+        authority_weight: 0.85
+
+        documents:
+
+          - title: India Post
+            url: https://www.indiapost.gov.in/
+            type: html
+
+      - authority: ESIC
+        authority_weight: 0.85
+
+        documents:
+
+          - title: ESIC Home
+            url: https://www.esic.gov.in/
+            type: html
+
+      - authority: Employees' Provident Fund Organisation
+        authority_weight: 0.85
+
+        documents:
+
+          - title: EDLI Scheme
+            url: https://www.epfindia.gov.in/
+            type: html
+  
+  - name: Taxation
+
+    sources:
+
+      - authority: Income Tax Department
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Income Tax Portal
+            url: https://www.incometax.gov.in/
+            type: html
+
+          - title: e-Filing Home
+            url: https://www.incometax.gov.in/iec/foportal/
+            type: html
+
+      - authority: GST Portal
+        authority_weight: 1.0
+
+        documents:
+
+          - title: GST Portal
+            url: https://www.gst.gov.in/
+            type: html
+
+          - title: GST Registration
+            url: https://www.gst.gov.in/help/registration
+            type: html
+
+          - title: GST Returns
+            url: https://www.gst.gov.in/help/returns
+            type: html
+
+          - title: GST Payments
+            url: https://www.gst.gov.in/help/payments
+            type: html
+
+      - authority: CBIC
+        authority_weight: 0.95
+
+        documents:
+
+          - title: CBIC Home
+            url: https://www.cbic.gov.in/
+            type: html
+
+          - title: GST Information
+            url: https://www.cbic.gov.in/resources//htdocs-cbec/gst/index
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Tax Schemes Search
+            url: https://www.myscheme.gov.in/search?q=tax
+            type: html
+
+          - title: PAN Search
+            url: https://www.myscheme.gov.in/search?q=pan
+            type: html
+
+      - authority: UTIITSL
+        authority_weight: 0.90
+
+        documents:
+
+          - title: PAN Services
+            url: https://www.utiitsl.com/
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Income Tax Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Tax Services Search
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: TRACES
+        authority_weight: 0.90
+
+        documents:
+
+          - title: TRACES Portal
+            url: https://www.tdscpc.gov.in/
+            type: html
+      
+      - authority: Income Tax Department
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Income Tax Portal
+            url: https://www.incometax.gov.in/
+            type: html
+
+          - title: e-Filing Home
+            url: https://www.incometax.gov.in/iec/foportal/
+            type: html
+
+      - authority: GST Portal
+        authority_weight: 1.0
+
+        documents:
+
+          - title: GST Portal
+            url: https://www.gst.gov.in/
+            type: html
+
+          - title: GST Registration
+            url: https://www.gst.gov.in/help/registration
+            type: html
+
+          - title: GST Returns
+            url: https://www.gst.gov.in/help/returns
+            type: html
+
+          - title: GST Payments
+            url: https://www.gst.gov.in/help/payments
+            type: html
+
+      - authority: CBIC
+        authority_weight: 0.95
+
+        documents:
+
+          - title: CBIC Home
+            url: https://www.cbic.gov.in/
+            type: html
+
+          - title: GST Information
+            url: https://www.cbic.gov.in/resources//htdocs-cbec/gst/index
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Tax Schemes Search
+            url: https://www.myscheme.gov.in/search?q=tax
+            type: html
+
+          - title: PAN Search
+            url: https://www.myscheme.gov.in/search?q=pan
+            type: html
+
+      - authority: UTIITSL
+        authority_weight: 0.90
+
+        documents:
+
+          - title: PAN Services
+            url: https://www.utiitsl.com/
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Income Tax Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Tax Services Search
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: TRACES
+        authority_weight: 0.90
+
+        documents:
+
+          - title: TRACES Portal
+            url: https://www.tdscpc.gov.in/
+            type: html
+
+  - name: Banking & Digital Payments
+
+    sources:
+      - authority: Reserve Bank of India
+        authority_weight: 1.0
+
+        documents:
+
+          - title: RBI Home
+            url: https://www.rbi.org.in/
+            type: html
+
+          - title: Banking Ombudsman
+            url: https://cms.rbi.org.in/
+            type: html
+
+          - title: Financial Education
+            url: https://financialeducation.rbi.org.in/
+            type: html
+
+          - title: RBI FAQs
+            url: https://www.rbi.org.in/commonman/English/Scripts/FAQs.aspx
+            type: html
+
+      - authority: NPCI
+        authority_weight: 1.0
+
+        documents:
+
+          - title: NPCI Home
+            url: https://www.npci.org.in/
+            type: html
+
+          - title: UPI
+            url: https://www.npci.org.in/what-we-do/upi/product-overview
+            type: html
+
+          - title: RuPay
+            url: https://www.npci.org.in/what-we-do/rupay/product-overview
+            type: html
+
+          - title: IMPS
+            url: https://www.npci.org.in/what-we-do/imps/product-overview
+            type: html
+
+          - title: NACH
+            url: https://www.npci.org.in/what-we-do/nach/product-overview
+            type: html
+
+          - title: AEPS
+            url: https://www.npci.org.in/what-we-do/aeps/product-overview
+            type: html
+
+          - title: Bharat BillPay
+            url: https://www.npci.org.in/what-we-do/bharat-billpay/product-overview
+            type: html
+
+          - title: FASTag
+            url: https://www.npci.org.in/what-we-do/netc-fastag/product-overview
+            type: html
+
+          - title: UPI Lite
+            url: https://www.npci.org.in/what-we-do/upi-lite/product-overview
+            type: html
+
+          - title: UPI 123PAY
+            url: https://www.npci.org.in/what-we-do/upi-123pay/product-overview
+            type: html
+
+      - authority: PM Jan Dhan Yojana
+        authority_weight: 0.95
+
+        documents:
+
+          - title: PMJDY Home
+            url: https://pmjdy.gov.in/
+            type: html
+
+      - authority: Digital India
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Digital India Home
+            url: https://www.digitalindia.gov.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Banking Schemes Search
+            url: https://www.myscheme.gov.in/search?q=bank
+            type: html
+
+          - title: Financial Schemes Search
+            url: https://www.myscheme.gov.in/search?q=financial
+            type: html
+
+  - name: Healthcare
+    sources:
+      - authority: Ministry of Health & Family Welfare
+        authority_weight: 1.0
+
+        documents:
+
+            - title: MoHFW Home
+              url: https://www.mohfw.gov.in/
+              type: html
+
+            - title: National Health Portal
+              url: https://www.nhp.gov.in/
+              type: html
+
+            - title: National Organ & Tissue Transplant Organization
+              url: https://notto.mohfw.gov.in/
+              type: html
+
+            - title: eHospital
+              url: https://ehospital.gov.in/
+              type: html
+
+      - authority: National Health Authority
+        authority_weight: 1.0
+
+        documents:
+
+          - title: NHA Home
+            url: https://nha.gov.in/
+            type: html
+
+          - title: Ayushman Bharat PM-JAY
+            url: https://pmjay.gov.in/
+            type: html
+
+          - title: ABDM Home
+            url: https://abdm.gov.in/
+            type: html
+
+          - title: ABHA
+            url: https://abha.abdm.gov.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Health Schemes Search
+            url: https://www.myscheme.gov.in/search?q=health
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Health Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Healthcare Search
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: National Health Mission
+        authority_weight: 0.90
+
+        documents:
+
+          - title: NHM Home
+            url: https://nhm.gov.in/
+            type: html
+
+      - authority: PMJAY
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Beneficiary Portal
+            url: https://beneficiary.nha.gov.in/
+            type: html
+    
+      - authority: National Health Authority
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Scan and Share
+            url: https://scanandshare.nha.gov.in/
+            type: html
+
+          - title: Health Facility Registry
+            url: https://facility.abdm.gov.in/
+            type: html
+
+          - title: Healthcare Professionals Registry
+            url: https://hpr.abdm.gov.in/
+            type: html
+
+      - authority: Ayush Bharat Digital Mission
+        authority_weight: 1.0
+
+        documents:
+
+          - title: ABDM Sandbox
+            url: https://sandbox.abdm.gov.in/
+            type: html
+
+          - title: ABDM Resources
+            url: https://abdm.gov.in/resources
+            type: html
+
+      - authority: National AIDS Control Organisation
+        authority_weight: 0.95
+
+        documents:
+
+          - title: NACO Home
+            url: https://naco.gov.in/
+            type: html
+
+      - authority: Central Drugs Standard Control Organization
+        authority_weight: 0.95
+
+        documents:
+
+          - title: CDSCO Home
+            url: https://cdsco.gov.in/
+            type: html
+
+      - authority: Food Safety and Standards Authority of India
+        authority_weight: 0.95
+
+        documents:
+
+          - title: FSSAI Home
+            url: https://fssai.gov.in/
+            type: html
+
+      - authority: National Medical Commission
+        authority_weight: 0.90
+
+        documents:
+
+          - title: NMC Home
+            url: https://www.nmc.org.in/
+            type: html
+
+      - authority: MyGov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Health Campaigns
+            url: https://www.mygov.in/
+            type: html
+
+  - name: Education
+
+    sources:
+
+      - authority: Ministry of Education
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Ministry of Education
+            url: https://www.education.gov.in/
+            type: html
+
+          - title: Department of School Education
+            url: https://dsel.education.gov.in/
+            type: html
+
+      - authority: National Scholarship Portal
+        authority_weight: 1.0
+
+        documents:
+
+          - title: NSP Home
+            url: https://scholarships.gov.in/
+            type: html
+
+          - title: NSP FAQ
+            url: https://scholarships.gov.in/fresh/faq
+            type: html
+
+      - authority: UGC
+        authority_weight: 1.0
+
+        documents:
+
+          - title: UGC Home
+            url: https://www.ugc.gov.in/
+            type: html
+
+          - title: Student Corner
+            url: https://www.ugc.gov.in/
+            type: html
+
+      - authority: AICTE
+        authority_weight: 1.0
+
+        documents:
+
+          - title: AICTE Home
+            url: https://www.aicte-india.org/
+            type: html
+
+          - title: Student Development
+            url: https://www.aicte-india.org/
+            type: html
+
+      - authority: National Testing Agency
+        authority_weight: 0.95
+
+        documents:
+
+          - title: NTA Home
+            url: https://nta.ac.in/
+            type: html
+
+      - authority: SWAYAM
+        authority_weight: 0.95
+
+        documents:
+
+          - title: SWAYAM Home
+            url: https://swayam.gov.in/
+            type: html
+
+      - authority: DIKSHA
+        authority_weight: 0.95
+
+        documents:
+
+          - title: DIKSHA Home
+            url: https://diksha.gov.in/
+            type: html
+
+      - authority: NCERT
+        authority_weight: 0.95
+
+        documents:
+
+          - title: NCERT Home
+            url: https://ncert.nic.in/
+            type: html
+
+      - authority: Academic Bank of Credits
+        authority_weight: 0.90
+
+        documents:
+
+          - title: ABC Home
+            url: https://www.abc.gov.in/
+            type: html
+
+      - authority: NAD
+        authority_weight: 0.90
+
+        documents:
+
+          - title: National Academic Depository
+            url: https://nad.digilocker.gov.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Scholarship Schemes
+            url: https://www.myscheme.gov.in/search?q=scholarship
+            type: html
+
+          - title: Education Schemes
+            url: https://www.myscheme.gov.in/search?q=education
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Education Services
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: PM eVIDYA
+        authority_weight: 0.90
+
+        documents:
+
+          - title: PM eVIDYA
+            url: https://pmevidya.education.gov.in/
+            type: html
+
+  - name: Employment & Skills
+
+    sources:
+
+      - authority: Ministry of Labour & Employment
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Ministry of Labour
+            url: https://labour.gov.in/
+            type: html
+
+          - title: Labour Services
+            url: https://labour.gov.in/services
+            type: html
+
+      - authority: National Career Service
+        authority_weight: 1.0
+
+        documents:
+
+          - title: NCS Home
+            url: https://www.ncs.gov.in/
+            type: html
+
+          - title: Job Seeker Services
+            url: https://www.ncs.gov.in/
+            type: html
+
+      - authority: EPFO
+        authority_weight: 1.0
+
+        documents:
+
+          - title: EPFO Home
+            url: https://www.epfindia.gov.in/
+            type: html
+
+          - title: Member Services
+            url: https://www.epfindia.gov.in/
+            type: html
+
+      - authority: ESIC
+        authority_weight: 1.0
+
+        documents:
+
+          - title: ESIC Home
+            url: https://www.esic.gov.in/
+            type: html
+
+      - authority: Skill India
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Skill India
+            url: https://www.skillindia.gov.in/
+            type: html
+
+      - authority: NSDC
+        authority_weight: 1.0
+
+        documents:
+
+          - title: NSDC Home
+            url: https://nsdcindia.org/
+            type: html
+
+      - authority: PMKVY
+        authority_weight: 0.95
+
+        documents:
+
+          - title: PMKVY
+            url: https://www.pmkvyofficial.org/
+            type: html
+
+      - authority: Apprenticeship India
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Apprenticeship India
+            url: https://www.apprenticeshipindia.gov.in/
+            type: html
+
+      - authority: Directorate General of Training
+        authority_weight: 0.95
+
+        documents:
+
+          - title: DGT Home
+            url: https://dgt.gov.in/
+            type: html
+
+      - authority: eShram
+        authority_weight: 0.95
+
+        documents:
+
+          - title: eShram Portal
+            url: https://eshram.gov.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Employment Schemes
+            url: https://www.myscheme.gov.in/search?q=employment
+            type: html
+
+          - title: Skill Development Schemes
+            url: https://www.myscheme.gov.in/search?q=skill
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Employment Services
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: Government e-Marketplace
+        authority_weight: 0.90
+
+        documents:
+
+          - title: GeM
+            url: https://gem.gov.in/
+            type: html
+  
+  - name: Social Welfare & Pensions
+
+    sources:
+
+      - authority: Department of Social Justice & Empowerment
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Social Justice Home
+            url: https://socialjustice.gov.in/
+            type: html
+
+          - title: Senior Citizens
+            url: https://socialjustice.gov.in/
+            type: html
+
+      - authority: National Social Assistance Programme
+        authority_weight: 1.0
+
+        documents:
+
+          - title: NSAP Home
+            url: https://nsap.nic.in/
+            type: html
+
+      - authority: Department of Empowerment of Persons with Disabilities
+        authority_weight: 1.0
+
+        documents:
+
+          - title: DEPwD Home
+            url: https://depwd.gov.in/
+            type: html
+
+          - title: Unique Disability ID
+            url: https://www.swavlambancard.gov.in/
+            type: html
+
+      - authority: Ministry of Women & Child Development
+        authority_weight: 1.0
+
+        documents:
+
+          - title: MWCD Home
+            url: https://wcd.gov.in/
+            type: html
+
+      - authority: National Commission for Women
+        authority_weight: 0.95
+
+        documents:
+
+          - title: NCW Home
+            url: https://ncw.nic.in/
+            type: html
+
+      - authority: Ministry of Rural Development
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Rural Development Home
+            url: https://rural.nic.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Pension Schemes
+            url: https://www.myscheme.gov.in/search?q=pension
+            type: html
+
+          - title: Women Welfare Schemes
+            url: https://www.myscheme.gov.in/search?q=women
+            type: html
+
+          - title: Disability Schemes
+            url: https://www.myscheme.gov.in/search?q=disability
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Pension Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Social Welfare Services
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: DigiLocker
+        authority_weight: 0.90
+
+        documents:
+
+          - title: DigiLocker Home
+            url: https://www.digilocker.gov.in/
+            type: html
+
+  - name: Agriculture & Farmers
+
+    sources:
+
+      - authority: Ministry of Agriculture & Farmers Welfare
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Ministry of Agriculture
+            url: https://agriwelfare.gov.in/
+            type: html
+
+          - title: Department of Agriculture & Farmers Welfare
+            url: https://agriwelfare.gov.in/en
+            type: html
+
+      - authority: PM-KISAN
+        authority_weight: 1.0
+
+        documents:
+
+          - title: PM-KISAN Home
+            url: https://pmkisan.gov.in/
+            type: html
+
+          - title: PM-KISAN Beneficiary Status
+            url: https://pmkisan.gov.in/
+            type: html
+
+      - authority: eNAM
+        authority_weight: 1.0
+
+        documents:
+
+          - title: eNAM Home
+            url: https://enam.gov.in/
+            type: html
+
+      - authority: PM Fasal Bima Yojana
+        authority_weight: 1.0
+
+        documents:
+
+          - title: PMFBY Home
+            url: https://pmfby.gov.in/
+            type: html
+
+      - authority: Soil Health Card
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Soil Health Card
+            url: https://soilhealth.dac.gov.in/
+            type: html
+
+      - authority: Kisan Suvidha
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Kisan Suvidha
+            url: https://kisansuvidha.gov.in/
+            type: html
+
+      - authority: Agmarknet
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Agmarknet
+            url: https://agmarknet.gov.in/
+            type: html
+
+      - authority: ICAR
+        authority_weight: 0.95
+
+        documents:
+
+          - title: ICAR Home
+            url: https://icar.org.in/
+            type: html
+
+      - authority: Digital Agriculture Mission
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Digital Agriculture
+            url: https://agriwelfare.gov.in/
+            type: html
+
+      - authority: Krishi Vigyan Kendra
+        authority_weight: 0.95
+
+        documents:
+
+          - title: KVK Portal
+            url: https://kvk.icar.gov.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Agriculture Schemes
+            url: https://www.myscheme.gov.in/search?q=agriculture
+            type: html
+
+          - title: Farmer Schemes
+            url: https://www.myscheme.gov.in/search?q=farmer
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Agriculture Services
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: National Horticulture Board
+        authority_weight: 0.90
+
+        documents:
+
+          - title: NHB Home
+            url: https://nhb.gov.in/
+            type: html
+
+      - authority: Coconut Development Board
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Coconut Development Board
+            url: https://coconutboard.gov.in/
+            type: html
+
+      - authority: APEDA
+        authority_weight: 0.90
+
+        documents:
+
+          - title: APEDA Home
+            url: https://apeda.gov.in/
+            type: html
+
+  - name: Transport & Driving
+
+    sources:
+
+      - authority: Ministry of Road Transport & Highways
+        authority_weight: 1.0
+
+        documents:
+
+          - title: MoRTH Home
+            url: https://morth.nic.in/
+            type: html
+
+          - title: Road Transport Services
+            url: https://morth.nic.in/
+            type: html
+
+      - authority: Parivahan Sewa
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Parivahan Home
+            url: https://parivahan.gov.in/
+            type: html
+
+          - title: Driving Licence Services
+            url: https://parivahan.gov.in/parivahan/
+            type: html
+
+          - title: Vehicle Registration
+            url: https://parivahan.gov.in/parivahan/
+            type: html
+
+          - title: Vehicle Related Services
+            url: https://parivahan.gov.in/parivahan/
+            type: html
+
+      - authority: VAHAN
+        authority_weight: 1.0
+
+        documents:
+
+          - title: VAHAN Portal
+            url: https://vahan.parivahan.gov.in/
+            type: html
+
+      - authority: SARATHI
+        authority_weight: 1.0
+
+        documents:
+
+          - title: SARATHI Portal
+            url: https://sarathi.parivahan.gov.in/
+            type: html
+
+      - authority: National Highways Authority of India
+        authority_weight: 0.95
+
+        documents:
+
+          - title: NHAI Home
+            url: https://nhai.gov.in/
+            type: html
+
+          - title: FASTag Information
+            url: https://nhai.gov.in/
+            type: html
+
+      - authority: FASTag
+        authority_weight: 0.95
+
+        documents:
+
+          - title: FASTag Portal
+            url: https://www.fastag.org/
+            type: html
+
+      - authority: eChallan
+        authority_weight: 0.95
+
+        documents:
+
+          - title: eChallan Home
+            url: https://echallan.parivahan.gov.in/
+            type: html
+
+      - authority: National Road Safety Council
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Road Safety
+            url: https://morth.nic.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Transport Schemes
+            url: https://www.myscheme.gov.in/search?q=transport
+            type: html
+
+          - title: Road Safety Schemes
+            url: https://www.myscheme.gov.in/search?q=road
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Driving Licence Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Vehicle Services
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: National Informatics Centre
+        authority_weight: 0.90
+
+        documents:
+
+          - title: DigiLocker Transport Documents
+            url: https://www.digilocker.gov.in/
+            type: html
+
+      - authority: Bureau of Indian Standards
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Vehicle Standards
+            url: https://www.services.bis.gov.in/
+            type: html
+
+  - name: Business & MSME
+
+    sources:
+
+      - authority: Ministry of MSME
+        authority_weight: 1.0
+
+        documents:
+
+          - title: MSME Ministry Home
+            url: https://msme.gov.in/
+            type: html
+
+      - authority: Udyam Registration
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Udyam Registration Portal
+            url: https://udyamregistration.gov.in/
+            type: html
+
+          - title: Udyam Assist Platform
+            url: https://udyamassist.gov.in/
+            type: html
+
+      - authority: Government e-Marketplace
+        authority_weight: 1.0
+
+        documents:
+
+          - title: GeM Portal
+            url: https://gem.gov.in/
+            type: html
+
+      - authority: Startup India
+        authority_weight: 1.0
+
+        documents:
+
+          - title: Startup India
+            url: https://www.startupindia.gov.in/
+            type: html
+
+      - authority: National Single Window System
+        authority_weight: 1.0
+
+        documents:
+
+          - title: NSWS Portal
+            url: https://www.nsws.gov.in/
+            type: html
+
+      - authority: Ministry of Corporate Affairs
+        authority_weight: 1.0
+
+        documents:
+
+          - title: MCA Home
+            url: https://www.mca.gov.in/
+            type: html
+
+      - authority: Directorate General of Foreign Trade
+        authority_weight: 0.95
+
+        documents:
+
+          - title: DGFT Home
+            url: https://www.dgft.gov.in/
+            type: html
+
+      - authority: Invest India
+        authority_weight: 0.95
+
+        documents:
+
+          - title: Invest India
+            url: https://www.investindia.gov.in/
+            type: html
+
+      - authority: National Small Industries Corporation
+        authority_weight: 0.95
+
+        documents:
+
+          - title: NSIC Home
+            url: https://www.nsic.co.in/
+            type: html
+
+      - authority: SIDBI
+        authority_weight: 0.95
+
+        documents:
+
+          - title: SIDBI Home
+            url: https://www.sidbi.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+
+        documents:
+
+          - title: MSME Schemes
+            url: https://www.myscheme.gov.in/search?q=msme
+            type: html
+
+          - title: Startup Schemes
+            url: https://www.myscheme.gov.in/search?q=startup
+            type: html
+
+          - title: Business Schemes
+            url: https://www.myscheme.gov.in/search?q=business
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+
+        documents:
+
+          - title: Business Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Company Registration Services
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: DPIIT
+        authority_weight: 0.90
+
+        documents:
+
+          - title: DPIIT Home
+            url: https://dpiit.gov.in/
+            type: html
+
+      - authority: Trade Marks Registry
+        authority_weight: 0.85
+
+        documents:
+
+          - title: Intellectual Property India
+            url: https://ipindia.gov.in/
+            type: html
+  
+  - name: Land & Property
+
+    sources:
+
+      - authority: Department of Land Resources
+        authority_weight: 1.0
+        documents:
+          - title: DoLR Home
+            url: https://dolr.gov.in/
+            type: html
+
+      - authority: Digital India Land Records Modernization Programme
+        authority_weight: 1.0
+        documents:
+          - title: DILRMP
+            url: https://dilrmp.gov.in/
+            type: html
+
+      - authority: BhuNaksha
+        authority_weight: 1.0
+        documents:
+          - title: BhuNaksha Portal
+            url: https://bhunaksha.gov.in/
+            type: html
+
+      - authority: SVAMITVA Scheme
+        authority_weight: 1.0
+        documents:
+          - title: SVAMITVA
+            url: https://svamitva.nic.in/
+            type: html
+
+      - authority: Department of Land Resources
+        authority_weight: 0.95
+        documents:
+          - title: Wasteland Atlas
+            url: https://dolr.gov.in/
+            type: html
+
+      - authority: National Informatics Centre
+        authority_weight: 0.90
+        documents:
+          - title: NGDRS
+            url: https://ngdrs.gov.in/
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+        documents:
+          - title: Land Records Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Property Registration Services
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+        documents:
+          - title: Land Schemes
+            url: https://www.myscheme.gov.in/search?q=land
+            type: html
+
+          - title: Property Schemes
+            url: https://www.myscheme.gov.in/search?q=property
+            type: html
+
+      - authority: Survey of India
+        authority_weight: 0.90
+        documents:
+          - title: Survey of India
+            url: https://surveyofindia.gov.in/
+            type: html
+
+      - authority: National Remote Sensing Centre
+        authority_weight: 0.85
+        documents:
+          - title: NRSC
+            url: https://www.nrsc.gov.in/
+            type: html
+
+      - authority: Bhuvan
+        authority_weight: 0.85
+        documents:
+          - title: ISRO Bhuvan
+            url: https://bhuvan.nrsc.gov.in/
+            type: html
+
+      - authority: Department of Space
+        authority_weight: 0.85
+        documents:
+          - title: Department of Space
+            url: https://www.dos.gov.in/
+            type: html
+  
+  - name: Police & Legal Services
+
+    sources:
+
+      - authority: Ministry of Home Affairs
+        authority_weight: 1.0
+        documents:
+          - title: MHA Home
+            url: https://www.mha.gov.in/
+            type: html
+
+      - authority: India Code
+        authority_weight: 1.0
+        documents:
+          - title: India Code
+            url: https://www.indiacode.nic.in/
+            type: html
+
+      - authority: eCourts
+        authority_weight: 1.0
+        documents:
+          - title: eCourts Services
+            url: https://ecourts.gov.in/
+            type: html
+
+      - authority: National Legal Services Authority
+        authority_weight: 1.0
+        documents:
+          - title: NALSA
+            url: https://nalsa.gov.in/
+            type: html
+
+      - authority: Cyber Crime Portal
+        authority_weight: 1.0
+        documents:
+          - title: National Cyber Crime Reporting Portal
+            url: https://cybercrime.gov.in/
+            type: html
+
+      - authority: Crime and Criminal Tracking Network
+        authority_weight: 0.95
+        documents:
+          - title: CCTNS
+            url: https://cctns.gov.in/
+            type: html
+
+      - authority: Bureau of Police Research and Development
+        authority_weight: 0.95
+        documents:
+          - title: BPR&D
+            url: https://bprd.nic.in/
+            type: html
+
+      - authority: National Crime Records Bureau
+        authority_weight: 0.95
+        documents:
+          - title: NCRB
+            url: https://ncrb.gov.in/
+            type: html
+
+      - authority: Lok Adalat
+        authority_weight: 0.90
+        documents:
+          - title: Lok Adalat Services
+            url: https://nalsa.gov.in/
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+        documents:
+          - title: Police Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Legal Services
+            url: https://services.india.gov.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+        documents:
+          - title: Legal Aid Schemes
+            url: https://www.myscheme.gov.in/search?q=legal
+            type: html
+
+          - title: Police Schemes
+            url: https://www.myscheme.gov.in/search?q=police
+            type: html
+
+      - authority: ePrisons
+        authority_weight: 0.85
+        documents:
+          - title: ePrisons
+            url: https://eprisons.nic.in/
+            type: html
+
+      - authority: Interpol India
+        authority_weight: 0.85
+        documents:
+          - title: Interpol Wing
+            url: https://cbi.gov.in/
+            type: html
+
+      - authority: Central Bureau of Investigation
+        authority_weight: 0.85
+        documents:
+          - title: CBI
+            url: https://cbi.gov.in/
+            type: html
+
+  - name: Women & Child Welfare
+
+    sources:
+
+      - authority: Ministry of Women and Child Development
+        authority_weight: 1.0
+        documents:
+          - title: Ministry of Women and Child Development
+            url: https://wcd.gov.in/
+            type: html
+
+      - authority: Mission Shakti
+        authority_weight: 1.0
+        documents:
+          - title: Mission Shakti
+            url: https://missionshakti.gov.in/
+            type: html
+
+      - authority: POSHAN Abhiyaan
+        authority_weight: 1.0
+        documents:
+          - title: POSHAN Tracker
+            url: https://poshantracker.in/
+            type: html
+
+      - authority: PM Matru Vandana Yojana
+        authority_weight: 1.0
+        documents:
+          - title: PMMVY
+            url: https://pmmvy.wcd.gov.in/
+            type: html
+
+      - authority: National Commission for Women
+        authority_weight: 0.95
+        documents:
+          - title: NCW
+            url: https://ncw.nic.in/
+            type: html
+
+      - authority: National Commission for Protection of Child Rights
+        authority_weight: 0.95
+        documents:
+          - title: NCPCR
+            url: https://ncpcr.gov.in/
+            type: html
+
+      - authority: Child Helpline
+        authority_weight: 0.95
+        documents:
+          - title: Child Helpline 1098
+            url: https://childhelpline1098.in/
+            type: html
+
+      - authority: One Stop Centre Scheme
+        authority_weight: 0.95
+        documents:
+          - title: Sakhi One Stop Centre
+            url: https://sakhi.gov.in/
+            type: html
+
+      - authority: PM CARES for Children
+        authority_weight: 0.90
+        documents:
+          - title: PM CARES for Children
+            url: https://pmcaresforchildren.in/
+            type: html
+
+      - authority: MyScheme
+        authority_weight: 0.90
+        documents:
+          - title: Women Schemes
+            url: https://www.myscheme.gov.in/search?q=women
+            type: html
+
+          - title: Child Schemes
+            url: https://www.myscheme.gov.in/search?q=child
+            type: html
+
+      - authority: India.gov
+        authority_weight: 0.90
+        documents:
+          - title: Women Services
+            url: https://services.india.gov.in/
+            type: html
+
+          - title: Child Services
+            url: https://services.india.gov.in/
+            type: html

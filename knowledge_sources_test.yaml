@@ -1,0 +1,104 @@
+domains:
+
+- name: Women & Child Welfare
+
+  sources:
+
+    - authority: Ministry of Women and Child Development
+      authority_weight: 1.0
+      documents:
+        - title: Ministry of Women and Child Development
+          url: https://wcd.gov.in/
+          type: html
+
+    - authority: Mission Shakti
+      authority_weight: 1.0
+      documents:
+        - title: Mission Shakti
+          url: https://missionshakti.gov.in/
+          type: html
+
+    - authority: POSHAN Abhiyaan
+      authority_weight: 1.0
+      documents:
+        - title: POSHAN Tracker
+          url: https://poshantracker.in/
+          type: html
+
+    - authority: PM Matru Vandana Yojana
+      authority_weight: 1.0
+      documents:
+        - title: PMMVY
+          url: https://pmmvy.wcd.gov.in/
+          type: html
+
+    - authority: National Commission for Women
+      authority_weight: 0.95
+      documents:
+        - title: NCW
+          url: https://ncw.nic.in/
+          type: html
+
+    - authority: National Commission for Protection of Child Rights
+      authority_weight: 0.95
+      documents:
+        - title: NCPCR
+          url: https://ncpcr.gov.in/
+          type: html
+
+    - authority: Child Helpline
+      authority_weight: 0.95
+      documents:
+        - title: Child Helpline 1098
+          url: https://childhelpline1098.in/
+          type: html
+
+    - authority: One Stop Centre Scheme
+      authority_weight: 0.95
+      documents:
+        - title: Sakhi One Stop Centre
+          url: https://sakhi.gov.in/
+          type: html
+
+    - authority: Beti Bachao Beti Padhao
+      authority_weight: 0.90
+      documents:
+        - title: BBBP
+          url: https://wcd.gov.in/bbbp-schemes
+          type: html
+
+    - authority: PM CARES for Children
+      authority_weight: 0.90
+      documents:
+        - title: PM CARES for Children
+          url: https://pmcaresforchildren.in/
+          type: html
+
+    - authority: eBal Nidan
+      authority_weight: 0.90
+      documents:
+        - title: eBal Nidan
+          url: https://ebalnidan.nic.in/
+          type: html
+
+    - authority: MyScheme
+      authority_weight: 0.90
+      documents:
+        - title: Women Schemes
+          url: https://www.myscheme.gov.in/search?q=women
+          type: html
+
+        - title: Child Schemes
+          url: https://www.myscheme.gov.in/search?q=child
+          type: html
+
+    - authority: India.gov
+      authority_weight: 0.90
+      documents:
+        - title: Women Services
+          url: https://services.india.gov.in/
+          type: html
+
+        - title: Child Services
+          url: https://services.india.gov.in/
+          type: html
